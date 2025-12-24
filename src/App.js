@@ -17,7 +17,6 @@ import Drivers from './pages/Owner/Drivers';
 import Routes from './pages/Owner/Routes';
 import Analytics from './pages/Owner/Analytics';
 import { Menu, X } from 'lucide-react';
-
 function App() {
   const [currentView, setCurrentView] = useState('login');
   const [sidebarOpen, setSidebarOpen] = useState(true);
