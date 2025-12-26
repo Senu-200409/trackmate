@@ -16,8 +16,11 @@ import {
   Clock,
   Gauge
 } from 'lucide-react';
+import OwnerHeader from '../../components/Owner/OwnerHeader';
+import OwnerFooter from '../../components/Owner/OwnerFooter';
 
 function OwnerDashboard() {
+  const [notifications] = useState([]);
   const [businessStats] = useState({
     totalRevenue: "$45,820",
     monthlyGrowth: "+12.5%",
@@ -59,17 +62,21 @@ function OwnerDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-2xl p-4 md:p-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between">
-          <div className="mb-4 md:mb-0">
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">Business Overview, David! 📊</h1>
-            <p className="text-white/90 text-sm md:text-base">Trackmate Fleet Management • Monthly Performance</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <div className="text-xl md:text-2xl font-bold">{businessStats.totalRevenue}</div>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <OwnerHeader notifications={notifications} ownerName="David" companyName="TrackMate Fleet" />
+      
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-6 max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-2xl p-4 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between">
+              <div className="mb-4 md:mb-0">
+                <h1 className="text-2xl md:text-3xl font-bold mb-2">Business Overview, David! 📊</h1>
+                <p className="text-white/90 text-sm md:text-base">Trackmate Fleet Management • Monthly Performance</p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <div className="text-xl md:text-2xl font-bold">{businessStats.totalRevenue}</div>
               <div className="text-xs md:text-sm text-white/80">Monthly Revenue</div>
             </div>
             <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/20 flex items-center justify-center">
@@ -365,6 +372,10 @@ function OwnerDashboard() {
           </div>
         </div>
       </div>
+        </div>
+      </main>
+
+      <OwnerFooter />
     </div>
   );
 }

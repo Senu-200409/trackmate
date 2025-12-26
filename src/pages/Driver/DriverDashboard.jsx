@@ -13,8 +13,11 @@ import {
   ShieldCheck,
   Thermometer
 } from 'lucide-react';
+import DriverHeader from '../../components/Driver/DriverHeader';
+import DriverFooter from '../../components/Driver/DriverFooter';
 
 function DriverDashboard() {
+  const [notifications] = useState([]);
   const [routeInfo, setRouteInfo] = useState({
     currentRoute: "Route A - Morning Shift",
     studentsAboard: 24,
@@ -52,19 +55,23 @@ function DriverDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white rounded-2xl p-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Good Morning, Michael! 🚌</h1>
-            <p className="text-white/90">Route A • Morning Shift • On Duty</p>
-          </div>
-          <div className="hidden md:block">
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <div className="text-2xl font-bold">{routeInfo.nextStop}</div>
-                <div className="text-sm text-white/80">Next Stop</div>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <DriverHeader notifications={notifications} driverName="Michael" />
+      
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-6 max-w-7xl mx-auto">
+          <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white rounded-2xl p-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">Good Morning, Michael! 🚌</h1>
+                <p className="text-white/90">Route A • Morning Shift • On Duty</p>
               </div>
+              <div className="hidden md:block">
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <div className="text-2xl font-bold">{routeInfo.nextStop}</div>
+                    <div className="text-sm text-white/80">Next Stop</div>
+                  </div>
               <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
                 <Navigation className="w-8 h-8 text-white" />
               </div>
@@ -285,6 +292,10 @@ function DriverDashboard() {
           </div>
         </div>
       </div>
+        </div>
+      </main>
+
+      <DriverFooter />
     </div>
   );
 }
