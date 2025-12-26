@@ -3,20 +3,19 @@ import {
   User,
   Clock,
   Bus,
-  TrendingUp,
   MapPin,
-  Calendar,
   AlertTriangle,
   CheckCircle,
-  Bell,
-  Award
+  Phone,
+  ChevronRight,
+  AlertCircle
 } from 'lucide-react';
 import ParentHeader from '../../components/Parent/ParentHeader';
 import ParentFooter from '../../components/Parent/ParentFooter';
 
-function ParentDashboard({ onMenuClick }) {
+function ParentDashboard({ onMenuClick, setActiveTab }) {
   const [notifications] = useState([]);
-  const [childStatus, setChildStatus] = useState({
+  const [childStatus] = useState({
     name: "Alex Johnson",
     grade: "6th Grade",
     school: "Central High School",
@@ -25,245 +24,228 @@ function ParentDashboard({ onMenuClick }) {
     location: "Approaching Oak Avenue",
     arrival: "8:10 AM",
     progress: 65,
-    speed: "25 km/h",
-    temperature: "22°C"
+    busDriver: "Michael Johnson",
+    driverPhone: "+1-555-0123"
   });
 
-  const stats = [
-    { label: "On Time Days", value: "24", change: "+3", color: "from-green-400 to-emerald-400", icon: <CheckCircle className="w-5 h-5" /> },
-    { label: "Distance Traveled", value: "156 km", change: "+12%", color: "from-blue-400 to-cyan-400", icon: <MapPin className="w-5 h-5" /> },
-    { label: "Avg Speed", value: "28 km/h", change: "-2%", color: "from-purple-400 to-pink-400", icon: <TrendingUp className="w-5 h-5" /> },
-    { label: "Safety Score", value: "9.8/10", change: "+0.2", color: "from-orange-400 to-red-400", icon: <Award className="w-5 h-5" /> },
-  ];
-
-  const recentJourneys = [
-    { date: "Today", time: "8:10 AM", status: "On Time", duration: "25 min", color: "bg-green-100 text-green-800" },
-    { date: "Yesterday", time: "8:15 AM", status: "Delayed", duration: "32 min", color: "bg-yellow-100 text-yellow-800" },
-    { date: "Nov 30", time: "8:05 AM", status: "Early", duration: "22 min", color: "bg-blue-100 text-blue-800" },
-    { date: "Nov 29", time: "8:12 AM", status: "On Time", duration: "28 min", color: "bg-green-100 text-green-800" },
+  const alerts = [
+    { id: 1, type: 'warning', title: 'Bus Delayed', message: 'BUS-001 delayed by 5 minutes due to traffic', time: '2 mins ago' },
+    { id: 2, type: 'success', title: 'Student Boarded', message: 'Alex has boarded Bus BUS-001', time: '10 mins ago' }
   ];
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
       <ParentHeader notifications={notifications} onMenuClick={onMenuClick} />
       
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
         <div className="space-y-6 max-w-7xl mx-auto">
-          <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-8 border-b-4 border-[#F5C518]">
+          
+          {/* Welcome Header */}
+          <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-6 border-b-4 border-[#F5C518]">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold mb-2">Good Morning, Alex! 👋</h1>
-                <p className="text-[#FFE066]">Track your child's journey in real-time</p>
+                <h1 className="text-3xl font-bold mb-2">Welcome, Parent! 👋</h1>
+                <p className="text-[#FFE066]">Track {childStatus.name}'s journey in real-time</p>
               </div>
-              <div className="hidden md:block">
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <div className="text-2xl font-bold">{childStatus.arrival}</div>
-                    <div className="text-sm text-[#FFE066]">Expected Arrival</div>
-                  </div>
-                  <div className="w-16 h-16 rounded-full bg-[#F5C518] flex items-center justify-center">
-                    <Bus className="w-8 h-8 text-[#1E3A5F]" />
-                  </div>
+              <div className="hidden md:block text-right">
+                <div className="text-2xl font-bold">{childStatus.arrival}</div>
+                <div className="text-sm text-[#FFE066]">Expected Arrival</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Status Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Status Card */}
+            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-green-100">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-600">Status</div>
+                  <div className="text-lg font-bold text-gray-900">{childStatus.status}</div>
+                  <div className="text-xs text-gray-500">Live</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Location Card */}
+            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-blue-100">
+                  <MapPin className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-600">Location</div>
+                  <div className="text-lg font-bold text-gray-900 truncate">{childStatus.location}</div>
+                  <div className="text-xs text-gray-500">Current</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bus Card */}
+            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-purple-100">
+                  <Bus className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-600">Bus</div>
+                  <div className="text-lg font-bold text-gray-900">{childStatus.bus}</div>
+                  <div className="text-xs text-gray-500">Assigned</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Progress Card */}
+            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-orange-100">
+                  <Clock className="w-5 h-5 text-orange-600" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-600">Progress</div>
+                  <div className="text-lg font-bold text-gray-900">{childStatus.progress}%</div>
+                  <div className="text-xs text-gray-500">To School</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.color}`}>
-                    {stat.icon}
-                  </div>
-                  <span className="text-green-600 font-bold text-sm">↑ {stat.change}</span>
-                </div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
-                <div className="text-sm text-gray-600">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-
+          {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Your Child's Journey</h2>
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">Live</span>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">GPS Active</span>
+            
+            {/* Left Column - Live Map & Child Info */}
+            <div className="lg:col-span-2 space-y-6">
+              
+              {/* Child Info Card */}
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 flex items-center justify-center">
+                    <User className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900">{childStatus.name}</h3>
+                    <div className="flex flex-wrap gap-3 mt-2">
+                      <span className="text-sm text-gray-600">Grade: {childStatus.grade}</span>
+                      <span className="text-sm text-gray-600">School: {childStatus.school}</span>
+                    </div>
                   </div>
                 </div>
-
-                <div className="space-y-6">
-                  <div className="flex items-center gap-6 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50">
-                    <div className="relative">
-                      <div className="w-20 h-20 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 flex items-center justify-center">
-                        <User className="w-10 h-10 text-white" />
-                      </div>
-                      <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 border-4 border-white flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900">{childStatus.name}</h3>
-                      <div className="flex flex-wrap gap-4 mt-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                          <span className="text-gray-600 font-medium">Grade: {childStatus.grade}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                          <span className="text-gray-600 font-medium">School: {childStatus.school}</span>
-                        </div>
-                      </div>
-                    </div>
+                
+                <div className="border-t border-gray-200 pt-4">
+                  <h4 className="font-semibold text-gray-900 mb-3">Progress to School</h4>
+                  <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+                      style={{ width: `${childStatus.progress}%` }}
+                    ></div>
                   </div>
+                  <div className="text-sm text-gray-600 mt-2">{childStatus.progress}% of journey completed</div>
+                </div>
+              </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                          <Clock className="w-4 h-4 text-green-600" />
-                        </div>
-                        <span className="font-bold text-gray-900">Current Status</span>
-                      </div>
-                      <div className="text-green-700 font-semibold">● {childStatus.status}</div>
-                      <div className="text-sm text-gray-600 mt-1">{childStatus.location}</div>
+              {/* Live Location Map */}
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="h-64 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center relative">
+                  <div className="text-center z-10">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center shadow-lg mx-auto mb-3 animate-pulse">
+                      <Bus className="w-8 h-8 text-white" />
                     </div>
-
-                    <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                          <Bus className="w-4 h-4 text-blue-600" />
-                        </div>
-                        <span className="font-bold text-gray-900">Bus Details</span>
-                      </div>
-                      <div className="text-blue-700 font-semibold">Bus {childStatus.bus}</div>
-                      <div className="text-sm text-gray-600 mt-1">Expected: {childStatus.arrival}</div>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                          <TrendingUp className="w-4 h-4 text-purple-600" />
-                        </div>
-                        <span className="font-bold text-gray-900">Progress</span>
-                      </div>
-                      <div className="mb-2">
-                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
-                            style={{ width: `${childStatus.progress}%` }}
-                          ></div>
-                        </div>
-                        <div className="text-sm text-gray-600 mt-1">{childStatus.progress}% completed</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-4">Live Route Map</h4>
-                    <div className="h-64 rounded-2xl overflow-hidden relative bg-gradient-to-br from-blue-100 to-purple-100">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-center">
-                          <MapPin className="w-12 h-12 text-blue-600 mx-auto mb-3" />
-                          <p className="text-gray-700 font-medium">Real-time bus location tracking</p>
-                          <p className="text-sm text-gray-500">Bus {childStatus.bus} • {childStatus.location}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="absolute top-1/2 left-1/4 right-1/4 h-1 bg-gradient-to-r from-blue-400 to-purple-400"></div>
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                        <div className="relative">
-                          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center shadow-lg animate-pulse">
-                            <Bus className="w-8 h-8 text-white" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <p className="text-gray-700 font-semibold">{childStatus.location}</p>
+                    <p className="text-sm text-gray-600">Bus {childStatus.bus}</p>
                   </div>
                 </div>
               </div>
             </div>
 
+            {/* Right Column - Alerts & Quick Actions */}
             <div className="space-y-6">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Notifications</h2>
-                  <Bell className="w-6 h-6 text-gray-600" />
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-gradient-to-r from-yellow-50 to-orange-50">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-400">
-                      <AlertTriangle className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900">Bus Delay</h4>
-                      <p className="text-sm text-gray-600 mt-1">Bus BUS-001 delayed by 5 minutes due to traffic</p>
-                      <span className="text-xs text-gray-500">2 mins ago</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-green-400 to-emerald-400">
-                      <CheckCircle className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900">Student Boarded</h4>
-                      <p className="text-sm text-gray-600 mt-1">Alex has boarded Bus BUS-001</p>
-                      <span className="text-xs text-gray-500">10 mins ago</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-400 to-cyan-400">
-                      <MapPin className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900">Route Alert</h4>
-                      <p className="text-sm text-gray-600 mt-1">New stop added at Oak Avenue</p>
-                      <span className="text-xs text-gray-500">1 hour ago</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="font-bold text-gray-900 mb-4">Recent Journeys</h3>
+              
+              {/* Active Alerts */}
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-orange-600" />
+                  Active Alerts
+                </h3>
                 <div className="space-y-3">
-                  {recentJourneys.map((journey, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                          <Calendar className="w-5 h-5 text-gray-600" />
+                  {alerts.map(alert => (
+                    <div key={alert.id} className={`p-4 rounded-lg border-l-4 ${
+                      alert.type === 'warning'
+                        ? 'bg-orange-50 border-orange-300'
+                        : 'bg-green-50 border-green-300'
+                    }`}>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900">{alert.title}</h4>
+                          <p className="text-sm text-gray-600 mt-1">{alert.message}</p>
                         </div>
-                        <div>
-                          <div className="font-semibold text-gray-900">{journey.date}</div>
-                          <div className="text-sm text-gray-600">{journey.time}</div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className={`font-bold ${journey.status === 'On Time' ? 'text-green-600' : journey.status === 'Early' ? 'text-blue-600' : 'text-yellow-600'}`}>
-                          {journey.status}
-                        </div>
-                        <div className="text-sm text-gray-600">{journey.duration}</div>
+                        <div className="text-xs text-gray-500 whitespace-nowrap ml-2">{alert.time}</div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm border border-red-200 p-6 bg-gradient-to-r from-red-50 to-pink-50">
-                <h3 className="font-bold text-gray-900 mb-4">Emergency Support</h3>
-                <p className="text-gray-600 mb-4">Need immediate assistance?</p>
-                <button className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all">
-                  Contact School Support
+              {/* Driver Info */}
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Driver Info</h3>
+                <div className="space-y-3">
+                  <div>
+                    <div className="text-sm text-gray-600 mb-1">Driver Name</div>
+                    <div className="font-semibold text-gray-900">{childStatus.busDriver}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600 mb-1">Contact</div>
+                    <div className="font-semibold text-gray-900">{childStatus.driverPhone}</div>
+                  </div>
+                  <button className="w-full flex items-center justify-center gap-2 mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                    <Phone className="w-4 h-4" />
+                    Call Driver
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Access</h3>
+                <div className="space-y-2">
+                  <button 
+                    onClick={() => setActiveTab && setActiveTab('my-child')}
+                    className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+                  >
+                    <span className="font-medium text-gray-900">Child Details</span>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab && setActiveTab('history')}
+                    className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+                  >
+                    <span className="font-medium text-gray-900">Journey History</span>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab && setActiveTab('alerts')}
+                    className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+                  >
+                    <span className="font-medium text-gray-900">All Alerts</span>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Emergency */}
+              <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl border-2 border-red-200 p-6">
+                <h3 className="font-bold text-gray-900 mb-2">Emergency</h3>
+                <p className="text-sm text-gray-600 mb-4">Immediate assistance needed?</p>
+                <button className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-semibold">
+                  Emergency Support
                 </button>
               </div>
             </div>
           </div>
+
         </div>
       </main>
 

@@ -65,13 +65,14 @@ function App() {
     const commonProps = { onMenuClick: toggleSidebar };
     
     if (userRole === 'parent') {
+      const parentProps = { ...commonProps, setActiveTab };
       switch (activeTab) {
-        case 'dashboard': return <ParentDashboard {...commonProps} />;
-        case 'my-child': return <MyChild {...commonProps} />;
-        case 'history': return <History {...commonProps} />;
-        case 'alerts': return <Alerts {...commonProps} />;
-        case 'settings': return <Settings {...commonProps} />;
-        default: return <ParentDashboard {...commonProps} />;
+        case 'dashboard': return <ParentDashboard {...parentProps} />;
+        case 'my-child': return <MyChild {...parentProps} />;
+        case 'history': return <History {...parentProps} />;
+        case 'alerts': return <Alerts {...parentProps} />;
+        case 'settings': return <Settings {...parentProps} />;
+        default: return <ParentDashboard {...parentProps} />;
       }
     } else if (userRole === 'driver') {
       const driverProps = { ...commonProps, setActiveTab };

@@ -3,7 +3,7 @@ import { User } from 'lucide-react';
 import ParentHeader from '../../components/Parent/ParentHeader';
 import ParentFooter from '../../components/Parent/ParentFooter';
 
-function MyChild({ onMenuClick }) {
+function MyChild({ onMenuClick, setActiveTab }) {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
       <ParentHeader notifications={[]} onMenuClick={onMenuClick} />
