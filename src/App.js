@@ -74,13 +74,14 @@ function App() {
         default: return <ParentDashboard {...commonProps} />;
       }
     } else if (userRole === 'driver') {
+      const driverProps = { ...commonProps, setActiveTab };
       switch (activeTab) {
-        case 'dashboard': return <DriverDashboard {...commonProps} />;
-        case 'navigation': return <Navigation {...commonProps} />;
-        case 'students': return <Reports {...commonProps} />;
-        case 'reports': return <Reports {...commonProps} />;
-        case 'support': return <Support {...commonProps} />;
-        default: return <DriverDashboard {...commonProps} />;
+        case 'dashboard': return <DriverDashboard {...driverProps} />;
+        case 'navigation': return <Navigation {...driverProps} />;
+        case 'students': return <Reports {...driverProps} />;
+        case 'reports': return <Reports {...driverProps} />;
+        case 'support': return <Support {...driverProps} />;
+        default: return <DriverDashboard {...driverProps} />;
       }
     } else if (userRole === 'owner') {
       const ownerProps = { ...commonProps, setActiveTab };
