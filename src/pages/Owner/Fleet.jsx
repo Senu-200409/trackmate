@@ -15,7 +15,11 @@ import {
   XCircle,
   Eye,
   Edit,
-  Gauge
+  Gauge,
+  X,
+  Save,
+  Upload,
+  FileText
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
@@ -23,6 +27,71 @@ import OwnerFooter from '../../components/Owner/OwnerFooter';
 function Fleet({ onMenuClick }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [formData, setFormData] = useState({
+    busNumber: '',
+    licensePlate: '',
+    make: '',
+    model: '',
+    year: '',
+    capacity: '',
+    fuelType: 'diesel',
+    assignedRoute: '',
+    assignedDriver: '',
+    registrationNumber: '',
+    insuranceExpiry: '',
+    lastServiceDate: '',
+    nextServiceDate: '',
+    status: 'active',
+    notes: ''
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('New Bus Data:', formData);
+    // Here you would typically send data to backend
+    alert('Bus added successfully!');
+    setShowAddModal(false);
+    setFormData({
+      busNumber: '',
+      licensePlate: '',
+      make: '',
+      model: '',
+      year: '',
+      capacity: '',
+      fuelType: 'diesel',
+      assignedRoute: '',
+      assignedDriver: '',
+      registrationNumber: '',
+      insuranceExpiry: '',
+      lastServiceDate: '',
+      nextServiceDate: '',
+      status: 'active',
+      notes: ''
+    });
+  };
+
+  // Available drivers and routes for dropdowns
+  const availableDrivers = [
+    { id: 'DRV-001', name: 'Michael Smith' },
+    { id: 'DRV-002', name: 'Sarah Johnson' },
+    { id: 'DRV-003', name: 'Robert Brown' },
+    { id: 'DRV-004', name: 'Lisa Davis' },
+    { id: 'DRV-005', name: 'James Wilson' },
+  ];
+
+  const availableRoutes = [
+    { id: 'RT-001', name: 'Route A - Morning' },
+    { id: 'RT-002', name: 'Route B - Morning' },
+    { id: 'RT-003', name: 'Route C - Morning' },
+    { id: 'RT-004', name: 'Route A - Afternoon' },
+    { id: 'RT-005', name: 'Route D - Morning' },
+  ];
 
   const busFleet = [
     { 
@@ -157,7 +226,10 @@ function Fleet({ onMenuClick }) {
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Fleet Management</h1>
               <p className="text-gray-600 mt-1">Monitor and manage your bus fleet</p>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors">
+            <button 
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors"
+            >
               <Plus className="w-5 h-5" />
               Add New Bus
             </button>
@@ -339,6 +411,315 @@ function Fleet({ onMenuClick }) {
       </main>
 
       <OwnerFooter />
+
+      {/* Add New Bus Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#1E3A5F] to-[#3B6FB6]">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <Bus className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Add New Bus</h2>
+                  <p className="text-white/70 text-sm">Fill in the details for the new bus</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowAddModal(false)}
+                className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleSubmit} className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+              <div className="space-y-6">
+                
+                {/* Basic Information Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Basic Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Bus Number <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="busNumber"
+                        value={formData.busNumber}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="e.g., BUS-006"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        License Plate <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="licensePlate"
+                        value={formData.licensePlate}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="e.g., ABC 1234"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Make <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="make"
+                        value={formData.make}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="e.g., Blue Bird"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Model <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="model"
+                        value={formData.model}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="e.g., Vision"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Year <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        name="year"
+                        value={formData.year}
+                        onChange={handleInputChange}
+                        required
+                        min="2000"
+                        max="2030"
+                        placeholder="e.g., 2023"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Seating Capacity <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        name="capacity"
+                        value={formData.capacity}
+                        onChange={handleInputChange}
+                        required
+                        min="1"
+                        max="100"
+                        placeholder="e.g., 45"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Technical Details Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Wrench className="w-4 h-4" />
+                    Technical Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Fuel Type <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        name="fuelType"
+                        value={formData.fuelType}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
+                      >
+                        <option value="diesel">Diesel</option>
+                        <option value="petrol">Petrol</option>
+                        <option value="cng">CNG</option>
+                        <option value="electric">Electric</option>
+                        <option value="hybrid">Hybrid</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Registration Number
+                      </label>
+                      <input
+                        type="text"
+                        name="registrationNumber"
+                        value={formData.registrationNumber}
+                        onChange={handleInputChange}
+                        placeholder="Vehicle registration"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Insurance Expiry Date
+                      </label>
+                      <input
+                        type="date"
+                        name="insuranceExpiry"
+                        value={formData.insuranceExpiry}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Status
+                      </label>
+                      <select
+                        name="status"
+                        value={formData.status}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
+                      >
+                        <option value="active">Active</option>
+                        <option value="maintenance">Under Maintenance</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Assignment Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Assignment
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Assigned Route
+                      </label>
+                      <select
+                        name="assignedRoute"
+                        value={formData.assignedRoute}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
+                      >
+                        <option value="">Select a route</option>
+                        {availableRoutes.map(route => (
+                          <option key={route.id} value={route.id}>{route.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Assigned Driver
+                      </label>
+                      <select
+                        name="assignedDriver"
+                        value={formData.assignedDriver}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
+                      >
+                        <option value="">Select a driver</option>
+                        {availableDrivers.map(driver => (
+                          <option key={driver.id} value={driver.id}>{driver.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Service Schedule Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Service Schedule
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Last Service Date
+                      </label>
+                      <input
+                        type="date"
+                        name="lastServiceDate"
+                        value={formData.lastServiceDate}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Next Service Date
+                      </label>
+                      <input
+                        type="date"
+                        name="nextServiceDate"
+                        value={formData.nextServiceDate}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notes Section */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Additional Notes
+                  </label>
+                  <textarea
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleInputChange}
+                    rows="3"
+                    placeholder="Any additional information about the bus..."
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all resize-none"
+                  />
+                </div>
+
+              </div>
+            </form>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                className="px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors font-medium flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                Save Bus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
