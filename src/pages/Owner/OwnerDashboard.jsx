@@ -62,25 +62,25 @@ function OwnerDashboard() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
       <OwnerHeader notifications={notifications} ownerName="David" companyName="TrackMate Fleet" />
       
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6 max-w-7xl mx-auto">
           {/* Header */}
-          <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white rounded-2xl p-4 md:p-8">
+          <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-4 md:p-8 border-b-4 border-[#F5C518]">
             <div className="flex flex-col md:flex-row md:items-center justify-between">
               <div className="mb-4 md:mb-0">
                 <h1 className="text-2xl md:text-3xl font-bold mb-2">Business Overview, David! 📊</h1>
-                <p className="text-white/90 text-sm md:text-base">Trackmate Fleet Management • Monthly Performance</p>
+                <p className="text-[#FFE066] text-sm md:text-base">TrackMate Fleet Management • Monthly Performance</p>
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <div className="text-xl md:text-2xl font-bold">{businessStats.totalRevenue}</div>
-              <div className="text-xs md:text-sm text-white/80">Monthly Revenue</div>
+              <div className="text-xs md:text-sm text-[#FFE066]">Monthly Revenue</div>
             </div>
-            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/20 flex items-center justify-center">
-              <DollarSign className="w-6 h-6 md:w-8 md:h-8 text-white" />
+            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#F5C518] flex items-center justify-center">
+              <DollarSign className="w-6 h-6 md:w-8 md:h-8 text-[#1E3A5F]" />
             </div>
           </div>
         </div>

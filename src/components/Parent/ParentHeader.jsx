@@ -1,44 +1,45 @@
 import React, { useState } from 'react';
-import { Bell, Menu, X, User, LogOut, Settings } from 'lucide-react';
+import { Bell, Menu, X, User, LogOut, Settings, GraduationCap } from 'lucide-react';
 
 function ParentHeader({ notifications = [] }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 via-blue-500 to-orange-500 text-white shadow-lg">
+    <header className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white shadow-xl">
+      {/* Top accent bar */}
+      <div className="h-1 bg-gradient-to-r from-[#F5C518] via-[#FFE066] to-[#F5C518]"></div>
+      
       {/* Desktop & Tablet Header */}
       <div className="px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           {/* Logo & Brand */}
           <div className="flex items-center gap-3">
-            <div className="bg-white rounded-lg p-2 shadow-md">
-              <svg className="w-6 h-6 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm11 0c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" />
-              </svg>
+            <div className="bg-[#F5C518] rounded-lg p-2 shadow-md">
+              <GraduationCap className="w-6 h-6 text-[#1E3A5F]" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold">TrackMate</h1>
-              <p className="text-xs sm:text-sm text-blue-100">Safe Transportation, Happy Parents</p>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight">TrackMate</h1>
+              <p className="text-xs sm:text-sm text-[#FFE066]">Parent Portal</p>
             </div>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#" className="text-white/90 hover:text-white transition-colors font-medium">Home</a>
-            <a href="#" className="text-white/90 hover:text-white transition-colors font-medium">My Child</a>
-            <a href="#" className="text-white/90 hover:text-white transition-colors font-medium">History</a>
-            <a href="#" className="text-white/90 hover:text-white transition-colors font-medium">Support</a>
+            <a href="#" className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">Dashboard</a>
+            <a href="#" className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">My Child</a>
+            <a href="#" className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">History</a>
+            <a href="#" className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">Support</a>
           </nav>
 
           {/* Right Section - Desktop */}
           <div className="hidden md:flex items-center gap-4">
             {/* Notifications */}
             <div className="relative">
-              <button className="relative p-2 rounded-lg hover:bg-white/20 transition-colors">
-                <Bell className="w-6 h-6" />
+              <button className="relative p-2 rounded-lg hover:bg-white/10 transition-colors border border-white/20">
+                <Bell className="w-5 h-5" />
                 {notifications.length > 0 && (
-                  <span className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg">
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#F5C518] text-[#1E3A5F] text-xs rounded-full flex items-center justify-center font-bold shadow-lg">
                     {notifications.length > 9 ? '9+' : notifications.length}
                   </span>
                 )}
@@ -49,26 +50,26 @@ function ParentHeader({ notifications = [] }) {
             <div className="relative">
               <button
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/20 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors border border-white/20"
               >
-                <div className="w-8 h-8 bg-white/30 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5" />
+                <div className="w-8 h-8 bg-[#F5C518] rounded-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-[#1E3A5F]" />
                 </div>
                 <span className="text-sm font-medium">Profile</span>
               </button>
 
               {/* Profile Dropdown */}
               {profileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white text-gray-900 rounded-lg shadow-xl z-50">
-                  <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 border-b border-gray-200">
-                    <User className="w-4 h-4" />
+                <div className="absolute right-0 mt-2 w-48 bg-white text-[#1E3A5F] rounded-lg shadow-xl z-50 border border-gray-200">
+                  <button className="w-full text-left px-4 py-3 hover:bg-[#FFF9E6] flex items-center gap-2 border-b border-gray-200 font-medium">
+                    <User className="w-4 h-4 text-[#3B6FB6]" />
                     <span>My Profile</span>
                   </button>
-                  <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 border-b border-gray-200">
-                    <Settings className="w-4 h-4" />
+                  <button className="w-full text-left px-4 py-3 hover:bg-[#FFF9E6] flex items-center gap-2 border-b border-gray-200 font-medium">
+                    <Settings className="w-4 h-4 text-[#3B6FB6]" />
                     <span>Settings</span>
                   </button>
-                  <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-2 text-red-600">
+                  <button className="w-full text-left px-4 py-3 hover:bg-red-50 flex items-center gap-2 text-red-600 font-medium">
                     <LogOut className="w-4 h-4" />
                     <span>Logout</span>
                   </button>
@@ -80,7 +81,7 @@ function ParentHeader({ notifications = [] }) {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-white/20 transition-colors"
+            className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors border border-white/20"
           >
             {mobileMenuOpen ? (
               <X className="w-6 h-6" />
@@ -93,22 +94,22 @@ function ParentHeader({ notifications = [] }) {
 
       {/* Mobile Navigation Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-blue-700 px-4 py-4 space-y-2 border-t border-blue-400">
-          <a href="#" className="block px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium">Home</a>
-          <a href="#" className="block px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium">My Child</a>
-          <a href="#" className="block px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium">History</a>
-          <a href="#" className="block px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium">Support</a>
+        <div className="md:hidden bg-[#1E3A5F] px-4 py-4 space-y-2 border-t border-[#3B6FB6]">
+          <a href="#" className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">Dashboard</a>
+          <a href="#" className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">My Child</a>
+          <a href="#" className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">History</a>
+          <a href="#" className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">Support</a>
           
-          <div className="border-t border-blue-400 pt-4 mt-4">
-            <button className="w-full flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium">
-              <User className="w-5 h-5" />
+          <div className="border-t border-[#3B6FB6] pt-4 mt-4">
+            <button className="w-full flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">
+              <User className="w-5 h-5 text-[#FFE066]" />
               <span>My Profile</span>
             </button>
-            <button className="w-full flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium">
-              <Settings className="w-5 h-5" />
+            <button className="w-full flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">
+              <Settings className="w-5 h-5 text-[#FFE066]" />
               <span>Settings</span>
             </button>
-            <button className="w-full flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium text-red-300">
+            <button className="w-full flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-red-900/30 transition-colors font-medium text-red-300">
               <LogOut className="w-5 h-5" />
               <span>Logout</span>
             </button>
