@@ -15,6 +15,7 @@ import Fleet from './pages/Owner/Fleet';
 import Drivers from './pages/Owner/Drivers';
 import Routes from './pages/Owner/Routes';
 import Analytics from './pages/Owner/Analytics';
+import Schools from './pages/Owner/Schools';
 
 function App() {
   const [currentView, setCurrentView] = useState('login');
@@ -80,14 +81,16 @@ function App() {
         default: return <DriverDashboard {...commonProps} />;
       }
     } else if (userRole === 'owner') {
+      const ownerProps = { ...commonProps, setActiveTab };
       switch (activeTab) {
-        case 'dashboard': return <OwnerDashboard {...commonProps} />;
-        case 'fleet': return <Fleet {...commonProps} />;
-        case 'drivers': return <Drivers {...commonProps} />;
-        case 'routes': return <Routes {...commonProps} />;
-        case 'analytics': return <Analytics {...commonProps} />;
-        case 'settings': return <Settings {...commonProps} />;
-        default: return <OwnerDashboard {...commonProps} />;
+        case 'dashboard': return <OwnerDashboard {...ownerProps} />;
+        case 'fleet': return <Fleet {...ownerProps} />;
+        case 'drivers': return <Drivers {...ownerProps} />;
+        case 'routes': return <Routes {...ownerProps} />;
+        case 'analytics': return <Analytics {...ownerProps} />;
+        case 'schools': return <Schools {...ownerProps} />;
+        case 'settings': return <Settings {...ownerProps} />;
+        default: return <OwnerDashboard {...ownerProps} />;
       }
     }
     return <ParentDashboard {...commonProps} />;

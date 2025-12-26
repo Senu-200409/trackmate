@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Bell, Menu, X, User, LogOut, Settings, Building2, BarChart3, Bus, Users, AlignJustify } from 'lucide-react';
+import { Bell, Menu, X, User, LogOut, Settings, Building2, BarChart3, Bus, Users, AlignJustify, School } from 'lucide-react';
 
-function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyName = "TrackMate Fleet", onMenuClick }) {
+function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyName = "TrackMate Fleet", onMenuClick, setActiveTab }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
@@ -35,20 +35,24 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            <a href="#" className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
+            <button onClick={() => setActiveTab('analytics')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
               <BarChart3 className="w-4 h-4" />
               Analytics
-            </a>
-            <a href="#" className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
+            </button>
+            <button onClick={() => setActiveTab('fleet')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
               <Bus className="w-4 h-4" />
               Fleet
-            </a>
-            <a href="#" className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
+            </button>
+            <button onClick={() => setActiveTab('drivers')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
               <Users className="w-4 h-4" />
               Drivers
-            </a>
-            <a href="#" className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">Routes</a>
-            <a href="#" className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">Reports</a>
+            </button>
+            <button onClick={() => setActiveTab('schools')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
+              <School className="w-4 h-4" />
+              Schools
+            </button>
+            <button onClick={() => setActiveTab('routes')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">Routes</button>
+            <button onClick={() => setActiveTab('dashboard')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">Dashboard</button>
           </nav>
 
           {/* Right Section - Desktop */}
@@ -137,20 +141,24 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
             <span className="text-sm text-[#FFE066] font-medium">{companyName}</span>
           </div>
 
-          <a href="#" className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">
+          <button onClick={() => { setActiveTab('analytics'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
             <BarChart3 className="w-5 h-5 text-[#FFE066]" />
             Analytics
-          </a>
-          <a href="#" className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">
+          </button>
+          <button onClick={() => { setActiveTab('fleet'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
             <Bus className="w-5 h-5 text-[#FFE066]" />
             Fleet
-          </a>
-          <a href="#" className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">
+          </button>
+          <button onClick={() => { setActiveTab('drivers'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
             <Users className="w-5 h-5 text-[#FFE066]" />
             Drivers
-          </a>
-          <a href="#" className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">Routes</a>
-          <a href="#" className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">Reports</a>
+          </button>
+          <button onClick={() => { setActiveTab('schools'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
+            <School className="w-5 h-5 text-[#FFE066]" />
+            Schools
+          </button>
+          <button onClick={() => { setActiveTab('routes'); setMobileMenuOpen(false); }} className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">Routes</button>
+          <button onClick={() => { setActiveTab('dashboard'); setMobileMenuOpen(false); }} className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">Dashboard</button>
           
           <div className="border-t border-[#3B6FB6] pt-4 mt-4">
             <button className="w-full flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">

@@ -13,7 +13,8 @@ import {
   Route,
   BarChart3,
   LogOut,
-  X
+  X,
+  School
 } from 'lucide-react';
 
 function Sidebar({ activeTab, setActiveTab, onLogout, isOpen, userRole, onClose }) {
@@ -43,6 +44,7 @@ function Sidebar({ activeTab, setActiveTab, onLogout, isOpen, userRole, onClose 
         ...commonItems,
         { icon: <Bus className="w-5 h-5" />, label: 'Fleet', view: 'fleet' },
         { icon: <Users className="w-5 h-5" />, label: 'Drivers', view: 'drivers' },
+        { icon: <School className="w-5 h-5" />, label: 'Schools', view: 'schools' },
         { icon: <Route className="w-5 h-5" />, label: 'Routes', view: 'routes' },
         { icon: <BarChart3 className="w-5 h-5" />, label: 'Analytics', view: 'analytics' },
         { icon: <Settings className="w-5 h-5" />, label: 'Settings', view: 'settings' },
