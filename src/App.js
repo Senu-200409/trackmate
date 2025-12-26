@@ -16,6 +16,8 @@ import Drivers from './pages/Owner/Drivers';
 import Routes from './pages/Owner/Routes';
 import Analytics from './pages/Owner/Analytics';
 import Schools from './pages/Owner/Schools';
+import Students from './pages/Owner/Students';
+import Parents from './pages/Owner/Parents';
 
 function App() {
   const [currentView, setCurrentView] = useState('login');
@@ -89,6 +91,8 @@ function App() {
         case 'routes': return <Routes {...ownerProps} />;
         case 'analytics': return <Analytics {...ownerProps} />;
         case 'schools': return <Schools {...ownerProps} />;
+        case 'students': return <Students {...ownerProps} />;
+        case 'parents': return <Parents {...ownerProps} />;
         case 'settings': return <Settings {...ownerProps} />;
         default: return <OwnerDashboard {...ownerProps} />;
       }

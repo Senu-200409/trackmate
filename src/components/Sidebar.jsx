@@ -45,6 +45,8 @@ function Sidebar({ activeTab, setActiveTab, onLogout, isOpen, userRole, onClose 
         { icon: <Bus className="w-5 h-5" />, label: 'Fleet', view: 'fleet' },
         { icon: <Users className="w-5 h-5" />, label: 'Drivers', view: 'drivers' },
         { icon: <School className="w-5 h-5" />, label: 'Schools', view: 'schools' },
+        { icon: <Users className="w-5 h-5" />, label: 'Students', view: 'students' },
+        { icon: <User className="w-5 h-5" />, label: 'Parents', view: 'parents' },
         { icon: <Route className="w-5 h-5" />, label: 'Routes', view: 'routes' },
         { icon: <BarChart3 className="w-5 h-5" />, label: 'Analytics', view: 'analytics' },
         { icon: <Settings className="w-5 h-5" />, label: 'Settings', view: 'settings' },

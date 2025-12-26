@@ -51,9 +51,28 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
               <School className="w-4 h-4" />
               Schools
             </button>
-            <button onClick={() => setActiveTab('routes')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">Routes</button>
-            <button onClick={() => setActiveTab('dashboard')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">Dashboard</button>
           </nav>
+
+          {/* More Options Menu */}
+          <div className="hidden lg:flex items-center gap-2">
+            <div className="relative group">
+              <button className="text-white/90 hover:text-[#FFE066] transition-colors font-medium px-3 py-2 rounded-lg hover:bg-white/10 border-b-2 border-transparent hover:border-[#F5C518]">
+                More ▼
+              </button>
+              <div className="absolute right-0 mt-0 w-48 bg-[#1E3A5F] text-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-[#3B6FB6]">
+                <button onClick={() => setActiveTab('students')} className="w-full text-left px-4 py-3 hover:bg-[#3B6FB6] transition-colors flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Students
+                </button>
+                <button onClick={() => setActiveTab('parents')} className="w-full text-left px-4 py-3 hover:bg-[#3B6FB6] transition-colors flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  Parents
+                </button>
+                <button onClick={() => setActiveTab('routes')} className="w-full text-left px-4 py-3 hover:bg-[#3B6FB6] transition-colors">Routes</button>
+                <button onClick={() => setActiveTab('dashboard')} className="w-full text-left px-4 py-3 hover:bg-[#3B6FB6] transition-colors border-t border-[#3B6FB6]">Dashboard</button>
+              </div>
+            </div>
+          </div>
 
           {/* Right Section - Desktop */}
           <div className="hidden md:flex items-center gap-4">
@@ -156,6 +175,14 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
           <button onClick={() => { setActiveTab('schools'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
             <School className="w-5 h-5 text-[#FFE066]" />
             Schools
+          </button>
+          <button onClick={() => { setActiveTab('students'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
+            <Users className="w-5 h-5 text-[#FFE066]" />
+            Students
+          </button>
+          <button onClick={() => { setActiveTab('parents'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
+            <User className="w-5 h-5 text-[#FFE066]" />
+            Parents
           </button>
           <button onClick={() => { setActiveTab('routes'); setMobileMenuOpen(false); }} className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">Routes</button>
           <button onClick={() => { setActiveTab('dashboard'); setMobileMenuOpen(false); }} className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">Dashboard</button>
