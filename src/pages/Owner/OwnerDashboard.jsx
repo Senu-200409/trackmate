@@ -19,7 +19,7 @@ import {
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
 
-function OwnerDashboard() {
+function OwnerDashboard({ onMenuClick }) {
   const [notifications] = useState([]);
   const [businessStats] = useState({
     totalRevenue: "$45,820",
@@ -63,7 +63,7 @@ function OwnerDashboard() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
-      <OwnerHeader notifications={notifications} ownerName="David" companyName="TrackMate Fleet" />
+      <OwnerHeader notifications={notifications} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} />
       
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6 max-w-7xl mx-auto">

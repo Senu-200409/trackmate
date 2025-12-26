@@ -3,10 +3,10 @@ import { Navigation } from 'lucide-react';
 import DriverHeader from '../../components/Driver/DriverHeader';
 import DriverFooter from '../../components/Driver/DriverFooter';
 
-function NavigationPage() {
+function NavigationPage({ onMenuClick }) {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
-      <DriverHeader notifications={[]} driverName="Michael" />
+      <DriverHeader notifications={[]} driverName="Michael" onMenuClick={onMenuClick} />
       
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-7xl mx-auto">

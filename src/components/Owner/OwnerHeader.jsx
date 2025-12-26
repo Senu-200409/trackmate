@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Bell, Menu, X, User, LogOut, Settings, Building2, BarChart3, Bus, Users } from 'lucide-react';
+import { Bell, Menu, X, User, LogOut, Settings, Building2, BarChart3, Bus, Users, AlignJustify } from 'lucide-react';
 
-function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyName = "TrackMate Fleet" }) {
+function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyName = "TrackMate Fleet", onMenuClick }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
@@ -13,8 +13,17 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
       {/* Desktop & Tablet Header */}
       <div className="px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo & Brand */}
+          {/* Sidebar Toggle + Logo & Brand */}
           <div className="flex items-center gap-3">
+            {/* Sidebar Toggle Button */}
+            <button
+              onClick={onMenuClick}
+              className="p-2 rounded-lg hover:bg-white/10 transition-colors border border-white/20 group"
+              title="Open Menu"
+            >
+              <AlignJustify className="w-5 h-5 group-hover:text-[#FFE066] transition-colors" />
+            </button>
+            
             <div className="bg-[#F5C518] rounded-lg p-2 shadow-md">
               <Building2 className="w-6 h-6 text-[#1E3A5F]" />
             </div>
