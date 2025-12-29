@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import {
   User,
   Clock,
@@ -32,6 +34,43 @@ function ParentDashboard({ onMenuClick, setActiveTab }) {
     { id: 1, type: 'warning', title: 'Bus Delayed', message: 'BUS-001 delayed by 5 minutes due to traffic', time: '2 mins ago' },
     { id: 2, type: 'success', title: 'Student Boarded', message: 'Alex has boarded Bus BUS-001', time: '10 mins ago' }
   ];
+
+  // Map refs & init for the map card (keep size the same)
+  const parentMapRef = useRef(null);
+  const parentMapInstanceRef = useRef(null);
+  const parentMarkerRef = useRef(null);
+
+  useEffect(() => {
+    if (parentMapRef.current && !parentMapInstanceRef.current) {
+      const map = L.map(parentMapRef.current, {
+        zoomControl: true,
+        attributionControl: false
+      }).setView([20.5937, 78.9629], 5); // Default world/India view
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+      }).addTo(map);
+
+      // Simple placeholder marker to indicate bus position until backend wiring
+      const latlng = [20.5937, 78.9629];
+      parentMarkerRef.current = L.circleMarker(latlng, {
+        radius: 8,
+        color: '#1E3A5F',
+        fillColor: '#3B6FB6',
+        fillOpacity: 0.9,
+        weight: 2
+      }).addTo(map);
+
+      parentMapInstanceRef.current = map;
+    }
+
+    return () => {
+      if (parentMapInstanceRef.current) {
+        parentMapInstanceRef.current.remove();
+        parentMapInstanceRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
@@ -148,13 +187,11 @@ function ParentDashboard({ onMenuClick, setActiveTab }) {
 
               {/* Live Location Map */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="h-64 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center relative">
-                  <div className="text-center z-10">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center shadow-lg mx-auto mb-3 animate-pulse">
-                      <Bus className="w-8 h-8 text-white" />
-                    </div>
-                    <p className="text-gray-700 font-semibold">{childStatus.location}</p>
-                    <p className="text-sm text-gray-600">Bus {childStatus.bus}</p>
+                <div className="relative h-64">
+                  <div ref={parentMapRef} className="absolute inset-0" />
+                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-sm border border-gray-200 z-10">
+                    <p className="text-sm text-gray-700 font-semibold">{childStatus.location}</p>
+                    <p className="text-xs text-gray-500">Bus {childStatus.bus}</p>
                   </div>
                 </div>
               </div>
