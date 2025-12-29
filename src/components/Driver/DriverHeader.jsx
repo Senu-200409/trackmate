@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Menu, X, User, LogOut, Settings, Navigation, Bus, AlignJustify } from 'lucide-react';
+import { Bell, Menu, X, User, LogOut, Settings, Navigation, Bus, AlignJustify, Home } from 'lucide-react';
 
 function DriverHeader({ notifications = [], driverName = "Driver", onMenuClick, setActiveTab }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,6 +35,10 @@ function DriverHeader({ notifications = [], driverName = "Driver", onMenuClick, 
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
+            <button onClick={() => setActiveTab('dashboard')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
+              <Home className="w-4 h-4" />
+              Dashboard
+            </button>
             <button onClick={() => setActiveTab('navigation')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
               <Navigation className="w-4 h-4" />
               Navigation
@@ -122,6 +126,10 @@ function DriverHeader({ notifications = [], driverName = "Driver", onMenuClick, 
           <button onClick={() => { setActiveTab('navigation'); setMobileMenuOpen(false); }} className="w-full text-left flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">
             <Navigation className="w-5 h-5 text-[#FFE066]" />
             Navigation
+          </button>
+          <button onClick={() => { setActiveTab('dashboard'); setMobileMenuOpen(false); }} className="w-full text-left flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">
+            <Home className="w-5 h-5 text-[#FFE066]" />
+            Dashboard
           </button>
           <button onClick={() => { setActiveTab('students'); setMobileMenuOpen(false); }} className="w-full text-left block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">Students</button>
           <button onClick={() => { setActiveTab('reports'); setMobileMenuOpen(false); }} className="w-full text-left block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">Reports</button>
