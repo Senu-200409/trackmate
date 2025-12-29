@@ -17,7 +17,9 @@ import {
   FileText,
   Globe,
   User,
-  Building
+  Building,
+  Edit,
+  Edit2
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
@@ -26,6 +28,8 @@ function Schools({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingSchool, setEditingSchool] = useState(null);
   const [formData, setFormData] = useState({
     schoolCode: '',
     schoolName: '',
@@ -76,6 +80,38 @@ function Schools({ onMenuClick, setActiveTab }) {
       status: 'active',
       notes: ''
     });
+  };
+
+  const handleEditClick = (school) => {
+    setEditingSchool(school);
+    setFormData({
+      schoolCode: school.code || '',
+      schoolName: school.name || '',
+      address: school.address || '',
+      city: school.city || '',
+      state: school.state || '',
+      postalCode: school.postalCode || '',
+      principalName: school.principal || '',
+      contactPerson: school.contact || '',
+      phoneNumber: school.phone || '',
+      email: school.email || '',
+      website: school.website || '',
+      schoolType: (school.type || 'primary').toLowerCase(),
+      establishedYear: school.established || new Date().getFullYear(),
+      totalStudents: school.students || '',
+      busFleetSize: school.buses || '',
+      status: (school.status || 'active').toLowerCase(),
+      notes: school.notes || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateSubmit = (e) => {
+    e.preventDefault();
+    console.log('Updated School Data:', formData);
+    alert('School updated successfully!');
+    setShowEditModal(false);
+    setEditingSchool(null);
   };
 
   const schoolsList = [
@@ -172,7 +208,7 @@ function Schools({ onMenuClick, setActiveTab }) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF7CC] via-[#FFE7A0] to-[#FFF7CC]">
       <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
       
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
@@ -353,8 +389,13 @@ function Schools({ onMenuClick, setActiveTab }) {
 
                 {/* Footer Actions */}
                 <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
-                  <button className="p-2 rounded-lg hover:bg-gray-200 transition-colors" title="Edit">
-                    <School className="w-4 h-4 text-gray-600" />
+                  <button
+                    onClick={() => handleEditClick(school)}
+                    className="px-3 py-1.5 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] transition-colors text-xs font-medium flex items-center gap-1"
+                    title="Update"
+                  >
+                    <Edit className="w-3 h-3" />
+                    Update
                   </button>
                   <button className="p-2 rounded-lg hover:bg-gray-200 transition-colors" title="More Options">
                     <MoreVertical className="w-4 h-4 text-gray-600" />
@@ -699,6 +740,163 @@ function Schools({ onMenuClick, setActiveTab }) {
               >
                 <Save className="w-4 h-4" />
                 Save School
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Update School Modal */}
+      {showEditModal && editingSchool && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#1E3A5F] to-[#3B6FB6]">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <Edit2 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Update School</h2>
+                  <p className="text-white/70 text-sm">Update school information</p>
+                </div>
+              </div>
+              <button onClick={() => { setShowEditModal(false); setEditingSchool(null); }} className="p-2 rounded-lg hover:bg-white/20 transition-colors">
+                <X className="w-6 h-6 text-white" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleUpdateSubmit} className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+              <div className="space-y-6">
+
+                {/* Basic Information Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Basic Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">School Name <span className="text-red-500">*</span></label>
+                      <input type="text" name="schoolName" value={formData.schoolName} onChange={handleInputChange} required placeholder="e.g., Riverside Academy" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">School Code <span className="text-red-500">*</span></label>
+                      <input type="text" name="schoolCode" value={formData.schoolCode} disabled className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-100 text-gray-500 cursor-not-allowed" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">School Type <span className="text-red-500">*</span></label>
+                      <select name="schoolType" value={formData.schoolType} onChange={handleInputChange} required className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white">
+                        <option value="primary">Primary School</option>
+                        <option value="secondary">Secondary School</option>
+                        <option value="combined">Combined School</option>
+                        <option value="international">International School</option>
+                        <option value="private">Private School</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Year Established <span className="text-red-500">*</span></label>
+                      <input type="number" name="establishedYear" value={formData.establishedYear} onChange={handleInputChange} required min="1900" max="2030" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Principal & Contact Information */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Principal & Contact Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Principal Name <span className="text-red-500">*</span></label>
+                      <input type="text" name="principalName" value={formData.principalName} onChange={handleInputChange} required placeholder="e.g., Dr. James Williams" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contact Person <span className="text-red-500">*</span></label>
+                      <input type="text" name="contactPerson" value={formData.contactPerson} onChange={handleInputChange} required placeholder="e.g., John Smith" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number <span className="text-red-500">*</span></label>
+                      <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} required placeholder="e.g., +1 212-555-0100" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email Address <span className="text-red-500">*</span></label>
+                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} required placeholder="e.g., info@school.edu" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+                      <input type="url" name="website" value={formData.website} onChange={handleInputChange} placeholder="e.g., https://www.school.edu" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Address Information */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Address Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Street Address <span className="text-red-500">*</span></label>
+                      <input type="text" name="address" value={formData.address} onChange={handleInputChange} required placeholder="Full street address" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">City <span className="text-red-500">*</span></label>
+                      <input type="text" name="city" value={formData.city} onChange={handleInputChange} required placeholder="e.g., New York" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">State <span className="text-red-500">*</span></label>
+                      <input type="text" name="state" value={formData.state} onChange={handleInputChange} required placeholder="e.g., NY" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+                      <input type="text" name="postalCode" value={formData.postalCode} onChange={handleInputChange} placeholder="e.g., 10001" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* School Details Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Building className="w-4 h-4" />
+                    School Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Total Students <span className="text-red-500">*</span></label>
+                      <input type="number" name="totalStudents" value={formData.totalStudents} onChange={handleInputChange} required min="0" placeholder="e.g., 450" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Bus Fleet Size <span className="text-red-500">*</span></label>
+                      <input type="number" name="busFleetSize" value={formData.busFleetSize} onChange={handleInputChange} required min="0" placeholder="e.g., 5" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                      <select name="status" value={formData.status} onChange={handleInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all bg-white">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notes Section */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+                  <textarea name="notes" value={formData.notes} onChange={handleInputChange} rows="3" placeholder="Any additional information about the school..." className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all resize-none" />
+                </div>
+              </div>
+            </form>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-3">
+              <button type="button" onClick={() => { setShowEditModal(false); setEditingSchool(null); }} className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium">Cancel</button>
+              <button type="submit" onClick={handleUpdateSubmit} className="px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors font-medium flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                Update School
               </button>
             </div>
           </div>
