@@ -15,7 +15,9 @@ import {
   FileText,
   Building,
   Briefcase,
-  Award
+  Award,
+  Edit,
+  Edit2
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
@@ -24,6 +26,8 @@ function Parents({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingParent, setEditingParent] = useState(null);
   const [formData, setFormData] = useState({
     parentId: '',
     firstName: '',
@@ -79,6 +83,43 @@ function Parents({ onMenuClick, setActiveTab }) {
       status: 'active',
       notes: ''
     });
+  };
+
+  const handleEditClick = (parent) => {
+    const [firstName = '', ...rest] = parent.name ? parent.name.split(' ') : [''];
+    const lastName = rest.join(' ');
+    setEditingParent(parent);
+    setFormData({
+      parentId: parent.id || '',
+      firstName,
+      lastName,
+      email: parent.email || '',
+      phone: parent.phone || '',
+      alternatePhone: parent.alternatePhone || '',
+      gender: parent.gender || '',
+      occupation: parent.occupation || '',
+      companyName: parent.company || '',
+      address: parent.address || '',
+      city: parent.city || '',
+      state: parent.state || '',
+      postalCode: parent.postalCode || '',
+      childrenCount: parent.children || '',
+      childrenNames: parent.childNames || '',
+      emergencyRelation: parent.emergencyRelation || '',
+      aadharNumber: parent.aadharNumber || '',
+      panNumber: parent.panNumber || '',
+      status: (parent.status || 'active').toLowerCase(),
+      notes: parent.notes || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateSubmit = (e) => {
+    e.preventDefault();
+    console.log('Updated Parent Data:', formData);
+    alert('Parent updated successfully!');
+    setShowEditModal(false);
+    setEditingParent(null);
   };
 
   const parentsList = [
@@ -190,7 +231,7 @@ function Parents({ onMenuClick, setActiveTab }) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF6E0] via-[#FFE8C0] to-[#FFF6E0]">
       <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
       
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
@@ -359,8 +400,13 @@ function Parents({ onMenuClick, setActiveTab }) {
 
                 {/* Footer Actions */}
                 <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
-                  <button className="p-2 rounded-lg hover:bg-gray-200 transition-colors" title="Edit">
-                    <User className="w-4 h-4 text-gray-600" />
+                  <button
+                    onClick={() => handleEditClick(parent)}
+                    className="px-3 py-1.5 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] transition-colors text-xs font-medium flex items-center gap-1"
+                    title="Update"
+                  >
+                    <Edit className="w-3 h-3" />
+                    Update
                   </button>
                   <button className="p-2 rounded-lg hover:bg-gray-200 transition-colors" title="More Options">
                     <MoreVertical className="w-4 h-4 text-gray-600" />
@@ -769,6 +815,204 @@ function Parents({ onMenuClick, setActiveTab }) {
               >
                 <Save className="w-4 h-4" />
                 Register Parent
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Update Parent Modal */}
+      {showEditModal && editingParent && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#1E3A5F] to-[#3B6FB6]">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <Edit2 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Update Parent/Guardian</h2>
+                  <p className="text-white/70 text-sm">Update parent information</p>
+                </div>
+              </div>
+              <button onClick={() => { setShowEditModal(false); setEditingParent(null); }} className="p-2 rounded-lg hover:bg-white/20 transition-colors">
+                <X className="w-6 h-6 text-white" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleUpdateSubmit} className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+              <div className="space-y-6">
+
+                {/* Personal Information Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Personal Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Parent ID <span className="text-red-500">*</span></label>
+                      <input type="text" name="parentId" value={formData.parentId} disabled className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-100 text-gray-500 cursor-not-allowed" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Gender <span className="text-red-500">*</span></label>
+                      <select name="gender" value={formData.gender} onChange={handleInputChange} required className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white">
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">First Name <span className="text-red-500">*</span></label>
+                      <input type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} required placeholder="e.g., John" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Last Name <span className="text-red-500">*</span></label>
+                      <input type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} required placeholder="e.g., Doe" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact Information Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Phone className="w-4 h-4" />
+                    Contact Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email Address <span className="text-red-500">*</span></label>
+                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} required placeholder="e.g., john@example.com" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number <span className="text-red-500">*</span></label>
+                      <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} required placeholder="e.g., +1 212-555-0100" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Alternate Phone</label>
+                      <input type="tel" name="alternatePhone" value={formData.alternatePhone} onChange={handleInputChange} placeholder="e.g., +1 212-555-0150" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Professional Information Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Briefcase className="w-4 h-4" />
+                    Professional Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Occupation <span className="text-red-500">*</span></label>
+                      <input type="text" name="occupation" value={formData.occupation} onChange={handleInputChange} required placeholder="e.g., Software Engineer" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Company Name <span className="text-red-500">*</span></label>
+                      <input type="text" name="companyName" value={formData.companyName} onChange={handleInputChange} required placeholder="e.g., Tech Solutions" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Address Information Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Address Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Address <span className="text-red-500">*</span></label>
+                      <input type="text" name="address" value={formData.address} onChange={handleInputChange} required placeholder="Full address" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">City <span className="text-red-500">*</span></label>
+                      <input type="text" name="city" value={formData.city} onChange={handleInputChange} required placeholder="e.g., New York" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">State <span className="text-red-500">*</span></label>
+                      <input type="text" name="state" value={formData.state} onChange={handleInputChange} required placeholder="e.g., NY" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+                      <input type="text" name="postalCode" value={formData.postalCode} onChange={handleInputChange} placeholder="e.g., 10001" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Children Information Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Children Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Number of Children <span className="text-red-500">*</span></label>
+                      <input type="number" name="childrenCount" value={formData.childrenCount} onChange={handleInputChange} required min="1" placeholder="e.g., 1" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Emergency Relation <span className="text-red-500">*</span></label>
+                      <select name="emergencyRelation" value={formData.emergencyRelation} onChange={handleInputChange} required className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all bg-white">
+                        <option value="">Select Relation</option>
+                        <option value="Father">Father</option>
+                        <option value="Mother">Mother</option>
+                        <option value="Guardian">Guardian</option>
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Children Names <span className="text-red-500">*</span></label>
+                      <input type="text" name="childrenNames" value={formData.childrenNames} onChange={handleInputChange} required placeholder="e.g., Emma Johnson, John Johnson" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Government ID Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Award className="w-4 h-4" />
+                    Government ID
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Aadhar Number</label>
+                      <input type="text" name="aadharNumber" value={formData.aadharNumber} onChange={handleInputChange} placeholder="e.g., 1234-5678-9012" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text sm font-medium text-gray-700 mb-1">PAN Number</label>
+                      <input type="text" name="panNumber" value={formData.panNumber} onChange={handleInputChange} placeholder="e.g., ABCDE1234F" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Information */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Additional Information</h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                      <select name="status" value={formData.status} onChange={handleInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all bg-white">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                      <textarea name="notes" value={formData.notes} onChange={handleInputChange} rows="3" placeholder="Any additional information..." className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all resize-none" />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </form>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-3">
+              <button type="button" onClick={() => { setShowEditModal(false); setEditingParent(null); }} className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium">Cancel</button>
+              <button type="submit" onClick={handleUpdateSubmit} className="px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors font-medium flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                Update Parent
               </button>
             </div>
           </div>
