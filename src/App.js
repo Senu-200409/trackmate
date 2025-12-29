@@ -99,7 +99,8 @@ function App() {
         default: return <OwnerDashboard {...ownerProps} />;
       }
     }
-    return <ParentDashboard {...commonProps} />;
+    // Fallback to parent dashboard with proper props
+    return <ParentDashboard onMenuClick={toggleSidebar} setActiveTab={setActiveTab} />;
   };
 
   return (

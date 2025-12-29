@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Bell, Menu, X, User, LogOut, Settings, GraduationCap, AlignJustify } from 'lucide-react';
 
-function ParentHeader({ notifications = [], onMenuClick }) {
+function ParentHeader({ notifications = [], onMenuClick, setActiveTab }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
@@ -35,10 +35,10 @@ function ParentHeader({ notifications = [], onMenuClick }) {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#" className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">Dashboard</a>
-            <a href="#" className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">My Child</a>
-            <a href="#" className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">History</a>
-            <a href="#" className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">Support</a>
+            <button onClick={() => setActiveTab('dashboard')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">Dashboard</button>
+            <button onClick={() => setActiveTab('my-child')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">My Child</button>
+            <button onClick={() => setActiveTab('history')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">History</button>
+            <button onClick={() => setActiveTab('alerts')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium border-b-2 border-transparent hover:border-[#F5C518] pb-1">Alerts</button>
           </nav>
 
           {/* Right Section - Desktop */}
@@ -70,11 +70,11 @@ function ParentHeader({ notifications = [], onMenuClick }) {
               {/* Profile Dropdown */}
               {profileMenuOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white text-[#1E3A5F] rounded-lg shadow-xl z-50 border border-gray-200">
-                  <button className="w-full text-left px-4 py-3 hover:bg-[#FFF9E6] flex items-center gap-2 border-b border-gray-200 font-medium">
+                  <button onClick={() => { setActiveTab('my-child'); setProfileMenuOpen(false); }} className="w-full text-left px-4 py-3 hover:bg-[#FFF9E6] flex items-center gap-2 border-b border-gray-200 font-medium">
                     <User className="w-4 h-4 text-[#3B6FB6]" />
                     <span>My Profile</span>
                   </button>
-                  <button className="w-full text-left px-4 py-3 hover:bg-[#FFF9E6] flex items-center gap-2 border-b border-gray-200 font-medium">
+                  <button onClick={() => { setActiveTab('settings'); setProfileMenuOpen(false); }} className="w-full text-left px-4 py-3 hover:bg-[#FFF9E6] flex items-center gap-2 border-b border-gray-200 font-medium">
                     <Settings className="w-4 h-4 text-[#3B6FB6]" />
                     <span>Settings</span>
                   </button>
@@ -104,17 +104,17 @@ function ParentHeader({ notifications = [], onMenuClick }) {
       {/* Mobile Navigation Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#1E3A5F] px-4 py-4 space-y-2 border-t border-[#3B6FB6]">
-          <a href="#" className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">Dashboard</a>
-          <a href="#" className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">My Child</a>
-          <a href="#" className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">History</a>
-          <a href="#" className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">Support</a>
+          <button onClick={() => { setActiveTab('dashboard'); setMobileMenuOpen(false); }} className="w-full text-left block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">Dashboard</button>
+          <button onClick={() => { setActiveTab('my-child'); setMobileMenuOpen(false); }} className="w-full text-left block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">My Child</button>
+          <button onClick={() => { setActiveTab('history'); setMobileMenuOpen(false); }} className="w-full text-left block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">History</button>
+          <button onClick={() => { setActiveTab('alerts'); setMobileMenuOpen(false); }} className="w-full text-left block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">Alerts</button>
           
           <div className="border-t border-[#3B6FB6] pt-4 mt-4">
-            <button className="w-full flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">
+            <button onClick={() => { setActiveTab('my-child'); setMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">
               <User className="w-5 h-5 text-[#FFE066]" />
               <span>My Profile</span>
             </button>
-            <button className="w-full flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">
+            <button onClick={() => { setActiveTab('settings'); setMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">
               <Settings className="w-5 h-5 text-[#FFE066]" />
               <span>Settings</span>
             </button>
