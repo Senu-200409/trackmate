@@ -17,6 +17,7 @@ import {
   TrendingUp,
   Eye,
   Edit,
+  Edit2,
   Bus,
   X,
   Save,
@@ -31,7 +32,10 @@ function Drivers({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingDriver, setEditingDriver] = useState(null);
   const [formData, setFormData] = useState({
+    driverId: '',
     firstName: '',
     lastName: '',
     phone: '',
@@ -105,6 +109,44 @@ function Drivers({ onMenuClick, setActiveTab }) {
     { id: 'RT-004', name: 'Route A - Afternoon' },
     { id: 'RT-005', name: 'Route D - Morning' },
   ];
+
+  const handleEditClick = (driver) => {
+    const [firstName = '', ...restName] = driver.name ? driver.name.split(' ') : [''];
+    const lastName = restName.join(' ');
+    setEditingDriver(driver);
+    setFormData({
+      driverId: driver.id || '',
+      firstName,
+      lastName,
+      phone: driver.phone || '',
+      email: driver.email || '',
+      dateOfBirth: driver.dateOfBirth || '',
+      address: driver.address || '',
+      city: driver.city || '',
+      licenseNumber: driver.licenseNumber || '',
+      licenseType: driver.license || 'CDL-B',
+      licenseExpiry: driver.licenseExpiry || '',
+      experience: (driver.experience || '').replace(/[^0-9.]/g, ''),
+      emergencyContactName: driver.emergencyContactName || '',
+      emergencyContactPhone: driver.emergencyContactPhone || '',
+      emergencyContactRelation: driver.emergencyContactRelation || '',
+      assignedBus: driver.assignedBus || '',
+      assignedRoute: driver.route || '',
+      joiningDate: driver.joinDate || '',
+      salary: driver.salary || '',
+      status: (driver.status || 'active').toLowerCase().replace(' ', '-'),
+      notes: driver.notes || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateSubmit = (e) => {
+    e.preventDefault();
+    console.log('Updated Driver Data:', formData);
+    alert('Driver updated successfully!');
+    setShowEditModal(false);
+    setEditingDriver(null);
+  };
 
   const drivers = [
     { 
@@ -418,8 +460,13 @@ function Drivers({ onMenuClick, setActiveTab }) {
                   <button className="p-2 rounded-lg hover:bg-gray-200 transition-colors" title="View Profile">
                     <Eye className="w-4 h-4 text-gray-600" />
                   </button>
-                  <button className="p-2 rounded-lg hover:bg-gray-200 transition-colors" title="Edit">
-                    <Edit className="w-4 h-4 text-gray-600" />
+                  <button
+                    onClick={() => handleEditClick(driver)}
+                    className="px-3 py-1.5 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] transition-colors text-xs font-medium flex items-center gap-1"
+                    title="Update"
+                  >
+                    <Edit className="w-3 h-3" />
+                    Update
                   </button>
                   <button className="p-2 rounded-lg hover:bg-gray-200 transition-colors" title="More Options">
                     <MoreVertical className="w-4 h-4 text-gray-600" />
@@ -809,6 +856,199 @@ function Drivers({ onMenuClick, setActiveTab }) {
               >
                 <Save className="w-4 h-4" />
                 Save Driver
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Update Driver Modal */}
+      {showEditModal && editingDriver && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#1E3A5F] to-[#3B6FB6]">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <Edit2 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Update Driver</h2>
+                  <p className="text-white/70 text-sm">Update driver's information</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => { setShowEditModal(false); setEditingDriver(null); }}
+                className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleUpdateSubmit} className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+              <div className="space-y-6">
+                {/* Personal Information Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Personal Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Driver ID <span className="text-red-500">*</span></label>
+                      <input type="text" name="driverId" value={formData.driverId} disabled className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-100 text-gray-500 cursor-not-allowed" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">License Number <span className="text-red-500">*</span></label>
+                      <input type="text" name="licenseNumber" value={formData.licenseNumber} disabled className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-100 text-gray-500 cursor-not-allowed" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">First Name <span className="text-red-500">*</span></label>
+                      <input type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} required placeholder="e.g., John" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Last Name <span className="text-red-500">*</span></label>
+                      <input type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} required placeholder="e.g., Smith" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number <span className="text-red-500">*</span></label>
+                      <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} required placeholder="e.g., +1 234-567-8900" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email Address <span className="text-red-500">*</span></label>
+                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} required placeholder="e.g., john@example.com" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth <span className="text-red-500">*</span></label>
+                      <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} required className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                      <input type="text" name="city" value={formData.city} onChange={handleInputChange} placeholder="e.g., New York" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text sm font-medium text-gray-700 mb-1">Address</label>
+                      <input type="text" name="address" value={formData.address} onChange={handleInputChange} placeholder="Full address" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* License Information Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    License Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">License Type <span className="text-red-500">*</span></label>
+                      <select name="licenseType" value={formData.licenseType} onChange={handleInputChange} required className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white">
+                        <option value="CDL-A">CDL-A (Class A)</option>
+                        <option value="CDL-B">CDL-B (Class B)</option>
+                        <option value="CDL-C">CDL-C (Class C)</option>
+                        <option value="Standard">Standard License</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">License Expiry Date <span className="text-red-500">*</span></label>
+                      <input type="date" name="licenseExpiry" value={formData.licenseExpiry} onChange={handleInputChange} required className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Years of Experience</label>
+                      <input type="number" name="experience" value={formData.experience} onChange={handleInputChange} min="0" max="50" placeholder="e.g., 5" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Emergency Contact Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    Emergency Contact
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contact Name <span className="text-red-500">*</span></label>
+                      <input type="text" name="emergencyContactName" value={formData.emergencyContactName} onChange={handleInputChange} required placeholder="e.g., Jane Smith" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contact Phone <span className="text-red-500">*</span></label>
+                      <input type="tel" name="emergencyContactPhone" value={formData.emergencyContactPhone} onChange={handleInputChange} required placeholder="e.g., +1 234-567-8900" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
+                      <select name="emergencyContactRelation" value={formData.emergencyContactRelation} onChange={handleInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all bg-white">
+                        <option value="">Select relation</option>
+                        <option value="spouse">Spouse</option>
+                        <option value="parent">Parent</option>
+                        <option value="sibling">Sibling</option>
+                        <option value="child">Child</option>
+                        <option value="friend">Friend</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Assignment Section */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Bus className="w-4 h-4" />
+                    Assignment & Employment
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Assigned Bus</label>
+                      <select name="assignedBus" value={formData.assignedBus} onChange={handleInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all bg-white">
+                        <option value="">Select a bus</option>
+                        {availableBuses.map(bus => (
+                          <option key={bus.id} value={bus.id}>{bus.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Assigned Route</label>
+                      <select name="assignedRoute" value={formData.assignedRoute} onChange={handleInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all bg-white">
+                        <option value="">Select a route</option>
+                        {availableRoutes.map(route => (
+                          <option key={route.id} value={route.id}>{route.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Joining Date</label>
+                      <input type="date" name="joiningDate" value={formData.joiningDate} onChange={handleInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Salary ($)</label>
+                      <input type="number" name="salary" value={formData.salary} onChange={handleInputChange} min="0" placeholder="e.g., 3500" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                      <select name="status" value={formData.status} onChange={handleInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all bg-white">
+                        <option value="active">Active</option>
+                        <option value="on-leave">On Leave</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notes Section */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+                  <textarea name="notes" value={formData.notes} onChange={handleInputChange} rows="3" placeholder="Any additional information about the driver..." className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all resize-none" />
+                </div>
+              </div>
+            </form>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-3">
+              <button type="button" onClick={() => { setShowEditModal(false); setEditingDriver(null); }} className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium">Cancel</button>
+              <button type="submit" onClick={handleUpdateSubmit} className="px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors font-medium flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                Update Driver
               </button>
             </div>
           </div>
