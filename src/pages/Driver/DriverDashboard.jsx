@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import {
   AlertCircle,
   Clock,
@@ -32,6 +34,84 @@ function DriverDashboard({ onMenuClick, setActiveTab }) {
     busStatus: "Normal",
     currentLocation: "Maple Street"
   });
+
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const positionMarkerRef = useRef(null);
+  const accuracyCircleRef = useRef(null);
+  const watchIdRef = useRef(null);
+
+  useEffect(() => {
+    if (mapRef.current && !mapInstanceRef.current) {
+      const map = L.map(mapRef.current, {
+        zoomControl: true,
+        attributionControl: false
+      }).setView([20.5937, 78.9629], 5); // Default to India view
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+      }).addTo(map);
+
+      mapInstanceRef.current = map;
+    }
+
+    if ('geolocation' in navigator) {
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (pos) => {
+          const { latitude, longitude, accuracy } = pos.coords;
+          const map = mapInstanceRef.current;
+          if (!map) return;
+
+          const latlng = [latitude, longitude];
+
+          // Initialize or update a simple circle marker (no external icon paths)
+          if (!positionMarkerRef.current) {
+            positionMarkerRef.current = L.circleMarker(latlng, {
+              radius: 8,
+              color: '#1E3A5F',
+              fillColor: '#3B6FB6',
+              fillOpacity: 0.9,
+              weight: 2
+            }).addTo(map);
+          } else {
+            positionMarkerRef.current.setLatLng(latlng);
+          }
+
+          // Accuracy circle
+          if (!accuracyCircleRef.current) {
+            accuracyCircleRef.current = L.circle(latlng, {
+              radius: accuracy,
+              color: '#3B6FB6',
+              fillColor: '#3B6FB6',
+              fillOpacity: 0.15,
+              weight: 1
+            }).addTo(map);
+          } else {
+            accuracyCircleRef.current.setLatLng(latlng);
+            accuracyCircleRef.current.setRadius(accuracy);
+          }
+
+          // Smoothly pan to current location
+          map.setView(latlng, Math.max(map.getZoom(), 15), { animate: true });
+        },
+        (err) => {
+          // If permission denied or error, keep default view
+          console.warn('Geolocation error:', err.message);
+        },
+        { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
+      );
+    }
+
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
 
   const alerts = [
     { id: 1, type: 'warning', title: 'Traffic Alert', message: 'Heavy traffic on Main Street ahead', time: '2 mins ago' },
@@ -126,13 +206,11 @@ function DriverDashboard({ onMenuClick, setActiveTab }) {
               
               {/* Live Map Area */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="h-64 bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center relative">
-                  <div className="text-center z-10">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center shadow-lg animate-pulse mx-auto mb-3">
-                      <Bus className="w-8 h-8 text-white" />
-                    </div>
-                    <p className="text-gray-700 font-semibold">{routeInfo.currentLocation}</p>
-                    <p className="text-sm text-gray-600">Current Location</p>
+                <div className="relative h-64">
+                  <div ref={mapRef} className="absolute inset-0" />
+                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-sm border border-gray-200 z-10">
+                    <p className="text-sm text-gray-700 font-semibold">{routeInfo.currentLocation}</p>
+                    <p className="text-xs text-gray-500">Current Location</p>
                   </div>
                 </div>
                 <div className="p-4 border-t border-gray-200">
