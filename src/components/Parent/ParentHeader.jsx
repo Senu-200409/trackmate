@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Bell, Menu, X, User, LogOut, Settings, GraduationCap, AlignJustify } from 'lucide-react';
+import ProfileSlideOver from '../ProfileSlideOver';
 
-function ParentHeader({ notifications = [], onMenuClick, setActiveTab }) {
+function ParentHeader({ notifications = [], onMenuClick, setActiveTab, onLogout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   return (
     <header className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white shadow-xl">
@@ -58,7 +59,7 @@ function ParentHeader({ notifications = [], onMenuClick, setActiveTab }) {
             {/* Profile Menu */}
             <div className="relative">
               <button
-                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                onClick={() => setProfileOpen(true)}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors border border-white/20"
               >
                 <div className="w-8 h-8 bg-[#F5C518] rounded-full flex items-center justify-center">
@@ -66,24 +67,6 @@ function ParentHeader({ notifications = [], onMenuClick, setActiveTab }) {
                 </div>
                 <span className="text-sm font-medium">Profile</span>
               </button>
-
-              {/* Profile Dropdown */}
-              {profileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white text-[#1E3A5F] rounded-lg shadow-xl z-50 border border-gray-200">
-                  <button onClick={() => { setActiveTab('my-child'); setProfileMenuOpen(false); }} className="w-full text-left px-4 py-3 hover:bg-[#FFF9E6] flex items-center gap-2 border-b border-gray-200 font-medium">
-                    <User className="w-4 h-4 text-[#3B6FB6]" />
-                    <span>My Profile</span>
-                  </button>
-                  <button onClick={() => { setActiveTab('settings'); setProfileMenuOpen(false); }} className="w-full text-left px-4 py-3 hover:bg-[#FFF9E6] flex items-center gap-2 border-b border-gray-200 font-medium">
-                    <Settings className="w-4 h-4 text-[#3B6FB6]" />
-                    <span>Settings</span>
-                  </button>
-                  <button className="w-full text-left px-4 py-3 hover:bg-red-50 flex items-center gap-2 text-red-600 font-medium">
-                    <LogOut className="w-4 h-4" />
-                    <span>Logout</span>
-                  </button>
-                </div>
-              )}
             </div>
           </div>
 
@@ -118,13 +101,22 @@ function ParentHeader({ notifications = [], onMenuClick, setActiveTab }) {
               <Settings className="w-5 h-5 text-[#FFE066]" />
               <span>Settings</span>
             </button>
-            <button className="w-full flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-red-900/30 transition-colors font-medium text-red-300">
+            <button onClick={() => { onLogout && onLogout(); setMobileMenuOpen(false); }} className="w-full flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-red-900/30 transition-colors font-medium text-red-300">
               <LogOut className="w-5 h-5" />
               <span>Logout</span>
             </button>
           </div>
         </div>
       )}
+
+      {/* Profile Slide-Over */}
+      <ProfileSlideOver
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        user={{ name: 'Parent', role: 'Parent Portal' }}
+        onSettings={() => { setActiveTab('settings'); setProfileOpen(false); }}
+        onLogout={() => { onLogout && onLogout(); setProfileOpen(false); }}
+      />
     </header>
   );
 }

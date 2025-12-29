@@ -66,7 +66,7 @@ function App() {
     const commonProps = { onMenuClick: toggleSidebar };
     
     if (userRole === 'parent') {
-      const parentProps = { ...commonProps, setActiveTab };
+      const parentProps = { ...commonProps, setActiveTab, onLogout: handleLogout };
       switch (activeTab) {
         case 'dashboard': return <ParentDashboard {...parentProps} />;
         case 'my-child': return <MyChild {...parentProps} />;
@@ -76,7 +76,7 @@ function App() {
         default: return <ParentDashboard {...parentProps} />;
       }
     } else if (userRole === 'driver') {
-      const driverProps = { ...commonProps, setActiveTab };
+      const driverProps = { ...commonProps, setActiveTab, onLogout: handleLogout };
       switch (activeTab) {
         case 'dashboard': return <DriverDashboard {...driverProps} />;
         case 'navigation': return <Navigation {...driverProps} />;
@@ -86,7 +86,7 @@ function App() {
         default: return <DriverDashboard {...driverProps} />;
       }
     } else if (userRole === 'owner') {
-      const ownerProps = { ...commonProps, setActiveTab };
+      const ownerProps = { ...commonProps, setActiveTab, onLogout: handleLogout };
       switch (activeTab) {
         case 'dashboard': return <OwnerDashboard {...ownerProps} />;
         case 'fleet': return <Fleet {...ownerProps} />;

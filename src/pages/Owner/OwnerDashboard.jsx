@@ -22,7 +22,7 @@ import {
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
 
-function OwnerDashboard({ onMenuClick, setActiveTab }) {
+function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
   const [notifications] = useState([]);
   const [currentAlertIndex, setCurrentAlertIndex] = useState(0);
   
@@ -86,7 +86,7 @@ function OwnerDashboard({ onMenuClick, setActiveTab }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
-      <OwnerHeader notifications={notifications} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
+      <OwnerHeader notifications={notifications} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} onLogout={onLogout} />
       
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
         <div className="space-y-5 max-w-7xl mx-auto">
