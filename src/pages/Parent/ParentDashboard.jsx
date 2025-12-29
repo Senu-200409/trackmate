@@ -158,12 +158,8 @@ function ParentDashboard({ onMenuClick, setActiveTab }) {
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Right Column - Alerts & Quick Actions */}
-            <div className="space-y-6">
-              
-              {/* Active Alerts */}
+              {/* Active Alerts (moved here to balance layout) */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-orange-600" />
@@ -187,6 +183,10 @@ function ParentDashboard({ onMenuClick, setActiveTab }) {
                   ))}
                 </div>
               </div>
+            </div>
+
+            {/* Right Column - Alerts & Quick Actions */}
+            <div className="space-y-6">
 
               {/* Driver Info */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
