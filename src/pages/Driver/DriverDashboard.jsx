@@ -118,6 +118,68 @@ function DriverDashboard({ onMenuClick, setActiveTab }) {
     { id: 2, type: 'info', title: 'Pending Student', message: 'Emma Wilson at Oak Avenue stop not yet boarded', time: '1 min ago' }
   ];
 
+  // RFID phase toggle
+  const phaseSteps = [
+    { key: 'morning-pickup', label: 'Start Morning Pickup', alert: 'Morning student pickup by driver' },
+    { key: 'arrived-school', label: 'Mark Arrived at School', alert: 'Students dropped at school' },
+    { key: 'evening-pickup', label: 'Start Evening Pickup', alert: 'After school students picked to the bus' },
+    { key: 'home-drop', label: 'Mark Dropped at Home', alert: 'Students dropped at home' }
+  ];
+  const [phaseIndex, setPhaseIndex] = useState(() => {
+    const saved = localStorage.getItem('driverPhaseIndex');
+    return saved ? Math.min(phaseSteps.length - 1, Math.max(0, parseInt(saved, 10))) : 0;
+  });
+  const currentStep = phaseSteps[phaseIndex];
+
+  // Phase-specific color styles (4 distinct themes)
+  const phaseStyles = {
+    'morning-pickup': {
+      button: 'bg-gradient-to-r from-green-600 to-emerald-500 text-white',
+      chip: 'bg-green-100 text-green-800 border-green-300'
+    },
+    'arrived-school': {
+      button: 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white',
+      chip: 'bg-blue-100 text-blue-800 border-blue-300'
+    },
+    'evening-pickup': {
+      button: 'bg-gradient-to-r from-amber-500 to-yellow-500 text-[#1E3A5F]',
+      chip: 'bg-amber-100 text-amber-800 border-amber-300'
+    },
+    'home-drop': {
+      button: 'bg-gradient-to-r from-orange-600 to-red-500 text-white',
+      chip: 'bg-orange-100 text-orange-800 border-orange-300'
+    }
+  };
+  const getPhaseStyle = (key) => phaseStyles[key] || {
+    button: 'bg-gradient-to-r from-[#F5C518] to-[#FFE066] text-[#1E3A5F]',
+    chip: 'bg-yellow-100 text-yellow-800 border-yellow-300'
+  };
+
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().catch(() => {});
+    }
+  }, []);
+
+  const emitRfidAlert = (step) => {
+    const payload = {
+      type: step.key,
+      message: step.alert,
+      timestamp: new Date().toISOString()
+    };
+    console.log('RFID Alert:', payload);
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('RFID Alert', { body: step.alert });
+    }
+  };
+
+  const handleTogglePhase = () => {
+    emitRfidAlert(currentStep);
+    const next = (phaseIndex + 1) % phaseSteps.length;
+    setPhaseIndex(next);
+    localStorage.setItem('driverPhaseIndex', String(next));
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
       <DriverHeader notifications={notifications} driverName="Michael" onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
@@ -138,6 +200,8 @@ function DriverDashboard({ onMenuClick, setActiveTab }) {
               </div>
             </div>
           </div>
+
+          
 
           {/* Quick Status Cards Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -203,6 +267,21 @@ function DriverDashboard({ onMenuClick, setActiveTab }) {
             
             {/* Left Column - Live Tracking & Alerts */}
             <div className="lg:col-span-2 space-y-6">
+              {/* RFID Phase Toggle - near map, sticky */}
+              <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-sm rounded-xl border border-yellow-200 shadow-sm p-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-700">Driver Status:</span>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPhaseStyle(currentStep.key).chip}`}>
+                    {currentStep.key.replace(/-/g, ' ')}
+                  </span>
+                </div>
+                <button
+                  onClick={handleTogglePhase}
+                  className={`px-5 py-3 rounded-2xl font-semibold shadow-sm hover:shadow-md transition-shadow text-base ${getPhaseStyle(currentStep.key).button}`}
+                >
+                  {currentStep.label}
+                </button>
+              </div>
               
               {/* Live Map Area */}
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
