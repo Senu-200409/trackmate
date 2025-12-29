@@ -10,6 +10,7 @@ import DriverDashboard from './pages/Driver/DriverDashboard';
 import Navigation from './pages/Driver/Navigation';
 import Reports from './pages/Driver/Reports';
 import Support from './pages/Driver/Support';
+import DriverStudents from './pages/Driver/Students';
 import OwnerDashboard from './pages/Owner/OwnerDashboard';
 import Fleet from './pages/Owner/Fleet';
 import Drivers from './pages/Owner/Drivers';
@@ -79,7 +80,7 @@ function App() {
       switch (activeTab) {
         case 'dashboard': return <DriverDashboard {...driverProps} />;
         case 'navigation': return <Navigation {...driverProps} />;
-        case 'students': return <Reports {...driverProps} />;
+        case 'students': return <DriverStudents {...driverProps} />;
         case 'reports': return <Reports {...driverProps} />;
         case 'support': return <Support {...driverProps} />;
         default: return <DriverDashboard {...driverProps} />;
