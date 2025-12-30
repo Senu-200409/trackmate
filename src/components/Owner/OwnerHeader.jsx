@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Bell, Menu, X, User, LogOut, Settings, Building2, BarChart3, Bus, Users, AlignJustify, School } from 'lucide-react';
 import ProfileSlideOver from '../ProfileSlideOver';
 
-function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyName = "TrackMate Fleet", onMenuClick, setActiveTab, onLogout }) {
+function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyName = "TrackMate Fleet", onMenuClick, setActiveTab, onLogout, profileImage = null, onProfileImageUpdate = null }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [ownerImage, setOwnerImage] = useState(profileImage);
 
   return (
     <header className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white shadow-xl">
@@ -99,11 +100,19 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
             <div className="relative">
               <button
                 onClick={() => setProfileOpen(true)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors border border-white/20"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors border border-white/20 group"
               >
-                <div className="w-8 h-8 bg-[#F5C518] rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-[#1E3A5F]" />
-                </div>
+                {ownerImage ? (
+                  <img 
+                    src={ownerImage} 
+                    alt={ownerName}
+                    className="w-8 h-8 rounded-full object-cover group-hover:ring-2 ring-[#F5C518] transition-all"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-[#F5C518] rounded-full flex items-center justify-center group-hover:ring-2 ring-[#F5C518] transition-all">
+                    <User className="w-5 h-5 text-[#1E3A5F]" />
+                  </div>
+                )}
                 <div className="text-left">
                   <span className="text-sm font-medium block">{ownerName}</span>
                   <span className="text-xs text-[#FFE066]">Administrator</span>
@@ -187,9 +196,13 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
       <ProfileSlideOver
         isOpen={profileOpen}
         onClose={() => setProfileOpen(false)}
-        user={{ name: ownerName, role: 'Owner', company: companyName }}
+        user={{ name: ownerName, role: 'Owner', company: companyName, profileImage: ownerImage }}
         onSettings={() => { setActiveTab('settings'); setProfileOpen(false); }}
         onLogout={() => { onLogout && onLogout(); setProfileOpen(false); }}
+        onImageUpdate={(image) => {
+          setOwnerImage(image);
+          if (onProfileImageUpdate) onProfileImageUpdate(image);
+        }}
       />
     </header>
   );

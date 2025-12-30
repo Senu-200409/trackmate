@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Bell, Menu, X, User, LogOut, Settings, GraduationCap, AlignJustify } from 'lucide-react';
 import ProfileSlideOver from '../ProfileSlideOver';
 
-function ParentHeader({ notifications = [], onMenuClick, setActiveTab, onLogout }) {
+function ParentHeader({ notifications = [], parentName = "Parent", onMenuClick, setActiveTab, onLogout, profileImage = null, onProfileImageUpdate = null }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [parentImage, setParentImage] = useState(profileImage);
 
   return (
     <header className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white shadow-xl">
@@ -60,11 +61,19 @@ function ParentHeader({ notifications = [], onMenuClick, setActiveTab, onLogout 
             <div className="relative">
               <button
                 onClick={() => setProfileOpen(true)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors border border-white/20"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors border border-white/20 group"
               >
-                <div className="w-8 h-8 bg-[#F5C518] rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-[#1E3A5F]" />
-                </div>
+                {parentImage ? (
+                  <img 
+                    src={parentImage} 
+                    alt={parentName}
+                    className="w-8 h-8 rounded-full object-cover group-hover:ring-2 ring-[#F5C518] transition-all"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-[#F5C518] rounded-full flex items-center justify-center group-hover:ring-2 ring-[#F5C518] transition-all">
+                    <User className="w-5 h-5 text-[#1E3A5F]" />
+                  </div>
+                )}
                 <span className="text-sm font-medium">Profile</span>
               </button>
             </div>
@@ -113,8 +122,14 @@ function ParentHeader({ notifications = [], onMenuClick, setActiveTab, onLogout 
       <ProfileSlideOver
         isOpen={profileOpen}
         onClose={() => setProfileOpen(false)}
-        user={{ name: 'Parent', role: 'Parent Portal' }}
+        user={{ name: parentName, role: 'Parent', profileImage: parentImage }}
         onSettings={() => { setActiveTab('settings'); setProfileOpen(false); }}
+        onLogout={() => { onLogout && onLogout(); setProfileOpen(false); }}
+        onImageUpdate={(image) => {
+          setParentImage(image);
+          if (onProfileImageUpdate) onProfileImageUpdate(image);
+        }}
+      />
         onLogout={() => { onLogout && onLogout(); setProfileOpen(false); }}
       />
     </header>

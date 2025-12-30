@@ -1,8 +1,19 @@
-import React from 'react';
-import { X, User, Mail, Phone, CreditCard, Building2, Bus, School, Settings, LogOut } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, User, Mail, Phone, CreditCard, Building2, Bus, School, Settings, LogOut, Camera } from 'lucide-react';
+import ImageCropper from './ImageCropper';
 
-function ProfileSlideOver({ isOpen, onClose, user = {}, onSettings, onLogout }) {
+function ProfileSlideOver({ isOpen, onClose, user = {}, onSettings, onLogout, onImageUpdate }) {
+  const [showImageCropper, setShowImageCropper] = useState(false);
+  const [profileImage, setProfileImage] = useState(user.profileImage || null);
+
   if (!isOpen) return null;
+
+  const handleImageSave = (croppedImage) => {
+    setProfileImage(croppedImage);
+    if (onImageUpdate) {
+      onImageUpdate(croppedImage);
+    }
+  };
 
   const details = [
     user.name ? { label: 'Name', value: user.name, icon: User } : null,
@@ -32,10 +43,27 @@ function ProfileSlideOver({ isOpen, onClose, user = {}, onSettings, onLogout }) 
 
         {/* Body */}
         <div className="p-6 flex-1 overflow-y-auto">
-          {/* Avatar */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] flex items-center justify-center shadow-md">
-              <User className="w-12 h-12 text-[#F5C518]" />
+          {/* Avatar with Edit Button */}
+          <div className="flex items-end gap-4 mb-6">
+            <div className="relative group">
+              {profileImage ? (
+                <img 
+                  src={profileImage} 
+                  alt={user.name || 'Profile'} 
+                  className="w-24 h-24 rounded-full object-cover shadow-md border-4 border-[#1E3A5F]"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] flex items-center justify-center shadow-md">
+                  <User className="w-12 h-12 text-[#F5C518]" />
+                </div>
+              )}
+              <button
+                onClick={() => setShowImageCropper(true)}
+                className="absolute bottom-0 right-0 p-2 bg-[#F5C518] rounded-full hover:bg-[#FFE066] transition-colors shadow-lg border-2 border-white"
+                title="Edit Profile Picture"
+              >
+                <Camera className="w-4 h-4 text-[#1E3A5F]" />
+              </button>
             </div>
             <div>
               <div className="text-2xl font-bold text-gray-900">{user.name || 'User'}</div>
@@ -81,6 +109,14 @@ function ProfileSlideOver({ isOpen, onClose, user = {}, onSettings, onLogout }) 
           </button>
         </div>
       </div>
+
+      {/* Image Cropper Modal */}
+      <ImageCropper
+        isOpen={showImageCropper}
+        onClose={() => setShowImageCropper(false)}
+        onSave={handleImageSave}
+        title="Upload Profile Picture"
+      />
     </div>
   );
 }

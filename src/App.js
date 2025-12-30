@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import LoginPage from './pages/Login/LoginPage';
 import Sidebar from './components/Sidebar';
+import { ProfileImageProvider } from './context/ProfileImageContext';
 import ParentDashboard from './pages/Parent/ParentDashboard';
 import MyChild from './pages/Parent/MyChild';
 import History from './pages/Parent/History';
@@ -105,23 +106,25 @@ function App() {
   };
 
   return (
-    <div className="relative">
-      {/* Sidebar - hidden by default, slides in when toggled */}
-      <Sidebar 
-        activeTab={activeTab}
-        setActiveTab={(tab) => {
-          setActiveTab(tab);
-          setSidebarOpen(false); // Close sidebar after selecting
-        }}
-        onLogout={handleLogout}
-        isOpen={sidebarOpen}
-        userRole={userRole}
-        onClose={() => setSidebarOpen(false)}
-      />
-      
-      {/* Main Content */}
-      {getCurrentPage()}
-    </div>
+    <ProfileImageProvider>
+      <div className="relative">
+        {/* Sidebar - hidden by default, slides in when toggled */}
+        <Sidebar 
+          activeTab={activeTab}
+          setActiveTab={(tab) => {
+            setActiveTab(tab);
+            setSidebarOpen(false); // Close sidebar after selecting
+          }}
+          onLogout={handleLogout}
+          isOpen={sidebarOpen}
+          userRole={userRole}
+          onClose={() => setSidebarOpen(false)}
+        />
+        
+        {/* Main Content */}
+        {getCurrentPage()}
+      </div>
+    </ProfileImageProvider>
   );
 }
 
