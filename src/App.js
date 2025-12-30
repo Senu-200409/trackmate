@@ -20,6 +20,7 @@ import Analytics from './pages/Owner/Analytics';
 import Schools from './pages/Owner/Schools';
 import Students from './pages/Owner/Students';
 import Parents from './pages/Owner/Parents';
+import Devices from './pages/Owner/Devices';
 
 function App() {
   const [currentView, setCurrentView] = useState('login');
@@ -92,6 +93,7 @@ function App() {
         case 'dashboard': return <OwnerDashboard {...ownerProps} />;
         case 'fleet': return <Fleet {...ownerProps} />;
         case 'drivers': return <Drivers {...ownerProps} />;
+        case 'devices': return <Devices {...ownerProps} />;
         case 'routes': return <Routes {...ownerProps} />;
         case 'analytics': return <Analytics {...ownerProps} />;
         case 'schools': return <Schools {...ownerProps} />;

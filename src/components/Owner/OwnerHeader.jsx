@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Menu, X, User, LogOut, Settings, Building2, BarChart3, Bus, Users, AlignJustify, School } from 'lucide-react';
+import { Bell, Menu, X, User, LogOut, Settings, Building2, BarChart3, Bus, Users, AlignJustify, School, Radio } from 'lucide-react';
 import ProfileSlideOver from '../ProfileSlideOver';
 
 function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyName = "TrackMate Fleet", onMenuClick, setActiveTab, onLogout, profileImage = null, onProfileImageUpdate = null }) {
@@ -44,6 +44,10 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
             <button onClick={() => setActiveTab('fleet')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
               <Bus className="w-4 h-4" />
               Fleet
+            </button>
+            <button onClick={() => setActiveTab('devices')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
+              <Radio className="w-4 h-4" />
+              Devices
             </button>
             <button onClick={() => setActiveTab('drivers')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
               <Users className="w-4 h-4" />
@@ -151,6 +155,10 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
           <button onClick={() => { setActiveTab('fleet'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
             <Bus className="w-5 h-5 text-[#FFE066]" />
             Fleet
+          </button>
+          <button onClick={() => { setActiveTab('devices'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
+            <Radio className="w-5 h-5 text-[#FFE066]" />
+            Devices
           </button>
           <button onClick={() => { setActiveTab('drivers'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
             <Users className="w-5 h-5 text-[#FFE066]" />
