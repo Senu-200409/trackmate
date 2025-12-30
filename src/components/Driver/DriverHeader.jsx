@@ -145,7 +145,7 @@ function DriverHeader({ notifications = [], driverName = "Driver", onMenuClick, 
         }}
       />
         onLogout={() => { onLogout && onLogout(); setProfileOpen(false); }}
-      />
+      
     </header>
   );
 }
