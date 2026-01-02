@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LoginPage from './pages/Login/LoginPage';
 import Sidebar from './components/Sidebar';
 import { ProfileImageProvider } from './context/ProfileImageContext';
@@ -23,20 +23,81 @@ import Parents from './pages/Owner/Parents';
 import Devices from './pages/Owner/Devices';
 
 function App() {
+  // Initialize all states with defaults
+  const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState('login');
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Hidden by default
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [userRole, setUserRole] = useState('parent');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [showOtp, setShowOtp] = useState(false);
 
+  // On component mount, check localStorage and restore session
+  useEffect(() => {
+    console.log('App mounted - checking localStorage...');
+    try {
+      const savedLogin = localStorage.getItem('trackmate_login');
+      const savedRole = localStorage.getItem('trackmate_role');
+      const savedTab = localStorage.getItem('trackmate_tab');
+      
+      console.log('localStorage data:', { savedLogin, savedRole, savedTab });
+      
+      if (savedLogin === 'true' && savedRole) {
+        console.log('Session found! Restoring...');
+        setUserRole(savedRole);
+        setActiveTab(savedTab || 'dashboard');
+        setCurrentView('dashboard');
+      } else {
+        console.log('No valid session found');
+        setCurrentView('login');
+      }
+    } catch (error) {
+      console.error('Error reading localStorage:', error);
+      setCurrentView('login');
+    }
+    setIsLoading(false);
+  }, []);
+
+  // Save session whenever role or tab changes
+  useEffect(() => {
+    if (!isLoading && currentView === 'dashboard') {
+      console.log('Saving session:', { role: userRole, tab: activeTab });
+      try {
+        localStorage.setItem('trackmate_login', 'true');
+        localStorage.setItem('trackmate_role', userRole);
+        localStorage.setItem('trackmate_tab', activeTab);
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
+      }
+    }
+  }, [userRole, activeTab, isLoading]);
+
   const handleLogin = (role) => {
+    console.log('Login with role:', role);
+    try {
+      localStorage.setItem('trackmate_login', 'true');
+      localStorage.setItem('trackmate_role', role);
+      localStorage.setItem('trackmate_tab', 'dashboard');
+    } catch (error) {
+      console.error('Error saving login:', error);
+    }
     setUserRole(role);
+    setActiveTab('dashboard');
     setCurrentView('dashboard');
+    setOtp('');
+    setShowOtp(false);
   };
 
   const handleLogout = () => {
+    console.log('Logout');
+    try {
+      localStorage.removeItem('trackmate_login');
+      localStorage.removeItem('trackmate_role');
+      localStorage.removeItem('trackmate_tab');
+    } catch (error) {
+      console.error('Error clearing localStorage:', error);
+    }
     setCurrentView('login');
     setPhoneNumber('');
     setOtp('');
@@ -49,6 +110,18 @@ function App() {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
+  // Show loading state while checking localStorage
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F]">
+        <div className="text-white text-center">
+          <div className="text-4xl font-bold mb-4">🚌 TrackMate</div>
+          <div className="text-lg">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (currentView === 'login') {
     return (
