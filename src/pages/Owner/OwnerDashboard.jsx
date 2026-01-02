@@ -2,12 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Bus,
   Users,
-  DollarSign,
-  BarChart3,
   User,
-  TrendingUp,
-  Shield,
-  Clock,
   AlertTriangle,
   ChevronRight,
   Activity,
@@ -27,18 +22,12 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
   const [currentAlertIndex, setCurrentAlertIndex] = useState(0);
   
   const [businessStats] = useState({
-    totalRevenue: "$45,820",
-    monthlyGrowth: "+12.5%",
     activeBuses: 24,
     totalBuses: 28,
     totalDrivers: 32,
     driversOnDuty: 28,
     totalStudents: 1248,
-    activeRoutes: 8,
-    fleetUtilization: "78%",
-    avgRating: "4.8",
-    onTimeRate: "92%",
-    safetyScore: "9.2"
+    activeRoutes: 8
   });
 
   // Live alerts for marquee
@@ -93,23 +82,9 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
           
           {/* Welcome Header */}
           <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-5 md:p-6 border-b-4 border-[#F5C518]">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold mb-1">Welcome back, David! 👋</h1>
-                <p className="text-[#FFE066] text-sm md:text-base">Here's what's happening with your fleet today</p>
-              </div>
-              <div className="flex items-center gap-4 bg-white/10 rounded-xl p-4">
-                <div className="text-right">
-                  <div className="text-2xl md:text-3xl font-bold">{businessStats.totalRevenue}</div>
-                  <div className="text-sm text-[#FFE066] flex items-center justify-end gap-1">
-                    <TrendingUp className="w-4 h-4" />
-                    {businessStats.monthlyGrowth} this month
-                  </div>
-                </div>
-                <div className="w-14 h-14 rounded-full bg-[#F5C518] flex items-center justify-center">
-                  <DollarSign className="w-7 h-7 text-[#1E3A5F]" />
-                </div>
-              </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold mb-1">Welcome back, David! 👋</h1>
+              <p className="text-[#FFE066] text-sm md:text-base">Here's what's happening with your fleet today</p>
             </div>
           </div>
 
@@ -131,7 +106,7 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
           </div>
 
           {/* Key Metrics Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Active Buses */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all hover:border-green-300 group cursor-pointer">
               <div className="flex items-center justify-between mb-3">
@@ -180,23 +155,6 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
               <div className="text-sm text-gray-600">Total Students</div>
               <div className="mt-2 flex items-center text-xs text-purple-600 font-medium group-hover:underline">
                 View Routes <ChevronRight className="w-3 h-3" />
-              </div>
-            </div>
-
-            {/* On-Time Rate */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all hover:border-orange-300 group cursor-pointer">
-              <div className="flex items-center justify-between mb-3">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 shadow-lg shadow-orange-200">
-                  <Clock className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-xs font-medium px-2 py-1 bg-green-100 text-green-700 rounded-full">
-                  ↑ 3%
-                </span>
-              </div>
-              <div className="text-2xl font-bold text-gray-900">{businessStats.onTimeRate}</div>
-              <div className="text-sm text-gray-600">On-Time Rate</div>
-              <div className="mt-2 flex items-center text-xs text-orange-600 font-medium group-hover:underline">
-                View Analytics <ChevronRight className="w-3 h-3" />
               </div>
             </div>
           </div>
@@ -250,42 +208,6 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
 
             {/* Quick Stats Panel */}
             <div className="space-y-4">
-              {/* Performance Snapshot */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Today's Snapshot</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-green-100 flex items-center justify-center">
-                        <TrendingUp className="w-4 h-4 text-green-600" />
-                      </div>
-                      <span className="text-gray-700 text-sm">Fleet Utilization</span>
-                    </div>
-                    <span className="text-green-600 font-bold">{businessStats.fleetUtilization}</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">
-                        <Shield className="w-4 h-4 text-blue-600" />
-                      </div>
-                      <span className="text-gray-700 text-sm">Safety Score</span>
-                    </div>
-                    <span className="text-blue-600 font-bold">{businessStats.safetyScore}/10</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-yellow-100 flex items-center justify-center">
-                        <BarChart3 className="w-4 h-4 text-yellow-600" />
-                      </div>
-                      <span className="text-gray-700 text-sm">Avg. Rating</span>
-                    </div>
-                    <span className="text-yellow-600 font-bold">⭐ {businessStats.avgRating}</span>
-                  </div>
-                </div>
-              </div>
-
               {/* Quick Actions */}
               <div className="bg-gradient-to-br from-[#1E3A5F] to-[#3B6FB6] rounded-xl p-5 text-white">
                 <h3 className="font-bold mb-4">Quick Actions</h3>
@@ -306,7 +228,7 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
                   </button>
                   <button className="w-full flex items-center justify-between p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors">
                     <div className="flex items-center gap-3">
-                      <BarChart3 className="w-4 h-4 text-[#F5C518]" />
+                      <Activity className="w-4 h-4 text-[#F5C518]" />
                       <span className="text-sm">Full Analytics</span>
                     </div>
                     <ChevronRight className="w-4 h-4" />

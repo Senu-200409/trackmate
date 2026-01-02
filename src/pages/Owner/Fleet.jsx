@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { 
   Bus, 
-  MapPin, 
-  Calendar, 
-  Fuel, 
-  Wrench, 
   User, 
   Search,
   Filter,
@@ -15,11 +11,11 @@ import {
   XCircle,
   Eye,
   Edit,
-  Gauge,
   X,
   Save,
-  Upload,
-  FileText
+  FileText,
+  Wrench,
+  Calendar
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
@@ -31,21 +27,13 @@ function Fleet({ onMenuClick, setActiveTab }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingBus, setEditingBus] = useState(null);
   const [formData, setFormData] = useState({
-    busNumber: '',
     licensePlate: '',
-    make: '',
-    model: '',
-    year: '',
+    vehicle: '',
     capacity: '',
-    fuelType: 'diesel',
-    assignedRoute: '',
     assignedDriver: '',
-    registrationNumber: '',
     insuranceExpiry: '',
-    lastServiceDate: '',
-    nextServiceDate: '',
-    status: 'active',
-    notes: ''
+    licenseExpiry: '',
+    status: 'active'
   });
 
   const handleInputChange = (e) => {
@@ -60,42 +48,26 @@ function Fleet({ onMenuClick, setActiveTab }) {
     alert('Bus added successfully!');
     setShowAddModal(false);
     setFormData({
-      busNumber: '',
       licensePlate: '',
-      make: '',
-      model: '',
-      year: '',
+      vehicle: '',
       capacity: '',
-      fuelType: 'diesel',
-      assignedRoute: '',
       assignedDriver: '',
-      registrationNumber: '',
       insuranceExpiry: '',
-      lastServiceDate: '',
-      nextServiceDate: '',
-      status: 'active',
-      notes: ''
+      licenseExpiry: '',
+      status: 'active'
     });
   };
 
   const handleEditClick = (bus) => {
     setEditingBus(bus);
     setFormData({
-      busNumber: bus.id || '',
       licensePlate: bus.plate || '',
-      make: bus.make || '',
-      model: bus.model || '',
-      year: bus.year || '',
+      vehicle: bus.vehicle || '',
       capacity: bus.capacity || '',
-      fuelType: bus.fuelType || 'diesel',
-      assignedRoute: bus.assignedRoute || '',
-      assignedDriver: bus.assignedDriver || '',
-      registrationNumber: bus.registrationNumber || '',
+      assignedDriver: bus.driver || '',
       insuranceExpiry: bus.insuranceExpiry || '',
-      lastServiceDate: bus.lastServiceDate || '',
-      nextServiceDate: bus.nextServiceDate || '',
-      status: (bus.status || 'active').toLowerCase(),
-      notes: bus.notes || ''
+      licenseExpiry: bus.licenseExpiry || '',
+      status: (bus.status || 'active').toLowerCase()
     });
     setShowEditModal(true);
   };
@@ -108,7 +80,7 @@ function Fleet({ onMenuClick, setActiveTab }) {
     setEditingBus(null);
   };
 
-  // Available drivers and routes for dropdowns
+  // Available drivers for dropdowns
   const availableDrivers = [
     { id: 'DRV-001', name: 'Michael Smith' },
     { id: 'DRV-002', name: 'Sarah Johnson' },
@@ -117,89 +89,51 @@ function Fleet({ onMenuClick, setActiveTab }) {
     { id: 'DRV-005', name: 'James Wilson' },
   ];
 
-  const availableRoutes = [
-    { id: 'RT-001', name: 'Route A - Morning' },
-    { id: 'RT-002', name: 'Route B - Morning' },
-    { id: 'RT-003', name: 'Route C - Morning' },
-    { id: 'RT-004', name: 'Route A - Afternoon' },
-    { id: 'RT-005', name: 'Route D - Morning' },
-  ];
-
   const busFleet = [
     { 
-      id: "BUS-001", 
       plate: "ABC 1234",
-      route: "Route A - Morning", 
-      utilization: 92, 
+      vehicle: "Blue Bird Vision",
       status: "Active",
       driver: "Michael Smith",
       capacity: 45,
-      currentStudents: 42,
-      fuelLevel: 75,
-      lastService: "Nov 28, 2023",
-      nextService: "Dec 28, 2023",
-      mileage: "45,280 km",
-      condition: "Excellent"
+      insuranceExpiry: "2024-12-31",
+      licenseExpiry: "2025-06-30"
     },
     { 
-      id: "BUS-002", 
       plate: "DEF 5678",
-      route: "Route B - Morning", 
-      utilization: 85, 
+      vehicle: "IC Bus CE",
       status: "Active",
       driver: "Sarah Johnson",
       capacity: 45,
-      currentStudents: 38,
-      fuelLevel: 60,
-      lastService: "Nov 25, 2023",
-      nextService: "Dec 25, 2023",
-      mileage: "38,750 km",
-      condition: "Good"
+      insuranceExpiry: "2024-11-15",
+      licenseExpiry: "2025-05-20"
     },
     { 
-      id: "BUS-003", 
       plate: "GHI 9012",
-      route: "Route C - Morning", 
-      utilization: 78, 
+      vehicle: "Thomas Built C2",
       status: "Delayed",
       driver: "Robert Brown",
       capacity: 40,
-      currentStudents: 31,
-      fuelLevel: 45,
-      lastService: "Nov 20, 2023",
-      nextService: "Dec 20, 2023",
-      mileage: "52,300 km",
-      condition: "Fair"
+      insuranceExpiry: "2024-10-30",
+      licenseExpiry: "2025-04-15"
     },
     { 
-      id: "BUS-004", 
       plate: "JKL 3456",
-      route: "Route D - Morning", 
-      utilization: 65, 
+      vehicle: "Blue Bird Vision",
       status: "Maintenance",
       driver: "Unassigned",
       capacity: 45,
-      currentStudents: 0,
-      fuelLevel: 30,
-      lastService: "Dec 1, 2023",
-      nextService: "Jan 1, 2024",
-      mileage: "61,200 km",
-      condition: "Needs Repair"
+      insuranceExpiry: "2025-01-20",
+      licenseExpiry: "2025-07-10"
     },
     { 
-      id: "BUS-005", 
       plate: "MNO 7890",
-      route: "Route E - Morning", 
-      utilization: 95, 
+      vehicle: "IC Bus CE MaxForce",
       status: "Active",
       driver: "James Wilson",
       capacity: 50,
-      currentStudents: 48,
-      fuelLevel: 90,
-      lastService: "Nov 30, 2023",
-      nextService: "Dec 30, 2023",
-      mileage: "41,500 km",
-      condition: "Excellent"
+      insuranceExpiry: "2024-12-15",
+      licenseExpiry: "2025-06-01"
     },
   ];
 
@@ -221,19 +155,10 @@ function Fleet({ onMenuClick, setActiveTab }) {
     }
   };
 
-  const getConditionColor = (condition) => {
-    switch(condition) {
-      case 'Excellent': return 'text-green-600';
-      case 'Good': return 'text-blue-600';
-      case 'Fair': return 'text-yellow-600';
-      default: return 'text-red-600';
-    }
-  };
-
   const filteredBuses = busFleet.filter(bus => {
-    const matchesSearch = bus.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = bus.plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          bus.driver.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         bus.route.toLowerCase().includes(searchTerm.toLowerCase());
+                         bus.vehicle.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'all' || bus.status.toLowerCase() === filterStatus.toLowerCase();
     return matchesSearch && matchesFilter;
   });
@@ -241,8 +166,7 @@ function Fleet({ onMenuClick, setActiveTab }) {
   const stats = {
     total: busFleet.length,
     active: busFleet.filter(b => b.status === 'Active').length,
-    maintenance: busFleet.filter(b => b.status === 'Maintenance').length,
-    avgUtilization: Math.round(busFleet.reduce((acc, b) => acc + b.utilization, 0) / busFleet.length)
+    maintenance: busFleet.filter(b => b.status === 'Maintenance').length
   };
 
   return (
@@ -268,7 +192,7 @@ function Fleet({ onMenuClick, setActiveTab }) {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-blue-100">
@@ -302,17 +226,6 @@ function Fleet({ onMenuClick, setActiveTab }) {
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-purple-100">
-                  <Gauge className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">{stats.avgUtilization}%</div>
-                  <div className="text-sm text-gray-600">Avg Utilization</div>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Search and Filter */}
@@ -322,7 +235,7 @@ function Fleet({ onMenuClick, setActiveTab }) {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search by bus ID, driver, or route..."
+                  placeholder="Search by license plate, driver, or vehicle..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent"
@@ -347,7 +260,7 @@ function Fleet({ onMenuClick, setActiveTab }) {
           {/* Bus Cards Grid */}
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
             {filteredBuses.map((bus) => (
-              <div key={bus.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+              <div key={bus.plate} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                 {/* Header */}
                 <div className="p-4 border-b border-gray-100 bg-gray-50">
                   <div className="flex items-center justify-between">
@@ -356,8 +269,8 @@ function Fleet({ onMenuClick, setActiveTab }) {
                         <Bus className="w-6 h-6 text-[#F5C518]" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-gray-900">{bus.id}</h3>
-                        <p className="text-xs text-gray-500">{bus.plate}</p>
+                        <h3 className="font-bold text-gray-900">{bus.plate}</h3>
+                        <p className="text-xs text-gray-500">{bus.vehicle}</p>
                       </div>
                     </div>
                     <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(bus.status)}`}>
@@ -369,56 +282,29 @@ function Fleet({ onMenuClick, setActiveTab }) {
 
                 {/* Body */}
                 <div className="p-4 space-y-4">
-                  {/* Route & Driver */}
+                  {/* Driver */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">{bus.route}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
                       <User className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">{bus.driver}</span>
-                    </div>
-                  </div>
-
-                  {/* Metrics */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-lg bg-gray-50">
-                      <div className="text-xs text-gray-500 mb-1">Utilization</div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full rounded-full ${bus.utilization >= 80 ? 'bg-green-500' : bus.utilization >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                            style={{ width: `${bus.utilization}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm font-bold">{bus.utilization}%</span>
-                      </div>
-                    </div>
-                    <div className="p-3 rounded-lg bg-gray-50">
-                      <div className="text-xs text-gray-500 mb-1">Fuel Level</div>
-                      <div className="flex items-center gap-2">
-                        <Fuel className={`w-4 h-4 ${bus.fuelLevel >= 50 ? 'text-green-500' : bus.fuelLevel >= 25 ? 'text-yellow-500' : 'text-red-500'}`} />
-                        <span className="text-sm font-bold">{bus.fuelLevel}%</span>
-                      </div>
+                      <span className="text-gray-700">Driver: {bus.driver}</span>
                     </div>
                   </div>
 
                   {/* Capacity */}
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">Students</span>
-                    <span className="font-semibold">{bus.currentStudents}/{bus.capacity}</span>
+                  <div className="p-3 rounded-lg bg-gray-50">
+                    <div className="text-xs text-gray-500 mb-1">Seating Capacity</div>
+                    <div className="text-lg font-bold text-gray-900">{bus.capacity} seats</div>
                   </div>
 
-                  {/* Condition & Service */}
-                  <div className="flex items-center justify-between text-sm pt-3 border-t border-gray-100">
-                    <div>
-                      <span className="text-gray-500">Condition: </span>
-                      <span className={`font-semibold ${getConditionColor(bus.condition)}`}>{bus.condition}</span>
+                  {/* Insurance & License Expiry */}
+                  <div className="space-y-2 pt-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">Insurance Expiry:</span>
+                      <span className="font-medium text-gray-900">{bus.insuranceExpiry || 'N/A'}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-gray-500">
-                      <Calendar className="w-3 h-3" />
-                      <span className="text-xs">{bus.nextService}</span>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">License Expiry:</span>
+                      <span className="font-medium text-gray-900">{bus.licenseExpiry || 'N/A'}</span>
                     </div>
                   </div>
                 </div>
@@ -480,23 +366,9 @@ function Fleet({ onMenuClick, setActiveTab }) {
                 <div>
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
                     <FileText className="w-4 h-4" />
-                    Basic Information
+                    Bus Information
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Bus Number <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="busNumber"
-                        value={formData.busNumber}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., BUS-006"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         License Plate <span className="text-red-500">*</span>
@@ -513,45 +385,15 @@ function Fleet({ onMenuClick, setActiveTab }) {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Make <span className="text-red-500">*</span>
+                        Vehicle Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        name="make"
-                        value={formData.make}
+                        name="vehicle"
+                        value={formData.vehicle}
                         onChange={handleInputChange}
                         required
-                        placeholder="e.g., Blue Bird"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Model <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="model"
-                        value={formData.model}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., Vision"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Year <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        name="year"
-                        value={formData.year}
-                        onChange={handleInputChange}
-                        required
-                        min="2000"
-                        max="2030"
-                        placeholder="e.g., 2023"
+                        placeholder="e.g., Blue Bird Vision"
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
@@ -568,59 +410,6 @@ function Fleet({ onMenuClick, setActiveTab }) {
                         min="1"
                         max="100"
                         placeholder="e.g., 45"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Technical Details Section */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Wrench className="w-4 h-4" />
-                    Technical Details
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Fuel Type <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        name="fuelType"
-                        value={formData.fuelType}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="diesel">Diesel</option>
-                        <option value="petrol">Petrol</option>
-                        <option value="cng">CNG</option>
-                        <option value="electric">Electric</option>
-                        <option value="hybrid">Hybrid</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Registration Number
-                      </label>
-                      <input
-                        type="text"
-                        name="registrationNumber"
-                        value={formData.registrationNumber}
-                        onChange={handleInputChange}
-                        placeholder="Vehicle registration"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Insurance Expiry Date
-                      </label>
-                      <input
-                        type="date"
-                        name="insuranceExpiry"
-                        value={formData.insuranceExpiry}
-                        onChange={handleInputChange}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
@@ -642,95 +431,62 @@ function Fleet({ onMenuClick, setActiveTab }) {
                   </div>
                 </div>
 
-                {/* Assignment Section */}
+                {/* Driver Assignment Section */}
                 <div>
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
                     <User className="w-4 h-4" />
-                    Assignment
+                    Driver Assignment
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Assigned Route
-                      </label>
-                      <select
-                        name="assignedRoute"
-                        value={formData.assignedRoute}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="">Select a route</option>
-                        {availableRoutes.map(route => (
-                          <option key={route.id} value={route.id}>{route.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Assigned Driver
-                      </label>
-                      <select
-                        name="assignedDriver"
-                        value={formData.assignedDriver}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="">Select a driver</option>
-                        {availableDrivers.map(driver => (
-                          <option key={driver.id} value={driver.id}>{driver.name}</option>
-                        ))}
-                      </select>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Assigned Driver
+                    </label>
+                    <select
+                      name="assignedDriver"
+                      value={formData.assignedDriver}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
+                    >
+                      <option value="">Select a driver</option>
+                      {availableDrivers.map(driver => (
+                        <option key={driver.id} value={driver.id}>{driver.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
-                {/* Service Schedule Section */}
+                {/* Expiry Dates Section */}
                 <div>
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    Service Schedule
+                    Expiry Dates
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Last Service Date
+                        Insurance Expiry Date
                       </label>
                       <input
                         type="date"
-                        name="lastServiceDate"
-                        value={formData.lastServiceDate}
+                        name="insuranceExpiry"
+                        value={formData.insuranceExpiry}
                         onChange={handleInputChange}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Next Service Date
+                        License Expiry Date
                       </label>
                       <input
                         type="date"
-                        name="nextServiceDate"
-                        value={formData.nextServiceDate}
+                        name="licenseExpiry"
+                        value={formData.licenseExpiry}
                         onChange={handleInputChange}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
                   </div>
-                </div>
-
-                {/* Notes Section */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Additional Notes
-                  </label>
-                  <textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleInputChange}
-                    rows="3"
-                    placeholder="Any additional information about the bus..."
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all resize-none"
-                  />
                 </div>
 
               </div>
@@ -789,21 +545,9 @@ function Fleet({ onMenuClick, setActiveTab }) {
                 <div>
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
                     <FileText className="w-4 h-4" />
-                    Basic Information
+                    Bus Information
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Bus Number
-                      </label>
-                      <input
-                        type="text"
-                        name="busNumber"
-                        value={formData.busNumber}
-                        disabled
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-100 text-gray-600"
-                      />
-                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         License Plate
@@ -818,39 +562,13 @@ function Fleet({ onMenuClick, setActiveTab }) {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Make
+                        Vehicle Name
                       </label>
                       <input
                         type="text"
-                        name="make"
-                        value={formData.make}
+                        name="vehicle"
+                        value={formData.vehicle}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Model
-                      </label>
-                      <input
-                        type="text"
-                        name="model"
-                        value={formData.model}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Year
-                      </label>
-                      <input
-                        type="number"
-                        name="year"
-                        value={formData.year}
-                        onChange={handleInputChange}
-                        min="2000"
-                        max="2030"
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
@@ -865,57 +583,6 @@ function Fleet({ onMenuClick, setActiveTab }) {
                         onChange={handleInputChange}
                         min="1"
                         max="100"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Technical Details Section */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Wrench className="w-4 h-4" />
-                    Technical Details
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Fuel Type
-                      </label>
-                      <select
-                        name="fuelType"
-                        value={formData.fuelType}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="diesel">Diesel</option>
-                        <option value="petrol">Petrol</option>
-                        <option value="cng">CNG</option>
-                        <option value="electric">Electric</option>
-                        <option value="hybrid">Hybrid</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Registration Number
-                      </label>
-                      <input
-                        type="text"
-                        name="registrationNumber"
-                        value={formData.registrationNumber}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Insurance Expiry Date
-                      </label>
-                      <input
-                        type="date"
-                        name="insuranceExpiry"
-                        value={formData.insuranceExpiry}
-                        onChange={handleInputChange}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
@@ -937,95 +604,62 @@ function Fleet({ onMenuClick, setActiveTab }) {
                   </div>
                 </div>
 
-                {/* Assignment Section */}
+                {/* Driver Assignment Section */}
                 <div>
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
                     <User className="w-4 h-4" />
-                    Assignment
+                    Driver Assignment
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Assigned Route
-                      </label>
-                      <select
-                        name="assignedRoute"
-                        value={formData.assignedRoute}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="">Select a route</option>
-                        {availableRoutes.map(route => (
-                          <option key={route.id} value={route.id}>{route.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Assigned Driver
-                      </label>
-                      <select
-                        name="assignedDriver"
-                        value={formData.assignedDriver}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="">Select a driver</option>
-                        {availableDrivers.map(driver => (
-                          <option key={driver.id} value={driver.id}>{driver.name}</option>
-                        ))}
-                      </select>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Assigned Driver
+                    </label>
+                    <select
+                      name="assignedDriver"
+                      value={formData.assignedDriver}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
+                    >
+                      <option value="">Select a driver</option>
+                      {availableDrivers.map(driver => (
+                        <option key={driver.id} value={driver.id}>{driver.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
-                {/* Service Schedule Section */}
+                {/* Expiry Dates Section */}
                 <div>
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    Service Schedule
+                    Expiry Dates
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Last Service Date
+                        Insurance Expiry Date
                       </label>
                       <input
                         type="date"
-                        name="lastServiceDate"
-                        value={formData.lastServiceDate}
+                        name="insuranceExpiry"
+                        value={formData.insuranceExpiry}
                         onChange={handleInputChange}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Next Service Date
+                        License Expiry Date
                       </label>
                       <input
                         type="date"
-                        name="nextServiceDate"
-                        value={formData.nextServiceDate}
+                        name="licenseExpiry"
+                        value={formData.licenseExpiry}
                         onChange={handleInputChange}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
                   </div>
-                </div>
-
-                {/* Notes Section */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Additional Notes
-                  </label>
-                  <textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleInputChange}
-                    rows="3"
-                    placeholder="Any additional information about the bus..."
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all resize-none"
-                  />
                 </div>
 
               </div>
