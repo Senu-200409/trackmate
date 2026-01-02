@@ -323,5 +323,5 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
     </div>
   );
 }
-//kamal khan
+
 export default OwnerDashboard;
