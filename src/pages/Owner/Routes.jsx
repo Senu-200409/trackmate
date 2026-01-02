@@ -15,8 +15,7 @@ import {
   Pause,
   Eye,
   Edit,
-  Navigation,
-  ArrowRight
+  Navigation
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
@@ -27,89 +26,49 @@ function Routes({ onMenuClick, setActiveTab }) {
 
   const routes = [
     { 
-      id: "RT-001",
       name: "Route A - Morning",
-      type: "Morning Pickup",
       status: "Active",
       bus: "BUS-001",
       driver: "Michael Smith",
-      startPoint: "Central Station",
-      endPoint: "Greenwood High School",
-      stops: 12,
       students: 42,
       distance: "15.5 km",
-      duration: "45 mins",
-      startTime: "7:00 AM",
-      endTime: "7:45 AM",
-      onTimeRate: 96
+      time: "7:00 AM"
     },
     { 
-      id: "RT-002",
       name: "Route B - Morning",
-      type: "Morning Pickup",
       status: "Active",
       bus: "BUS-002",
       driver: "Sarah Johnson",
-      startPoint: "Oak Valley",
-      endPoint: "Lincoln Academy",
-      stops: 10,
       students: 38,
       distance: "12.8 km",
-      duration: "38 mins",
-      startTime: "7:15 AM",
-      endTime: "7:53 AM",
-      onTimeRate: 94
+      time: "7:15 AM"
     },
     { 
-      id: "RT-003",
       name: "Route C - Morning",
-      type: "Morning Pickup",
       status: "Delayed",
       bus: "BUS-003",
       driver: "Robert Brown",
-      startPoint: "Maple District",
-      endPoint: "St. Mary's School",
-      stops: 8,
       students: 31,
       distance: "10.2 km",
-      duration: "35 mins",
-      startTime: "7:30 AM",
-      endTime: "8:05 AM",
-      onTimeRate: 85
+      time: "7:30 AM"
     },
     { 
-      id: "RT-004",
       name: "Route A - Afternoon",
-      type: "Afternoon Drop",
       status: "Scheduled",
       bus: "BUS-001",
       driver: "Michael Smith",
-      startPoint: "Greenwood High School",
-      endPoint: "Central Station",
-      stops: 12,
       students: 42,
       distance: "15.5 km",
-      duration: "50 mins",
-      startTime: "3:00 PM",
-      endTime: "3:50 PM",
-      onTimeRate: 92
+      time: "3:00 PM"
     },
     { 
-      id: "RT-005",
       name: "Route D - Morning",
-      type: "Morning Pickup",
       status: "Inactive",
       bus: "BUS-004",
       driver: "Unassigned",
-      startPoint: "Pine Heights",
-      endPoint: "Central High",
-      stops: 6,
       students: 0,
       distance: "8.5 km",
-      duration: "30 mins",
-      startTime: "7:45 AM",
-      endTime: "8:15 AM",
-      onTimeRate: 0
+      time: "7:45 AM"
     },
   ];
 
@@ -135,7 +94,6 @@ function Routes({ onMenuClick, setActiveTab }) {
 
   const filteredRoutes = routes.filter(route => {
     const matchesSearch = route.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         route.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          route.driver.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'all' || route.status.toLowerCase() === filterStatus;
     return matchesSearch && matchesFilter;
@@ -144,8 +102,7 @@ function Routes({ onMenuClick, setActiveTab }) {
   const stats = {
     total: routes.length,
     active: routes.filter(r => r.status === 'Active').length,
-    totalStudents: routes.reduce((acc, r) => acc + r.students, 0),
-    avgOnTime: Math.round(routes.filter(r => r.onTimeRate > 0).reduce((acc, r) => acc + r.onTimeRate, 0) / routes.filter(r => r.onTimeRate > 0).length)
+    totalStudents: routes.reduce((acc, r) => acc + r.students, 0)
   };
 
   return (
@@ -168,7 +125,7 @@ function Routes({ onMenuClick, setActiveTab }) {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-blue-100">
@@ -202,17 +159,6 @@ function Routes({ onMenuClick, setActiveTab }) {
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-orange-100">
-                  <Clock className="w-5 h-5 text-orange-600" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">{stats.avgOnTime}%</div>
-                  <div className="text-sm text-gray-600">On-Time Rate</div>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Search and Filter */}
@@ -222,7 +168,7 @@ function Routes({ onMenuClick, setActiveTab }) {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search by route name, ID, or driver..."
+                  placeholder="Search by route name or driver..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent"
@@ -258,20 +204,12 @@ function Routes({ onMenuClick, setActiveTab }) {
                         <Navigation className="w-7 h-7 text-[#F5C518]" />
                       </div>
                       <div>
-                        <div className="flex items-center gap-3 mb-1">
+                        <div className="flex items-center gap-3">
                           <h3 className="font-bold text-gray-900 text-lg">{route.name}</h3>
                           <span className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(route.status)}`}>
                             {getStatusIcon(route.status)}
                             {route.status}
                           </span>
-                        </div>
-                        <p className="text-sm text-gray-500 mb-2">{route.id} • {route.type}</p>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <MapPin className="w-4 h-4 text-green-500" />
-                          <span>{route.startPoint}</span>
-                          <ArrowRight className="w-4 h-4 text-gray-400" />
-                          <MapPin className="w-4 h-4 text-red-500" />
-                          <span>{route.endPoint}</span>
                         </div>
                       </div>
                     </div>
@@ -279,26 +217,12 @@ function Routes({ onMenuClick, setActiveTab }) {
                     {/* Route Stats */}
                     <div className="flex flex-wrap items-center gap-4 lg:gap-6">
                       <div className="text-center">
-                        <div className="text-lg font-bold text-gray-900">{route.stops}</div>
-                        <div className="text-xs text-gray-500">Stops</div>
-                      </div>
-                      <div className="text-center">
                         <div className="text-lg font-bold text-gray-900">{route.students}</div>
                         <div className="text-xs text-gray-500">Students</div>
                       </div>
                       <div className="text-center">
                         <div className="text-lg font-bold text-gray-900">{route.distance}</div>
                         <div className="text-xs text-gray-500">Distance</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-gray-900">{route.duration}</div>
-                        <div className="text-xs text-gray-500">Duration</div>
-                      </div>
-                      <div className="text-center">
-                        <div className={`text-lg font-bold ${route.onTimeRate >= 90 ? 'text-green-600' : route.onTimeRate >= 80 ? 'text-yellow-600' : 'text-red-600'}`}>
-                          {route.onTimeRate}%
-                        </div>
-                        <div className="text-xs text-gray-500">On-Time</div>
                       </div>
                     </div>
 
@@ -330,8 +254,8 @@ function Routes({ onMenuClick, setActiveTab }) {
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-600">Schedule:</span>
-                      <span className="font-medium text-gray-900">{route.startTime} - {route.endTime}</span>
+                      <span className="text-gray-600">Time:</span>
+                      <span className="font-medium text-gray-900">{route.time}</span>
                     </div>
                   </div>
                 </div>
