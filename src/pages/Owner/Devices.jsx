@@ -32,18 +32,12 @@ function Devices({ onMenuClick, setActiveTab }) {
   const [editingDevice, setEditingDevice] = useState(null);
   const [formData, setFormData] = useState({
     deviceId: '',
-    serialNumber: '',
-    manufacturer: 'TrackMate',
-    model: 'RFID-X200',
-    firmwareVersion: '',
-    assignedBus: '',
-    installationDate: '',
-    lastMaintenance: '',
+    deviceName: '',
+    deviceType: 'RFID',
     status: 'active',
-    signalStrength: 'excellent',
-    batteryLevel: '100',
-    location: '',
-    notes: ''
+    busId: '',
+    installationDate: '',
+    lastMaintenance: ''
   });
 
   const handleInputChange = (e) => {
@@ -63,18 +57,12 @@ function Devices({ onMenuClick, setActiveTab }) {
     setEditingDevice(device);
     setFormData({
       deviceId: device.deviceId,
-      serialNumber: device.serialNumber,
-      manufacturer: device.manufacturer,
-      model: device.model,
-      firmwareVersion: device.firmwareVersion,
-      assignedBus: device.assignedBus,
-      installationDate: device.installationDate,
-      lastMaintenance: device.lastMaintenance,
+      deviceName: device.deviceName,
+      deviceType: device.deviceType,
       status: device.status,
-      signalStrength: device.signalStrength,
-      batteryLevel: device.batteryLevel,
-      location: device.location,
-      notes: device.notes || ''
+      busId: device.busId,
+      installationDate: device.installationDate,
+      lastMaintenance: device.lastMaintenance
     });
     setShowEditModal(true);
   };
@@ -90,18 +78,12 @@ function Devices({ onMenuClick, setActiveTab }) {
   const resetForm = () => {
     setFormData({
       deviceId: '',
-      serialNumber: '',
-      manufacturer: 'TrackMate',
-      model: 'RFID-X200',
-      firmwareVersion: '',
-      assignedBus: '',
-      installationDate: '',
-      lastMaintenance: '',
+      deviceName: '',
+      deviceType: 'RFID',
       status: 'active',
-      signalStrength: 'excellent',
-      batteryLevel: '100',
-      location: '',
-      notes: ''
+      busId: '',
+      installationDate: '',
+      lastMaintenance: ''
     });
   };
 
@@ -110,111 +92,63 @@ function Devices({ onMenuClick, setActiveTab }) {
     {
       id: 1,
       deviceId: 'RFID-001',
-      serialNumber: 'TM-RFID-2024-001',
-      manufacturer: 'TrackMate',
-      model: 'RFID-X200',
-      firmwareVersion: 'v2.4.1',
-      assignedBus: 'BUS-001',
-      busNumber: 'ABC 1234',
-      installationDate: '2024-01-15',
-      lastMaintenance: '2024-12-01',
+      deviceName: 'Main Gate Scanner',
+      deviceType: 'RFID',
       status: 'active',
-      signalStrength: 'excellent',
-      batteryLevel: '95',
-      location: 'Main Depot',
-      readsToday: 156,
-      totalReads: 45230
+      busId: 'BUS-001',
+      installationDate: '2024-01-15',
+      lastMaintenance: '2024-12-01'
     },
     {
       id: 2,
       deviceId: 'RFID-002',
-      serialNumber: 'TM-RFID-2024-002',
-      manufacturer: 'TrackMate',
-      model: 'RFID-X200',
-      firmwareVersion: 'v2.4.1',
-      assignedBus: 'BUS-002',
-      busNumber: 'DEF 5678',
-      installationDate: '2024-01-20',
-      lastMaintenance: '2024-11-28',
+      deviceName: 'Route A Scanner',
+      deviceType: 'RFID',
       status: 'active',
-      signalStrength: 'good',
-      batteryLevel: '88',
-      location: 'Main Depot',
-      readsToday: 142,
-      totalReads: 38920
+      busId: 'BUS-002',
+      installationDate: '2024-01-20',
+      lastMaintenance: '2024-11-28'
     },
     {
       id: 3,
       deviceId: 'RFID-003',
-      serialNumber: 'TM-RFID-2024-003',
-      manufacturer: 'TrackMate',
-      model: 'RFID-X200',
-      firmwareVersion: 'v2.3.5',
-      assignedBus: 'BUS-003',
-      busNumber: 'GHI 9012',
-      installationDate: '2024-02-10',
-      lastMaintenance: '2024-12-15',
+      deviceName: 'Route B Scanner',
+      deviceType: 'RFID',
       status: 'maintenance',
-      signalStrength: 'fair',
-      batteryLevel: '45',
-      location: 'Workshop',
-      readsToday: 0,
-      totalReads: 32105
+      busId: 'BUS-003',
+      installationDate: '2024-02-10',
+      lastMaintenance: '2024-12-15'
     },
     {
       id: 4,
       deviceId: 'RFID-004',
-      serialNumber: 'TM-RFID-2024-004',
-      manufacturer: 'TrackMate',
-      model: 'RFID-X250',
-      firmwareVersion: 'v2.4.1',
-      assignedBus: 'BUS-004',
-      busNumber: 'JKL 3456',
-      installationDate: '2024-03-05',
-      lastMaintenance: '2024-12-10',
+      deviceName: 'Route C Scanner',
+      deviceType: 'GPS',
       status: 'active',
-      signalStrength: 'excellent',
-      batteryLevel: '92',
-      location: 'Main Depot',
-      readsToday: 178,
-      totalReads: 28450
+      busId: 'BUS-004',
+      installationDate: '2024-03-05',
+      lastMaintenance: '2024-12-10'
     },
     {
       id: 5,
       deviceId: 'RFID-005',
-      serialNumber: 'TM-RFID-2024-005',
-      manufacturer: 'TrackMate',
-      model: 'RFID-X200',
-      firmwareVersion: 'v2.4.0',
-      assignedBus: 'BUS-005',
-      busNumber: 'MNO 7890',
-      installationDate: '2024-03-20',
-      lastMaintenance: '2024-11-25',
+      deviceName: 'Route D Scanner',
+      deviceType: 'RFID',
       status: 'offline',
-      signalStrength: 'none',
-      batteryLevel: '12',
-      location: 'Main Depot',
-      readsToday: 0,
-      totalReads: 25678
+      busId: 'BUS-005',
+      installationDate: '2024-03-20',
+      lastMaintenance: '2024-11-25'
     },
     {
       id: 6,
       deviceId: 'RFID-006',
-      serialNumber: 'TM-RFID-2024-006',
-      manufacturer: 'TrackMate',
-      model: 'RFID-X250',
-      firmwareVersion: 'v2.4.1',
-      assignedBus: 'Unassigned',
-      busNumber: 'N/A',
-      installationDate: '2024-12-01',
-      lastMaintenance: '2024-12-01',
+      deviceName: 'Backup Scanner',
+      deviceType: 'GPS',
       status: 'active',
-      signalStrength: 'excellent',
-      batteryLevel: '100',
-      location: 'Warehouse',
-      readsToday: 0,
-      totalReads: 245
-    },
+      busId: '',
+      installationDate: '2024-12-01',
+      lastMaintenance: '2024-12-01'
+    }
   ];
 
   const availableBuses = [
@@ -272,8 +206,8 @@ function Devices({ onMenuClick, setActiveTab }) {
 
   const filteredDevices = devices.filter(device => {
     const matchesSearch = device.deviceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         device.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         device.assignedBus.toLowerCase().includes(searchTerm.toLowerCase());
+                         device.deviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (device.busId && device.busId.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesFilter = filterStatus === 'all' || device.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
@@ -365,7 +299,7 @@ function Devices({ onMenuClick, setActiveTab }) {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search by Device ID, Serial Number, or Bus..."
+                  placeholder="Search by Device ID, Name, or Bus ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
@@ -400,7 +334,7 @@ function Devices({ onMenuClick, setActiveTab }) {
                       </div>
                       <div>
                         <div className="font-bold text-lg">{device.deviceId}</div>
-                        <div className="text-xs text-white/80">{device.serialNumber}</div>
+                        <div className="text-xs text-white/80">{device.deviceName}</div>
                       </div>
                     </div>
                     <div className={`px-2 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 ${getStatusColor(device.status)}`}>
@@ -415,12 +349,8 @@ function Devices({ onMenuClick, setActiveTab }) {
                   {/* Device Info */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Model:</span>
-                      <span className="font-semibold text-gray-900">{device.model}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Firmware:</span>
-                      <span className="font-semibold text-gray-900">{device.firmwareVersion}</span>
+                      <span className="text-gray-500">Type:</span>
+                      <span className="font-semibold text-gray-900">{device.deviceType}</span>
                     </div>
                   </div>
 
@@ -431,51 +361,16 @@ function Devices({ onMenuClick, setActiveTab }) {
                       <span className="text-xs font-semibold text-blue-900">Assigned Bus</span>
                     </div>
                     <div className="font-bold text-blue-900">
-                      {device.assignedBus === 'Unassigned' ? (
+                      {!device.busId || device.busId === '' ? (
                         <span className="text-gray-500 font-normal">Not Assigned</span>
                       ) : (
-                        `${device.assignedBus} (${device.busNumber})`
+                        device.busId
                       )}
                     </div>
                   </div>
 
-                  {/* Signal & Battery */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        {getSignalIcon(device.signalStrength)}
-                        <span className="text-xs text-gray-600">Signal</span>
-                      </div>
-                      <div className={`text-sm font-semibold capitalize ${getSignalColor(device.signalStrength)}`}>
-                        {device.signalStrength}
-                      </div>
-                    </div>
-                    <div className={`p-3 rounded-lg border ${getBatteryColor(device.batteryLevel)}`}>
-                      <div className="text-xs mb-1">Battery</div>
-                      <div className="text-sm font-bold">{device.batteryLevel}%</div>
-                    </div>
-                  </div>
-
-                  {/* Activity Stats */}
-                  <div className="p-3 rounded-lg bg-purple-50 border border-purple-100">
-                    <div className="grid grid-cols-2 gap-3 text-center">
-                      <div>
-                        <div className="text-xl font-bold text-purple-900">{device.readsToday}</div>
-                        <div className="text-xs text-purple-600">Reads Today</div>
-                      </div>
-                      <div>
-                        <div className="text-xl font-bold text-purple-900">{device.totalReads.toLocaleString()}</div>
-                        <div className="text-xs text-purple-600">Total Reads</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Location & Date */}
+                  {/* Installation & Maintenance */}
                   <div className="pt-3 border-t border-gray-100 space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-600">{device.location}</span>
-                    </div>
                     <div className="flex items-center gap-2 text-sm">
                       <Calendar className="w-4 h-4 text-gray-400" />
                       <span className="text-gray-600">Installed: {device.installationDate}</span>
@@ -564,55 +459,30 @@ function Devices({ onMenuClick, setActiveTab }) {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Serial Number *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Device Name *</label>
                       <input
                         type="text"
-                        name="serialNumber"
-                        value={formData.serialNumber}
+                        name="deviceName"
+                        value={formData.deviceName}
                         onChange={handleInputChange}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                        placeholder="TM-RFID-2024-007"
+                        placeholder="Main Scanner"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Manufacturer</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Device Type *</label>
                       <select
-                        name="manufacturer"
-                        value={formData.manufacturer}
+                        name="deviceType"
+                        value={formData.deviceType}
                         onChange={handleInputChange}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
+                        required
                       >
-                        <option value="TrackMate">TrackMate</option>
-                        <option value="RFID Solutions">RFID Solutions</option>
-                        <option value="TechTrack">TechTrack</option>
-                        <option value="SmartScan">SmartScan</option>
+                        <option value="RFID">RFID</option>
+                        <option value="GPS">GPS</option>
+                        <option value="Camera">Camera</option>
                       </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Model</label>
-                      <select
-                        name="model"
-                        value={formData.model}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                      >
-                        <option value="RFID-X200">RFID-X200</option>
-                        <option value="RFID-X250">RFID-X250</option>
-                        <option value="RFID-Pro">RFID-Pro</option>
-                        <option value="RFID-Lite">RFID-Lite</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Firmware Version</label>
-                      <input
-                        type="text"
-                        name="firmwareVersion"
-                        value={formData.firmwareVersion}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                        placeholder="v2.4.1"
-                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
@@ -630,18 +500,18 @@ function Devices({ onMenuClick, setActiveTab }) {
                   </div>
                 </div>
 
-                {/* Assignment & Location */}
+                {/* Assignment & Dates */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <Bus className="w-5 h-5 text-[#1E3A5F]" />
-                    Assignment & Location
+                    Assignment & Maintenance
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                    <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">Assigned Bus</label>
                       <select
-                        name="assignedBus"
-                        value={formData.assignedBus}
+                        name="busId"
+                        value={formData.busId}
                         onChange={handleInputChange}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
                       >
@@ -650,55 +520,6 @@ function Devices({ onMenuClick, setActiveTab }) {
                           <option key={bus.id} value={bus.id}>{bus.name}</option>
                         ))}
                       </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
-                      <input
-                        type="text"
-                        name="location"
-                        value={formData.location}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                        placeholder="Main Depot"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Technical Details */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-[#1E3A5F]" />
-                    Technical Details
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Signal Strength</label>
-                      <select
-                        name="signalStrength"
-                        value={formData.signalStrength}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                      >
-                        <option value="excellent">Excellent</option>
-                        <option value="good">Good</option>
-                        <option value="fair">Fair</option>
-                        <option value="poor">Poor</option>
-                        <option value="none">None</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Battery Level (%)</label>
-                      <input
-                        type="number"
-                        name="batteryLevel"
-                        value={formData.batteryLevel}
-                        onChange={handleInputChange}
-                        min="0"
-                        max="100"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                        placeholder="100"
-                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Installation Date</label>
@@ -721,19 +542,6 @@ function Devices({ onMenuClick, setActiveTab }) {
                       />
                     </div>
                   </div>
-                </div>
-
-                {/* Notes */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                  <textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleInputChange}
-                    rows="3"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                    placeholder="Additional notes or comments..."
-                  />
                 </div>
 
               </div>
