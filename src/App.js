@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import LoginPage from './pages/Login/LoginPage';
+import RegisterPage from './pages/Login/RegisterPage';
 import Sidebar from './components/Sidebar';
 import { ProfileImageProvider } from './context/ProfileImageContext';
 import ParentDashboard from './pages/Parent/ParentDashboard';
@@ -133,6 +134,15 @@ function App() {
         setOtp={setOtp}
         showOtp={showOtp}
         setShowOtp={setShowOtp}
+        onNavigateToRegister={() => setCurrentView('register')}
+      />
+    );
+  }
+
+  if (currentView === 'register') {
+    return (
+      <RegisterPage
+        onNavigateToLogin={() => setCurrentView('login')}
       />
     );
   }
