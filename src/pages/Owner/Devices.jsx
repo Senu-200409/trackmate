@@ -1,35 +1,63 @@
-import React, { useState } from 'react';
-import { 
-  Cpu,
-  Plus,
-  Search,
-  Filter,
-  Edit,
-  Trash2,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
+import React, { useMemo, useState } from 'react';
+import {
+  Activity,
   Bus,
   Calendar,
-  Activity,
-  Wifi,
-  WifiOff,
-  MoreVertical,
-  X,
-  Save,
+  Cpu,
+  Edit,
+  Filter,
+  Plus,
   Radio,
-  MapPin,
-  Settings
+  Save,
+  Search,
+  X
 } from 'lucide-react';
-import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
+import OwnerHeader from '../../components/Owner/OwnerHeader';
+
+const availableBuses = [
+  { id: 'BUS-101', name: 'Bus 101' },
+  { id: 'BUS-203', name: 'Bus 203' },
+  { id: 'BUS-305', name: 'Bus 305' }
+];
+
+const initialDevices = [
+  {
+    deviceId: 'DEV-001',
+    deviceName: 'North Gate RFID',
+    deviceType: 'RFID',
+    status: 'active',
+    busId: 'BUS-101',
+    installationDate: '2023-08-01',
+    lastMaintenance: '2023-12-10'
+  },
+  {
+    deviceId: 'DEV-002',
+    deviceName: 'Route 5 GPS',
+    deviceType: 'GPS',
+    status: 'maintenance',
+    busId: '',
+    installationDate: '2023-06-15',
+    lastMaintenance: '2024-01-05'
+  },
+  {
+    deviceId: 'DEV-003',
+    deviceName: 'West Lot Camera',
+    deviceType: 'Camera',
+    status: 'offline',
+    busId: 'BUS-203',
+    installationDate: '2023-10-20',
+    lastMaintenance: '2024-02-18'
+  }
+];
 
 function Devices({ onMenuClick, setActiveTab }) {
+  const [devices, setDevices] = useState(initialDevices);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingDevice, setEditingDevice] = useState(null);
+  const [editingDeviceId, setEditingDeviceId] = useState(null);
   const [formData, setFormData] = useState({
     deviceId: '',
     deviceName: '',
@@ -39,41 +67,6 @@ function Devices({ onMenuClick, setActiveTab }) {
     installationDate: '',
     lastMaintenance: ''
   });
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('New Device Data:', formData);
-    alert('Device added successfully!');
-    setShowAddModal(false);
-    resetForm();
-  };
-
-  const handleEditClick = (device) => {
-    setEditingDevice(device);
-    setFormData({
-      deviceId: device.deviceId,
-      deviceName: device.deviceName,
-      deviceType: device.deviceType,
-      status: device.status,
-      busId: device.busId,
-      installationDate: device.installationDate,
-      lastMaintenance: device.lastMaintenance
-    });
-    setShowEditModal(true);
-  };
-
-  const handleUpdate = (e) => {
-    e.preventDefault();
-    console.log('Updated Device Data:', formData);
-    alert('Device updated successfully!');
-    setShowEditModal(false);
-    resetForm();
-  };
 
   const resetForm = () => {
     setFormData({
@@ -87,359 +80,186 @@ function Devices({ onMenuClick, setActiveTab }) {
     });
   };
 
-  // Sample device data
-  const devices = [
-    {
-      id: 1,
-      deviceId: 'RFID-001',
-      deviceName: 'Main Gate Scanner',
-      deviceType: 'RFID',
-      status: 'active',
-      busId: 'BUS-001',
-      installationDate: '2024-01-15',
-      lastMaintenance: '2024-12-01'
-    },
-    {
-      id: 2,
-      deviceId: 'RFID-002',
-      deviceName: 'Route A Scanner',
-      deviceType: 'RFID',
-      status: 'active',
-      busId: 'BUS-002',
-      installationDate: '2024-01-20',
-      lastMaintenance: '2024-11-28'
-    },
-    {
-      id: 3,
-      deviceId: 'RFID-003',
-      deviceName: 'Route B Scanner',
-      deviceType: 'RFID',
-      status: 'maintenance',
-      busId: 'BUS-003',
-      installationDate: '2024-02-10',
-      lastMaintenance: '2024-12-15'
-    },
-    {
-      id: 4,
-      deviceId: 'RFID-004',
-      deviceName: 'Route C Scanner',
-      deviceType: 'GPS',
-      status: 'active',
-      busId: 'BUS-004',
-      installationDate: '2024-03-05',
-      lastMaintenance: '2024-12-10'
-    },
-    {
-      id: 5,
-      deviceId: 'RFID-005',
-      deviceName: 'Route D Scanner',
-      deviceType: 'RFID',
-      status: 'offline',
-      busId: 'BUS-005',
-      installationDate: '2024-03-20',
-      lastMaintenance: '2024-11-25'
-    },
-    {
-      id: 6,
-      deviceId: 'RFID-006',
-      deviceName: 'Backup Scanner',
-      deviceType: 'GPS',
-      status: 'active',
-      busId: '',
-      installationDate: '2024-12-01',
-      lastMaintenance: '2024-12-01'
-    }
-  ];
-
-  const availableBuses = [
-    { id: 'BUS-001', name: 'BUS-001 (ABC 1234)' },
-    { id: 'BUS-002', name: 'BUS-002 (DEF 5678)' },
-    { id: 'BUS-003', name: 'BUS-003 (GHI 9012)' },
-    { id: 'BUS-004', name: 'BUS-004 (JKL 3456)' },
-    { id: 'BUS-005', name: 'BUS-005 (MNO 7890)' },
-    { id: 'BUS-006', name: 'BUS-006 (PQR 1234)' },
-  ];
-
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'active': return 'bg-green-100 text-green-700 border-green-200';
-      case 'offline': return 'bg-red-100 text-red-700 border-red-200';
-      case 'maintenance': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const getStatusIcon = (status) => {
-    switch(status) {
-      case 'active': return <CheckCircle className="w-4 h-4" />;
-      case 'offline': return <XCircle className="w-4 h-4" />;
-      case 'maintenance': return <AlertTriangle className="w-4 h-4" />;
-      default: return <Activity className="w-4 h-4" />;
-    }
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setDevices((prev) => [...prev, formData]);
+    setShowAddModal(false);
+    resetForm();
   };
 
-  const getSignalIcon = (strength) => {
-    if (strength === 'none' || strength === 'offline') {
-      return <WifiOff className="w-4 h-4 text-red-500" />;
-    }
-    return <Wifi className="w-4 h-4 text-green-500" />;
+  const handleEditClick = (device) => {
+    setEditingDeviceId(device.deviceId);
+    setFormData({ ...device });
+    setShowEditModal(true);
   };
 
-  const getSignalColor = (strength) => {
-    switch(strength) {
-      case 'excellent': return 'text-green-600';
-      case 'good': return 'text-blue-600';
-      case 'fair': return 'text-yellow-600';
-      case 'poor': return 'text-orange-600';
-      case 'none': return 'text-red-600';
-      default: return 'text-gray-600';
-    }
+  const handleUpdate = (event) => {
+    event.preventDefault();
+    setDevices((prev) => prev.map((device) => (device.deviceId === editingDeviceId ? formData : device)));
+    setShowEditModal(false);
+    resetForm();
   };
 
-  const getBatteryColor = (level) => {
-    const numLevel = parseInt(level);
-    if (numLevel > 80) return 'text-green-600 bg-green-100';
-    if (numLevel > 50) return 'text-blue-600 bg-blue-100';
-    if (numLevel > 20) return 'text-yellow-600 bg-yellow-100';
-    return 'text-red-600 bg-red-100';
-  };
+  const filteredDevices = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return devices.filter((device) => {
+      const matchesSearch =
+        device.deviceId.toLowerCase().includes(term) ||
+        device.deviceName.toLowerCase().includes(term) ||
+        device.busId.toLowerCase().includes(term);
 
-  const filteredDevices = devices.filter(device => {
-    const matchesSearch = device.deviceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         device.deviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (device.busId && device.busId.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesFilter = filterStatus === 'all' || device.status === filterStatus;
-    return matchesSearch && matchesFilter;
-  });
+      const matchesStatus = filterStatus === 'all' ? true : device.status === filterStatus;
+      return matchesSearch && matchesStatus;
+    });
+  }, [devices, filterStatus, searchTerm]);
 
-  const stats = {
-    total: devices.length,
-    active: devices.filter(d => d.status === 'active').length,
-    offline: devices.filter(d => d.status === 'offline').length,
-    maintenance: devices.filter(d => d.status === 'maintenance').length,
+  const renderStatusBadge = (status) => {
+    const styles = {
+      active: 'bg-green-100 text-green-800',
+      offline: 'bg-red-100 text-red-800',
+      maintenance: 'bg-yellow-100 text-yellow-800'
+    };
+    const labels = {
+      active: 'Active',
+      offline: 'Offline',
+      maintenance: 'Maintenance'
+    };
+
+    return (
+      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${styles[status] || 'bg-gray-100 text-gray-800'}`}>
+        {labels[status] || 'Unknown'}
+      </span>
+    );
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF3B0] via-[#FFE082] to-[#FFF3B0]">
-      <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
-      
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
-        <div className="max-w-7xl mx-auto space-y-6">
-          
-          {/* Page Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <OwnerHeader onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
+
+      <main className="flex-1 container mx-auto px-4 py-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-[#1E3A5F] text-white rounded-xl shadow">
+              <Cpu className="w-6 h-6" />
+            </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">RFID Devices</h1>
-              <p className="text-gray-600 mt-1">Manage your RFID readers and tracking devices</p>
-            </div>
-            <button 
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              Add New Device
-            </button>
-          </div>
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-blue-100">
-                  <Cpu className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-                  <div className="text-sm text-gray-600">Total Devices</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-green-100">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">{stats.active}</div>
-                  <div className="text-sm text-gray-600">Active</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-red-100">
-                  <XCircle className="w-5 h-5 text-red-600" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">{stats.offline}</div>
-                  <div className="text-sm text-gray-600">Offline</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-yellow-100">
-                  <AlertTriangle className="w-5 h-5 text-yellow-600" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">{stats.maintenance}</div>
-                  <div className="text-sm text-gray-600">Maintenance</div>
-                </div>
-              </div>
+              <h1 className="text-2xl font-bold text-gray-900">Devices</h1>
+              <p className="text-gray-500">Manage device assignments and maintenance</p>
             </div>
           </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#1E3A5F] text-white rounded-lg hover:bg-[#3B6FB6] transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Add Device
+          </button>
+        </div>
 
-          {/* Search and Filter */}
-          <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search by Device ID, Name, or Bus ID..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                />
+        <div className="flex flex-col md:flex-row gap-4 md:items-center">
+          <div className="relative w-full md:w-1/2">
+            <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search by ID, name, or bus"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
+            />
+          </div>
+          <div className="flex gap-3">
+            <div className="relative">
+              <Filter className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <select
+                value={filterStatus}
+                onChange={(event) => setFilterStatus(event.target.value)}
+                className="pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
+              >
+                <option value="all">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="offline">Offline</option>
+                <option value="maintenance">Maintenance</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredDevices.map((device) => (
+            <div key={device.deviceId} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">{device.deviceId}</p>
+                  <h3 className="text-lg font-semibold text-gray-900">{device.deviceName}</h3>
+                </div>
+                {renderStatusBadge(device.status)}
               </div>
-              <div className="flex items-center gap-2">
-                <Filter className="w-5 h-5 text-gray-600" />
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
+
+              <div className="space-y-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <Radio className="w-4 h-4 text-[#1E3A5F]" />
+                  <span>{device.deviceType}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Bus className="w-4 h-4 text-[#1E3A5F]" />
+                  <span>{device.busId || 'Unassigned'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-[#1E3A5F]" />
+                  <span>Installed: {device.installationDate || '—'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-[#1E3A5F]" />
+                  <span>Last maintenance: {device.lastMaintenance || '—'}</span>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  onClick={() => handleEditClick(device)}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="offline">Offline</option>
-                  <option value="maintenance">Maintenance</option>
-                </select>
+                  <Edit className="w-4 h-4" />
+                  Edit
+                </button>
               </div>
             </div>
-          </div>
-
-          {/* Devices Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredDevices.map((device) => (
-              <div key={device.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                {/* Card Header */}
-                <div className="p-4 bg-gradient-to-r from-[#1E3A5F] to-[#3B6FB6] text-white">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white/20 rounded-lg">
-                        <Cpu className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <div className="font-bold text-lg">{device.deviceId}</div>
-                        <div className="text-xs text-white/80">{device.deviceName}</div>
-                      </div>
-                    </div>
-                    <div className={`px-2 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 ${getStatusColor(device.status)}`}>
-                      {getStatusIcon(device.status)}
-                      <span className="capitalize">{device.status}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card Body */}
-                <div className="p-4 space-y-3">
-                  {/* Device Info */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Type:</span>
-                      <span className="font-semibold text-gray-900">{device.deviceType}</span>
-                    </div>
-                  </div>
-
-                  {/* Bus Assignment */}
-                  <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Bus className="w-4 h-4 text-blue-600" />
-                      <span className="text-xs font-semibold text-blue-900">Assigned Bus</span>
-                    </div>
-                    <div className="font-bold text-blue-900">
-                      {!device.busId || device.busId === '' ? (
-                        <span className="text-gray-500 font-normal">Not Assigned</span>
-                      ) : (
-                        device.busId
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Installation & Maintenance */}
-                  <div className="pt-3 border-t border-gray-100 space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-600">Installed: {device.installationDate}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Settings className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-600">Maintained: {device.lastMaintenance}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card Footer */}
-                <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-2">
-                  <button
-                    onClick={() => handleEditClick(device)}
-                    className="flex-1 px-3 py-2 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] transition-colors text-sm font-medium flex items-center justify-center gap-2"
-                  >
-                    <Edit className="w-4 h-4" />
-                    Edit Device
-                  </button>
-                  <button className="p-2 rounded-lg hover:bg-gray-200 transition-colors">
-                    <MoreVertical className="w-5 h-5 text-gray-600" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
+          ))}
           {filteredDevices.length === 0 && (
-            <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
-              <Cpu className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No devices found</h3>
-              <p className="text-gray-600">Try adjusting your search or filters</p>
+            <div className="col-span-full text-center py-12 bg-white rounded-xl border border-dashed border-gray-200">
+              <p className="text-gray-500">No devices match your filters.</p>
             </div>
           )}
-
         </div>
       </main>
 
       <OwnerFooter />
 
-      {/* Add Device Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
-            {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#1E3A5F] to-[#3B6FB6]">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white/20 rounded-lg">
-                  <Cpu className="w-6 h-6 text-white" />
+                  <Plus className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">Add New RFID Device</h2>
-                  <p className="text-white/70 text-sm">Register a new device in the system</p>
+                  <h2 className="text-xl font-bold text-white">Add Device</h2>
+                  <p className="text-white/70 text-sm">Create a new device record</p>
                 </div>
               </div>
-              <button 
-                onClick={() => setShowAddModal(false)}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-              >
+              <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
                 <X className="w-6 h-6 text-white" />
               </button>
             </div>
 
-            {/* Modal Body */}
             <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(90vh-140px)]">
               <div className="p-6 space-y-6">
-                
-                {/* Device Information */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <Radio className="w-5 h-5 text-[#1E3A5F]" />
@@ -454,7 +274,6 @@ function Devices({ onMenuClick, setActiveTab }) {
                         value={formData.deviceId}
                         onChange={handleInputChange}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                        placeholder="RFID-007"
                         required
                       />
                     </div>
@@ -466,7 +285,6 @@ function Devices({ onMenuClick, setActiveTab }) {
                         value={formData.deviceName}
                         onChange={handleInputChange}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                        placeholder="Main Scanner"
                         required
                       />
                     </div>
@@ -500,7 +318,6 @@ function Devices({ onMenuClick, setActiveTab }) {
                   </div>
                 </div>
 
-                {/* Assignment & Dates */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <Bus className="w-5 h-5 text-[#1E3A5F]" />
@@ -516,8 +333,10 @@ function Devices({ onMenuClick, setActiveTab }) {
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
                       >
                         <option value="">Unassigned</option>
-                        {availableBuses.map(bus => (
-                          <option key={bus.id} value={bus.id}>{bus.name}</option>
+                        {availableBuses.map((bus) => (
+                          <option key={bus.id} value={bus.id}>
+                            {bus.name}
+                          </option>
                         ))}
                       </select>
                     </div>
@@ -543,10 +362,8 @@ function Devices({ onMenuClick, setActiveTab }) {
                     </div>
                   </div>
                 </div>
-
               </div>
 
-              {/* Modal Footer */}
               <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-200">
                 <button
                   type="button"
@@ -568,11 +385,9 @@ function Devices({ onMenuClick, setActiveTab }) {
         </div>
       )}
 
-      {/* Edit Device Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
-            {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#1E3A5F] to-[#3B6FB6]">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white/20 rounded-lg">
@@ -583,19 +398,13 @@ function Devices({ onMenuClick, setActiveTab }) {
                   <p className="text-white/70 text-sm">Update device information</p>
                 </div>
               </div>
-              <button 
-                onClick={() => setShowEditModal(false)}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-              >
+              <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
                 <X className="w-6 h-6 text-white" />
               </button>
             </div>
 
-            {/* Modal Body - Same form structure as Add Modal */}
             <form onSubmit={handleUpdate} className="overflow-y-auto max-h-[calc(90vh-140px)]">
               <div className="p-6 space-y-6">
-                
-                {/* Device Information */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <Radio className="w-5 h-5 text-[#1E3A5F]" />
@@ -614,54 +423,29 @@ function Devices({ onMenuClick, setActiveTab }) {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Serial Number *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Device Name *</label>
                       <input
                         type="text"
-                        name="serialNumber"
-                        value={formData.serialNumber}
+                        name="deviceName"
+                        value={formData.deviceName}
                         onChange={handleInputChange}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Manufacturer</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Device Type *</label>
                       <select
-                        name="manufacturer"
-                        value={formData.manufacturer}
+                        name="deviceType"
+                        value={formData.deviceType}
                         onChange={handleInputChange}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
+                        required
                       >
-                        <option value="TrackMate">TrackMate</option>
-                        <option value="RFID Solutions">RFID Solutions</option>
-                        <option value="TechTrack">TechTrack</option>
-                        <option value="SmartScan">SmartScan</option>
+                        <option value="RFID">RFID</option>
+                        <option value="GPS">GPS</option>
+                        <option value="Camera">Camera</option>
                       </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Model</label>
-                      <select
-                        name="model"
-                        value={formData.model}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                      >
-                        <option value="RFID-X200">RFID-X200</option>
-                        <option value="RFID-X250">RFID-X250</option>
-                        <option value="RFID-Pro">RFID-Pro</option>
-                        <option value="RFID-Lite">RFID-Lite</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Firmware Version</label>
-                      <input
-                        type="text"
-                        name="firmwareVersion"
-                        value={formData.firmwareVersion}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                        placeholder="v2.4.1"
-                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
@@ -679,74 +463,27 @@ function Devices({ onMenuClick, setActiveTab }) {
                   </div>
                 </div>
 
-                {/* Assignment & Location */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <Bus className="w-5 h-5 text-[#1E3A5F]" />
-                    Assignment & Location
+                    Assignment & Maintenance
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                    <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">Assigned Bus</label>
                       <select
-                        name="assignedBus"
-                        value={formData.assignedBus}
+                        name="busId"
+                        value={formData.busId}
                         onChange={handleInputChange}
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
                       >
                         <option value="">Unassigned</option>
-                        {availableBuses.map(bus => (
-                          <option key={bus.id} value={bus.id}>{bus.name}</option>
+                        {availableBuses.map((bus) => (
+                          <option key={bus.id} value={bus.id}>
+                            {bus.name}
+                          </option>
                         ))}
                       </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
-                      <input
-                        type="text"
-                        name="location"
-                        value={formData.location}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                        placeholder="Main Depot"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Technical Details */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-[#1E3A5F]" />
-                    Technical Details
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Signal Strength</label>
-                      <select
-                        name="signalStrength"
-                        value={formData.signalStrength}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                      >
-                        <option value="excellent">Excellent</option>
-                        <option value="good">Good</option>
-                        <option value="fair">Fair</option>
-                        <option value="poor">Poor</option>
-                        <option value="none">None</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Battery Level (%)</label>
-                      <input
-                        type="number"
-                        name="batteryLevel"
-                        value={formData.batteryLevel}
-                        onChange={handleInputChange}
-                        min="0"
-                        max="100"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Installation Date</label>
@@ -770,23 +507,8 @@ function Devices({ onMenuClick, setActiveTab }) {
                     </div>
                   </div>
                 </div>
-
-                {/* Notes */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                  <textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleInputChange}
-                    rows="3"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
-                    placeholder="Additional notes or comments..."
-                  />
-                </div>
-
               </div>
 
-              {/* Modal Footer */}
               <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-200">
                 <button
                   type="button"
@@ -807,7 +529,6 @@ function Devices({ onMenuClick, setActiveTab }) {
           </div>
         </div>
       )}
-
     </div>
   );
 }
