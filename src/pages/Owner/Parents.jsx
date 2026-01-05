@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   Users, 
-  User,
   Phone,
   Mail,
   MapPin,
@@ -14,10 +13,8 @@ import {
   Save,
   FileText,
   Building,
-  Briefcase,
-  Award,
   Edit,
-  Edit2
+  UserPlus
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
@@ -29,26 +26,13 @@ function Parents({ onMenuClick, setActiveTab }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingParent, setEditingParent] = useState(null);
   const [formData, setFormData] = useState({
-    parentId: '',
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
     phone: '',
-    alternatePhone: '',
-    gender: '',
-    occupation: '',
-    companyName: '',
     address: '',
     city: '',
-    state: '',
-    postalCode: '',
     childrenCount: '',
-    childrenNames: '',
-    emergencyRelation: '',
-    aadharNumber: '',
-    panNumber: '',
-    status: 'active',
-    notes: ''
+    status: 'active'
   });
 
   const handleInputChange = (e) => {
@@ -62,54 +46,26 @@ function Parents({ onMenuClick, setActiveTab }) {
     alert('Parent registered successfully!');
     setShowAddModal(false);
     setFormData({
-      parentId: '',
-      firstName: '',
-      lastName: '',
+      name: '',
       email: '',
       phone: '',
-      alternatePhone: '',
-      gender: '',
-      occupation: '',
-      companyName: '',
       address: '',
       city: '',
-      state: '',
-      postalCode: '',
       childrenCount: '',
-      childrenNames: '',
-      emergencyRelation: '',
-      aadharNumber: '',
-      panNumber: '',
-      status: 'active',
-      notes: ''
+      status: 'active'
     });
   };
 
   const handleEditClick = (parent) => {
-    const [firstName = '', ...rest] = parent.name ? parent.name.split(' ') : [''];
-    const lastName = rest.join(' ');
     setEditingParent(parent);
     setFormData({
-      parentId: parent.id || '',
-      firstName,
-      lastName,
+      name: parent.name || '',
       email: parent.email || '',
       phone: parent.phone || '',
-      alternatePhone: parent.alternatePhone || '',
-      gender: parent.gender || '',
-      occupation: parent.occupation || '',
-      companyName: parent.company || '',
       address: parent.address || '',
       city: parent.city || '',
-      state: parent.state || '',
-      postalCode: parent.postalCode || '',
       childrenCount: parent.children || '',
-      childrenNames: parent.childNames || '',
-      emergencyRelation: parent.emergencyRelation || '',
-      aadharNumber: parent.aadharNumber || '',
-      panNumber: parent.panNumber || '',
-      status: (parent.status || 'active').toLowerCase(),
-      notes: parent.notes || ''
+      status: (parent.status || 'active').toLowerCase()
     });
     setShowEditModal(true);
   };
@@ -128,98 +84,67 @@ function Parents({ onMenuClick, setActiveTab }) {
       name: 'Robert Johnson',
       email: 'robert.j@email.com',
       phone: '+1 212-555-0100',
-      alternatePhone: '+1 212-555-0150',
-      children: 1,
-      childNames: 'Emma Johnson',
-      occupation: 'Software Engineer',
-      company: 'Tech Solutions',
+      address: '123 Oak Street',
       city: 'New York',
-      children_enrolled: 'Riverside Academy',
-      status: 'Active',
-      gender: 'Male'
+      children: 1,
+      status: 'Active'
     },
     {
       id: 'PAR-002',
       name: 'Michael Chen',
       email: 'michael.c@email.com',
       phone: '+1 212-555-0101',
-      alternatePhone: '+1 212-555-0151',
-      children: 1,
-      childNames: 'Liam Chen',
-      occupation: 'Marketing Manager',
-      company: 'Digital Corp',
+      address: '456 Pine Avenue',
       city: 'New York',
-      children_enrolled: 'Riverside Academy',
-      status: 'Active',
-      gender: 'Male'
+      children: 1,
+      status: 'Active'
     },
     {
       id: 'PAR-003',
       name: 'Carlos Martinez',
       email: 'carlos.m@email.com',
       phone: '+1 617-555-0102',
-      alternatePhone: '+1 617-555-0152',
-      children: 1,
-      childNames: 'Olivia Martinez',
-      occupation: 'Architect',
-      company: 'Design Studios',
+      address: '789 Elm Road',
       city: 'Boston',
-      children_enrolled: 'Greenfield International',
-      status: 'Active',
-      gender: 'Male'
+      children: 1,
+      status: 'Active'
     },
     {
       id: 'PAR-004',
       name: 'James Williams',
       email: 'james.w@email.com',
       phone: '+1 215-555-0103',
-      alternatePhone: '+1 215-555-0153',
-      children: 1,
-      childNames: 'Noah Williams',
-      occupation: 'Finance Executive',
-      company: 'Finance Plus',
+      address: '321 Maple Lane',
       city: 'Philadelphia',
-      children_enrolled: 'Sunridge Public School',
-      status: 'Active',
-      gender: 'Male'
+      children: 1,
+      status: 'Active'
     },
     {
       id: 'PAR-005',
       name: 'Diego Garcia',
       email: 'diego.g@email.com',
       phone: '+1 312-555-0104',
-      alternatePhone: '+1 312-555-0154',
-      children: 1,
-      childNames: 'Ava Garcia',
-      occupation: 'Project Manager',
-      company: 'Build Corp',
+      address: '654 Birch Court',
       city: 'Chicago',
-      children_enrolled: 'Lakeside High School',
-      status: 'Active',
-      gender: 'Male'
+      children: 1,
+      status: 'Active'
     },
     {
       id: 'PAR-006',
       name: 'Susan Anderson',
       email: 'susan.a@email.com',
       phone: '+1 303-555-0105',
-      alternatePhone: '+1 303-555-0155',
-      children: 2,
-      childNames: 'Sophie & David Anderson',
-      occupation: 'Doctor',
-      company: 'Medical Center',
+      address: '987 Cedar Drive',
       city: 'Denver',
-      children_enrolled: 'Mountain View School',
-      status: 'Active',
-      gender: 'Female'
+      children: 2,
+      status: 'Active'
     }
   ];
 
   const filteredParents = parentsList.filter(parent => {
     const matchesSearch = parent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          parent.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         parent.phone.includes(searchTerm) ||
-                         parent.childNames.toLowerCase().includes(searchTerm.toLowerCase());
+                         parent.phone.includes(searchTerm);
     const matchesFilter = filterStatus === 'all' || parent.status.toLowerCase() === filterStatus.toLowerCase();
     return matchesSearch && matchesFilter;
   });
@@ -253,7 +178,7 @@ function Parents({ onMenuClick, setActiveTab }) {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-blue-100">
@@ -273,28 +198,6 @@ function Parents({ onMenuClick, setActiveTab }) {
                 <div>
                   <div className="text-2xl font-bold text-gray-900">{stats.active}</div>
                   <div className="text-sm text-gray-600">Active</div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-purple-100">
-                  <Award className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">{stats.totalChildren}</div>
-                  <div className="text-sm text-gray-600">Children Enrolled</div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-orange-100">
-                  <Briefcase className="w-5 h-5 text-orange-600" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">{stats.total > 0 ? Math.round(stats.totalChildren / stats.total) : 0}</div>
-                  <div className="text-sm text-gray-600">Avg Children</div>
                 </div>
               </div>
             </div>
@@ -360,10 +263,6 @@ function Parents({ onMenuClick, setActiveTab }) {
                     <Phone className="w-4 h-4 text-[#F5C518]" />
                     {parent.phone}
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Phone className="w-4 h-4 text-[#F5C518]" />
-                    {parent.alternatePhone}
-                  </div>
                 </div>
 
                 {/* Children Information */}
@@ -375,21 +274,10 @@ function Parents({ onMenuClick, setActiveTab }) {
                     </span>
                     <span className="font-semibold text-gray-900">{parent.children}</span>
                   </div>
-                  <div className="text-sm">
-                    <span className="text-gray-600">Names: </span>
-                    <span className="font-semibold text-gray-900">{parent.childNames}</span>
-                  </div>
                 </div>
 
-                {/* Professional Information */}
+                {/* Address Information */}
                 <div className="px-4 py-3 space-y-2 border-b border-gray-100">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Briefcase className="w-4 h-4 text-[#3B6FB6]" />
-                    <span className="text-gray-700">
-                      <span className="font-semibold text-gray-900">{parent.occupation}</span>
-                      <span className="text-gray-500"> at {parent.company}</span>
-                    </span>
-                  </div>
                   <div className="flex items-center gap-2 text-sm">
                     <MapPin className="w-4 h-4 text-[#3B6FB6]" />
                     <span className="text-gray-700">
@@ -429,7 +317,7 @@ function Parents({ onMenuClick, setActiveTab }) {
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#1E3A5F] to-[#3B6FB6]">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white/20 rounded-lg">
-                  <User className="w-6 h-6 text-white" />
+                  <UserPlus className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">Register Parent/Guardian</h2>
@@ -454,62 +342,18 @@ function Parents({ onMenuClick, setActiveTab }) {
                     <FileText className="w-4 h-4" />
                     Personal Information
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Parent ID <span className="text-red-500">*</span>
+                        Full Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        name="parentId"
-                        value={formData.parentId}
+                        name="name"
+                        value={formData.name}
                         onChange={handleInputChange}
                         required
-                        placeholder="e.g., PAR-007"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Gender <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        name="gender"
-                        value={formData.gender}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="">Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        First Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., John"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Last Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., Doe"
+                        placeholder="e.g., John Smith"
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
@@ -551,57 +395,6 @@ function Parents({ onMenuClick, setActiveTab }) {
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Alternate Phone
-                      </label>
-                      <input
-                        type="tel"
-                        name="alternatePhone"
-                        value={formData.alternatePhone}
-                        onChange={handleInputChange}
-                        placeholder="e.g., +1 212-555-0150"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Professional Information Section */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Briefcase className="w-4 h-4" />
-                    Professional Information
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Occupation <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="occupation"
-                        value={formData.occupation}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., Software Engineer"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Company Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="companyName"
-                        value={formData.companyName}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., Tech Solutions"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
                   </div>
                 </div>
 
@@ -640,33 +433,6 @@ function Parents({ onMenuClick, setActiveTab }) {
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        State <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="state"
-                        value={formData.state}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., NY"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Postal Code
-                      </label>
-                      <input
-                        type="text"
-                        name="postalCode"
-                        value={formData.postalCode}
-                        onChange={handleInputChange}
-                        placeholder="e.g., 10001"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
                   </div>
                 </div>
 
@@ -676,7 +442,7 @@ function Parents({ onMenuClick, setActiveTab }) {
                     <Users className="w-4 h-4" />
                     Children Information
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Number of Children <span className="text-red-500">*</span>
@@ -689,73 +455,6 @@ function Parents({ onMenuClick, setActiveTab }) {
                         required
                         min="1"
                         placeholder="e.g., 1"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Emergency Relation <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        name="emergencyRelation"
-                        value={formData.emergencyRelation}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="">Select Relation</option>
-                        <option value="Father">Father</option>
-                        <option value="Mother">Mother</option>
-                        <option value="Guardian">Guardian</option>
-                      </select>
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Children Names <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="childrenNames"
-                        value={formData.childrenNames}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., Emma Johnson, John Johnson"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Government ID Section */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Award className="w-4 h-4" />
-                    Government ID
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Aadhar Number
-                      </label>
-                      <input
-                        type="text"
-                        name="aadharNumber"
-                        value={formData.aadharNumber}
-                        onChange={handleInputChange}
-                        placeholder="e.g., 1234-5678-9012"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        PAN Number
-                      </label>
-                      <input
-                        type="text"
-                        name="panNumber"
-                        value={formData.panNumber}
-                        onChange={handleInputChange}
-                        placeholder="e.g., ABCDE1234F"
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
@@ -779,19 +478,6 @@ function Parents({ onMenuClick, setActiveTab }) {
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                       </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Notes
-                      </label>
-                      <textarea
-                        name="notes"
-                        value={formData.notes}
-                        onChange={handleInputChange}
-                        rows="3"
-                        placeholder="Any additional information..."
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all resize-none"
-                      />
                     </div>
                   </div>
                 </div>
@@ -829,7 +515,7 @@ function Parents({ onMenuClick, setActiveTab }) {
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#1E3A5F] to-[#3B6FB6]">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white/20 rounded-lg">
-                  <Edit2 className="w-6 h-6 text-white" />
+                  <Edit className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">Update Parent/Guardian</h2>
@@ -851,26 +537,10 @@ function Parents({ onMenuClick, setActiveTab }) {
                     <FileText className="w-4 h-4" />
                     Personal Information
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Parent ID <span className="text-red-500">*</span></label>
-                      <input type="text" name="parentId" value={formData.parentId} disabled className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-100 text-gray-500 cursor-not-allowed" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Gender <span className="text-red-500">*</span></label>
-                      <select name="gender" value={formData.gender} onChange={handleInputChange} required className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white">
-                        <option value="">Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">First Name <span className="text-red-500">*</span></label>
-                      <input type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} required placeholder="e.g., John" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Last Name <span className="text-red-500">*</span></label>
-                      <input type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} required placeholder="e.g., Doe" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
+                      <input type="text" name="name" value={formData.name} onChange={handleInputChange} required placeholder="e.g., John Smith" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
                     </div>
                   </div>
                 </div>
@@ -890,28 +560,6 @@ function Parents({ onMenuClick, setActiveTab }) {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number <span className="text-red-500">*</span></label>
                       <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} required placeholder="e.g., +1 212-555-0100" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
                     </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Alternate Phone</label>
-                      <input type="tel" name="alternatePhone" value={formData.alternatePhone} onChange={handleInputChange} placeholder="e.g., +1 212-555-0150" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Professional Information Section */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Briefcase className="w-4 h-4" />
-                    Professional Information
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Occupation <span className="text-red-500">*</span></label>
-                      <input type="text" name="occupation" value={formData.occupation} onChange={handleInputChange} required placeholder="e.g., Software Engineer" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Company Name <span className="text-red-500">*</span></label>
-                      <input type="text" name="companyName" value={formData.companyName} onChange={handleInputChange} required placeholder="e.g., Tech Solutions" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
-                    </div>
                   </div>
                 </div>
 
@@ -930,14 +578,6 @@ function Parents({ onMenuClick, setActiveTab }) {
                       <label className="block text-sm font-medium text-gray-700 mb-1">City <span className="text-red-500">*</span></label>
                       <input type="text" name="city" value={formData.city} onChange={handleInputChange} required placeholder="e.g., New York" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">State <span className="text-red-500">*</span></label>
-                      <input type="text" name="state" value={formData.state} onChange={handleInputChange} required placeholder="e.g., NY" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
-                      <input type="text" name="postalCode" value={formData.postalCode} onChange={handleInputChange} placeholder="e.g., 10001" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
-                    </div>
                   </div>
                 </div>
 
@@ -947,41 +587,10 @@ function Parents({ onMenuClick, setActiveTab }) {
                     <Users className="w-4 h-4" />
                     Children Information
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Number of Children <span className="text-red-500">*</span></label>
                       <input type="number" name="childrenCount" value={formData.childrenCount} onChange={handleInputChange} required min="1" placeholder="e.g., 1" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Emergency Relation <span className="text-red-500">*</span></label>
-                      <select name="emergencyRelation" value={formData.emergencyRelation} onChange={handleInputChange} required className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all bg-white">
-                        <option value="">Select Relation</option>
-                        <option value="Father">Father</option>
-                        <option value="Mother">Mother</option>
-                        <option value="Guardian">Guardian</option>
-                      </select>
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Children Names <span className="text-red-500">*</span></label>
-                      <input type="text" name="childrenNames" value={formData.childrenNames} onChange={handleInputChange} required placeholder="e.g., Emma Johnson, John Johnson" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Government ID Section */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Award className="w-4 h-4" />
-                    Government ID
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Aadhar Number</label>
-                      <input type="text" name="aadharNumber" value={formData.aadharNumber} onChange={handleInputChange} placeholder="e.g., 1234-5678-9012" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
-                    </div>
-                    <div>
-                      <label className="block text sm font-medium text-gray-700 mb-1">PAN Number</label>
-                      <input type="text" name="panNumber" value={formData.panNumber} onChange={handleInputChange} placeholder="e.g., ABCDE1234F" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
                     </div>
                   </div>
                 </div>
