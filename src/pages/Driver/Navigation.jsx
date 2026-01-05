@@ -20,7 +20,6 @@ function NavigationPage({ onMenuClick, setActiveTab }) {
     name: "Route A - Morning Shift",
     totalDistance: "24.8 km",
     estimatedTime: "1h 15m",
-    currentSpeed: "35 km/h",
     currentLocation: "Maple Street"
   };
 
@@ -29,63 +28,53 @@ function NavigationPage({ onMenuClick, setActiveTab }) {
       id: 1,
       name: "Oak Avenue",
       eta: "8:15 AM",
-      distance: "2.5 km",
       studentsToBoard: 4,
       studentsToDropOff: 0,
-      address: "45 Oak Avenue, near Central Park",
-      status: "pending"
+      address: "45 Oak Avenue, near Central Park"
     },
     {
       id: 2,
       name: "Maple Street",
       eta: "8:22 AM",
-      distance: "3.8 km",
       studentsToBoard: 3,
       studentsToDropOff: 1,
-      address: "156 Maple Street, next to Market",
-      status: "upcoming"
+      address: "156 Maple Street, next to Market"
     },
     {
       id: 3,
       name: "Central School",
       eta: "8:30 AM",
-      distance: "5.2 km",
       studentsToBoard: 2,
       studentsToDropOff: 8,
-      address: "789 School Road, Downtown",
-      status: "upcoming"
+      address: "789 School Road, Downtown"
     },
     {
       id: 4,
       name: "Pine Road",
       eta: "8:40 AM",
-      distance: "7.1 km",
       studentsToBoard: 1,
       studentsToDropOff: 2,
-      address: "321 Pine Road, East District",
-      status: "upcoming"
+      address: "321 Pine Road, East District"
     },
     {
       id: 5,
       name: "Cedar Lane",
       eta: "8:50 AM",
-      distance: "8.9 km",
       studentsToBoard: 0,
       studentsToDropOff: 6,
-      address: "654 Cedar Lane, Residential Area",
-      status: "upcoming"
+      address: "654 Cedar Lane, Residential Area"
     }
   ];
 
   const studentsOnboard = [
-    { id: 1, name: "Emma Wilson", grade: "5th", stop: "Maple St", status: "boarded" },
-    { id: 2, name: "Noah Johnson", grade: "6th", stop: "Pine Ave", status: "boarded" },
-    { id: 3, name: "Liam Brown", grade: "7th", stop: "Elm St", status: "boarded" },
-    { id: 4, name: "Sophia Martinez", grade: "4th", stop: "Oak Ave", status: "boarded" },
-    { id: 5, name: "Ava Davis", grade: "5th", stop: "Cedar Rd", status: "boarded" },
-    { id: 6, name: "James Wilson", grade: "6th", stop: "Maple St", status: "boarded" },
-    { id: 7, name: "Isabella Brown", grade: "5th", stop: "Oak Ave", status: "boarded" },
-    { id: 8, name: "Lucas Anderson", grade: "7th", stop: "Pine Ave", status: "boarded" }
+    { id: 1, name: "Emma Wilson", grade: "5th", stop: "Maple St" },
+    { id: 2, name: "Noah Johnson", grade: "6th", stop: "Pine Ave" },
+    { id: 3, name: "Liam Brown", grade: "7th", stop: "Elm St" },
+    { id: 4, name: "Sophia Martinez", grade: "4th", stop: "Oak Ave" },
+    { id: 5, name: "Ava Davis", grade: "5th", stop: "Cedar Rd" },
+    { id: 6, name: "James Wilson", grade: "6th", stop: "Maple St" },
+    { id: 7, name: "Isabella Brown", grade: "5th", stop: "Oak Ave" },
+    { id: 8, name: "Lucas Anderson", grade: "7th", stop: "Pine Ave" }
   ];
 
   return (
@@ -99,7 +88,7 @@ function NavigationPage({ onMenuClick, setActiveTab }) {
           <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-6 border-b-4 border-[#F5C518]">
             <h1 className="text-3xl font-bold mb-2">Route Navigation</h1>
             <p className="text-[#FFE066]">{currentRoute.name}</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
               <div>
                 <div className="text-sm opacity-75">Total Distance</div>
                 <div className="text-xl font-bold">{currentRoute.totalDistance}</div>
@@ -107,10 +96,6 @@ function NavigationPage({ onMenuClick, setActiveTab }) {
               <div>
                 <div className="text-sm opacity-75">Est. Time</div>
                 <div className="text-xl font-bold">{currentRoute.estimatedTime}</div>
-              </div>
-              <div>
-                <div className="text-sm opacity-75">Current Speed</div>
-                <div className="text-xl font-bold">{currentRoute.currentSpeed}</div>
               </div>
               <div>
                 <div className="text-sm opacity-75">Location</div>
@@ -146,23 +131,12 @@ function NavigationPage({ onMenuClick, setActiveTab }) {
                               {index + 1}
                             </div>
                             <h3 className="text-lg font-bold text-gray-900">{stop.name}</h3>
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                              stop.status === 'pending' 
-                                ? 'bg-orange-100 text-orange-700'
-                                : 'bg-blue-100 text-blue-700'
-                            }`}>
-                              {stop.status === 'pending' ? 'Next Stop' : 'Upcoming'}
-                            </span>
                           </div>
                           
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
                             <div className="flex items-center gap-2 text-sm text-gray-600">
                               <Clock className="w-4 h-4 text-gray-400" />
                               <span>{stop.eta}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <MapPin className="w-4 h-4 text-gray-400" />
-                              <span>{stop.distance}</span>
                             </div>
                             <div className="flex items-center gap-2 text-sm text-gray-600">
                               <Zap className="w-4 h-4 text-green-500" />
@@ -225,7 +199,7 @@ function NavigationPage({ onMenuClick, setActiveTab }) {
                         <p className="font-semibold text-gray-900 text-sm">{student.name}</p>
                         <p className="text-xs text-gray-600">{student.grade} Grade</p>
                       </div>
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Boarded</span>
+
                     </div>
                   ))}
                 </div>

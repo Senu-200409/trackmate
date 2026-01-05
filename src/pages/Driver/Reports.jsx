@@ -21,26 +21,20 @@ function Reports({ onMenuClick, setActiveTab }) {
 
   const performanceMetrics = {
     week: {
-      onTimeRate: { value: 96, target: 95, change: '+2%' },
-      avgSpeed: { value: 32, target: 35, change: '-3%' },
-      fuelEfficiency: { value: 8.2, target: 8.0, change: '+2.5%' },
-      safetyScore: { value: 9.5, target: 9.0, change: '+0.5%' }
+      onTimeRate: { value: 0, target: 95 },
+      avgSpeed: { value: 0, target: 35 },
+      fuelEfficiency: { value: 0, target: 8.0 },
+      safetyScore: { value: 0, target: 9.0 }
     },
     month: {
-      onTimeRate: { value: 94, target: 95, change: '-1%' },
-      avgSpeed: { value: 33, target: 35, change: '-6%' },
-      fuelEfficiency: { value: 8.0, target: 8.0, change: '0%' },
-      safetyScore: { value: 9.2, target: 9.0, change: '+2%' }
+      onTimeRate: { value: 0, target: 95 },
+      avgSpeed: { value: 0, target: 35 },
+      fuelEfficiency: { value: 0, target: 8.0 },
+      safetyScore: { value: 0, target: 9.0 }
     }
   };
 
-  const dailyStats = [
-    { date: 'Mon 11', onTime: 95, speed: 34, fuel: 8.3, safety: 9.6 },
-    { date: 'Tue 12', onTime: 97, speed: 31, fuel: 8.1, safety: 9.4 },
-    { date: 'Wed 13', onTime: 96, speed: 32, fuel: 8.2, safety: 9.5 },
-    { date: 'Thu 14', onTime: 94, speed: 33, fuel: 7.9, safety: 9.3 },
-    { date: 'Fri 15', onTime: 98, speed: 30, fuel: 8.4, safety: 9.7 }
-  ];
+  const dailyStats = [];
 
   const incidents = [
     {
@@ -121,11 +115,7 @@ function Reports({ onMenuClick, setActiveTab }) {
                 </div>
               </div>
               <div className="text-3xl font-bold text-gray-900 mb-2">{metrics.onTimeRate.value}%</div>
-              <div className="text-sm text-gray-600 mb-2">Target: {metrics.onTimeRate.target}%</div>
-              <div className={`text-sm font-semibold ${parseFloat(metrics.onTimeRate.change) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                <TrendingUp className="w-4 h-4 inline mr-1" />
-                {metrics.onTimeRate.change}
-              </div>
+              <div className="text-sm text-gray-600">Target: {metrics.onTimeRate.target}%</div>
             </div>
 
             {/* Average Speed */}
@@ -137,11 +127,7 @@ function Reports({ onMenuClick, setActiveTab }) {
                 </div>
               </div>
               <div className="text-3xl font-bold text-gray-900 mb-2">{metrics.avgSpeed.value} <span className="text-xl">km/h</span></div>
-              <div className="text-sm text-gray-600 mb-2">Target: {metrics.avgSpeed.target} km/h</div>
-              <div className={`text-sm font-semibold ${parseFloat(metrics.avgSpeed.change) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                <TrendingUp className="w-4 h-4 inline mr-1" />
-                {metrics.avgSpeed.change}
-              </div>
+              <div className="text-sm text-gray-600">Target: {metrics.avgSpeed.target} km/h</div>
             </div>
 
             {/* Fuel Efficiency */}
@@ -153,11 +139,7 @@ function Reports({ onMenuClick, setActiveTab }) {
                 </div>
               </div>
               <div className="text-3xl font-bold text-gray-900 mb-2">{metrics.fuelEfficiency.value} <span className="text-xl">km/L</span></div>
-              <div className="text-sm text-gray-600 mb-2">Target: {metrics.fuelEfficiency.target} km/L</div>
-              <div className={`text-sm font-semibold ${parseFloat(metrics.fuelEfficiency.change) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                <TrendingUp className="w-4 h-4 inline mr-1" />
-                {metrics.fuelEfficiency.change}
-              </div>
+              <div className="text-sm text-gray-600">Target: {metrics.fuelEfficiency.target} km/L</div>
             </div>
 
             {/* Safety Score */}
@@ -169,55 +151,11 @@ function Reports({ onMenuClick, setActiveTab }) {
                 </div>
               </div>
               <div className="text-3xl font-bold text-gray-900 mb-2">{metrics.safetyScore.value} <span className="text-xl">/10</span></div>
-              <div className="text-sm text-gray-600 mb-2">Target: {metrics.safetyScore.target}/10</div>
-              <div className={`text-sm font-semibold ${parseFloat(metrics.safetyScore.change) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                <TrendingUp className="w-4 h-4 inline mr-1" />
-                {metrics.safetyScore.change}
-              </div>
+              <div className="text-sm text-gray-600">Target: {metrics.safetyScore.target}/10</div>
             </div>
           </div>
 
-          {/* Daily Performance Chart */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-blue-600" />
-              Daily Performance ({selectedPeriod === 'week' ? 'This Week' : 'This Month'})
-            </h2>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">On Time %</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Avg Speed</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Fuel km/L</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">Safety</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dailyStats.map((stat, idx) => (
-                    <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 px-4 text-gray-900 font-medium">{stat.date}</td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
-                          {stat.onTime}%
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-center text-gray-700">{stat.speed} km/h</td>
-                      <td className="py-3 px-4 text-center text-gray-700">{stat.fuel} km/L</td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">
-                          {stat.safety}/10
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Incidents & Alerts */}
+{/* Incidents & Alerts */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-orange-600" />

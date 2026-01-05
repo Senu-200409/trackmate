@@ -24,13 +24,8 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
     currentRoute: "Route A - Morning Shift",
     studentsAboard: 24,
     totalStudents: 28,
-    timeToDestination: 18,
     nextStop: "Oak Avenue",
     eta: "8:15 AM",
-    distanceTraveled: "12.5 km",
-    fuelLevel: 85,
-    speed: "35 km/h",
-    temperature: "18°C",
     busStatus: "Normal",
     currentLocation: "Maple Street"
   });
@@ -204,20 +199,7 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
           
 
           {/* Quick Status Cards Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Live Route Card */}
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-blue-100">
-                  <Navigation className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <div className="text-sm text-gray-600">On Route</div>
-                  <div className="text-xl font-bold text-gray-900">{routeInfo.timeToDestination} min</div>
-                  <div className="text-xs text-gray-500">to destination</div>
-                </div>
-              </div>
-            </div>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
 
             {/* Students Aboard Card */}
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
@@ -229,20 +211,6 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
                   <div className="text-sm text-gray-600">Students</div>
                   <div className="text-xl font-bold text-gray-900">{routeInfo.studentsAboard}/{routeInfo.totalStudents}</div>
                   <div className="text-xs text-gray-500">Onboard</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Fuel Level Card */}
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-orange-100">
-                  <Battery className="w-5 h-5 text-orange-600" />
-                </div>
-                <div>
-                  <div className="text-sm text-gray-600">Fuel</div>
-                  <div className="text-xl font-bold text-gray-900">{routeInfo.fuelLevel}%</div>
-                  <div className="text-xs text-gray-500">Fuel Level</div>
                 </div>
               </div>
             </div>
@@ -290,18 +258,6 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
                   <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-sm border border-gray-200 z-10">
                     <p className="text-sm text-gray-700 font-semibold">{routeInfo.currentLocation}</p>
                     <p className="text-xs text-gray-500">Current Location</p>
-                  </div>
-                </div>
-                <div className="p-4 border-t border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Current Speed</p>
-                      <p className="text-2xl font-bold text-gray-900">{routeInfo.speed}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-600">Temperature</p>
-                      <p className="text-2xl font-bold text-gray-900">{routeInfo.temperature}</p>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -386,10 +342,6 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
                     <span className="text-gray-600">Shift</span>
                     <span className="font-semibold text-gray-900">Morning</span>
                   </div>
-                  <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                    <span className="text-gray-600">Total Distance</span>
-                    <span className="font-semibold text-gray-900">{routeInfo.distanceTraveled}</span>
-                  </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Next Stop</span>
                     <span className="font-semibold text-gray-900">{routeInfo.nextStop}</span>
@@ -397,30 +349,7 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
                 </div>
               </div>
 
-              {/* Vehicle Health Card */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Vehicle Health</h3>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm text-gray-600">Fuel Level</span>
-                      <span className="text-sm font-semibold text-gray-900">{routeInfo.fuelLevel}%</span>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500" style={{ width: `${routeInfo.fuelLevel}%` }}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm text-gray-600">Engine Temperature</span>
-                      <span className="text-sm font-semibold text-gray-900">Normal</span>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-500" style={{ width: '65%' }}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+
             </div>
           </div>
 
