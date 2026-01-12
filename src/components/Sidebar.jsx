@@ -42,7 +42,7 @@ function Sidebar({ activeTab, setActiveTab, onLogout, isOpen, userRole, onClose 
     } else if (userRole === 'owner') {
       return [
         ...commonItems,
-        { icon: <Bus className="w-5 h-5" />, label: 'Fleet', view: 'fleet' },
+        { icon: <Bus className="w-5 h-5" />, label: 'Buses', view: 'fleet' },
         { icon: <Users className="w-5 h-5" />, label: 'Drivers', view: 'drivers' },
         { icon: <School className="w-5 h-5" />, label: 'Schools', view: 'schools' },
         { icon: <Users className="w-5 h-5" />, label: 'Students', view: 'students' },

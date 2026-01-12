@@ -43,7 +43,7 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
             </button>
             <button onClick={() => setActiveTab('fleet')} className="text-white/85 hover:text-[#FFE066] transition-colors font-semibold flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1.5 text-sm">
               <Bus className="w-5 h-5" />
-              <span>Fleet</span>
+              <span>Buses</span>
             </button>
             <button onClick={() => setActiveTab('drivers')} className="text-white/85 hover:text-[#FFE066] transition-colors font-semibold flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1.5 text-sm">
               <Users className="w-5 h-5" />
@@ -129,7 +129,7 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
           </button>
           <button onClick={() => { setActiveTab('fleet'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
             <Bus className="w-5 h-5 text-[#FFE066]" />
-            Fleet
+            Buses
           </button>
           <button onClick={() => { setActiveTab('drivers'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
             <Users className="w-5 h-5 text-[#FFE066]" />

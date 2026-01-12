@@ -87,7 +87,7 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
           <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-5 md:p-6 border-b-4 border-[#F5C518]">
             <div className="mb-5">
               <h1 className="text-2xl md:text-3xl font-bold mb-1">Welcome back, David! 👋</h1>
-              <p className="text-[#FFE066] text-sm md:text-base">Here's what's happening with your fleet today</p>
+              <p className="text-[#FFE066] text-sm md:text-base">Here's what's happening with your buses today</p>
             </div>
             
             {/* Quick Access Buttons */}
@@ -147,7 +147,7 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
               <div className="text-2xl font-bold text-gray-900">{businessStats.activeBuses}</div>
               <div className="text-sm text-gray-600">Active Buses</div>
               <div className="mt-2 flex items-center text-xs text-green-600 font-medium group-hover:underline">
-                View Fleet <ChevronRight className="w-3 h-3" />
+                View Buses <ChevronRight className="w-3 h-3" />
               </div>
             </div>
 

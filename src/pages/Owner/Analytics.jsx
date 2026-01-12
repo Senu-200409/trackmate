@@ -46,7 +46,7 @@ function Analytics({ onMenuClick, setActiveTab }) {
   ];
 
   const performanceMetrics = [
-    { label: "Fleet Utilization", value: "78%", target: "80%", status: "warning" },
+    { label: "Bus Utilization", value: "78%", target: "80%", status: "warning" },
     { label: "On-Time Rate", value: "92%", target: "95%", status: "good" },
     { label: "Safety Score", value: "9.2/10", target: "9.0/10", status: "excellent" },
     { label: "Customer Satisfaction", value: "4.8/5", target: "4.5/5", status: "excellent" },
@@ -63,7 +63,7 @@ function Analytics({ onMenuClick, setActiveTab }) {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Business Analytics</h1>
-              <p className="text-gray-600 mt-1">Track your fleet's financial performance and KPIs</p>
+              <p className="text-gray-600 mt-1">Track your bus fleet's financial performance and KPIs</p>
             </div>
             <div className="flex items-center gap-2 bg-white rounded-lg p-1 border border-gray-200">
               {['monthly', 'quarterly', 'yearly'].map((period) => (

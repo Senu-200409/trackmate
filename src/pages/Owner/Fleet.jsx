@@ -179,8 +179,8 @@ function Fleet({ onMenuClick, setActiveTab }) {
           {/* Page Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Fleet Management</h1>
-              <p className="text-gray-600 mt-1">Monitor and manage your bus fleet</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Bus Management</h1>
+              <p className="text-gray-600 mt-1">Monitor and manage your school buses</p>
             </div>
             <button 
               onClick={() => setShowAddModal(true)}
