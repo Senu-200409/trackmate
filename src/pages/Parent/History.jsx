@@ -48,13 +48,13 @@ function History({ onMenuClick, setActiveTab }) {
         <div className="space-y-6 max-w-6xl mx-auto">
           
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-6 border-b-4 border-[#F5C518]">
-            <h1 className="text-3xl font-bold mb-2">Journey History</h1>
-            <p className="text-[#FFE066]">Track Alex's journey records and performance trends</p>
+          <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-4 sm:p-6 border-b-4 border-[#F5C518]">
+            <h1 className="text-xl sm:text-3xl font-bold mb-2">Journey History</h1>
+            <p className="text-xs sm:text-base text-[#FFE066]">Track Alex's journey records and performance trends</p>
           </div>
 
           {/* Statistics Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {stats.map((stat, index) => (
               <div key={index} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
                 <div className="flex items-center justify-between mb-4">
@@ -99,12 +99,12 @@ function History({ onMenuClick, setActiveTab }) {
                             <span className="text-xs text-gray-500 mt-1">{journey.day}</span>
                           </div>
                           <div className="flex-1">
-                            <div className="font-semibold text-gray-900">{journey.date}</div>
-                            <div className="text-sm text-gray-600">{journey.duration} • Bus {journey.bus}</div>
+                            <div className="text-sm sm:text-base font-semibold text-gray-900">{journey.date}</div>
+                            <div className="text-xs sm:text-sm text-gray-600">{journey.duration} • Bus {journey.bus}</div>
                           </div>
                         </div>
                         <div className="text-right mr-2">
-                          <div className="font-bold text-gray-900">{journey.time}</div>
+                          <div className="text-sm sm:text-base font-bold text-gray-900">{journey.time}</div>
                           <div className="text-xs text-gray-500">Arrival</div>
                         </div>
                         {expandedJourney === idx ? (

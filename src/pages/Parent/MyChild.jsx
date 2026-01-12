@@ -117,24 +117,24 @@ function MyChild({ onMenuClick, setActiveTab }) {
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-6xl mx-auto space-y-6">
           {/* Header + Actions */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">My Children</h2>
-              <p className="text-sm text-gray-600">Linked to your account</p>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900">My Children</h2>
+              <p className="text-xs sm:text-sm text-gray-600">Linked to your account</p>
             </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
               <div className="flex-1 sm:flex-initial flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2">
                 <Search className="w-4 h-4 text-gray-400" />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search by name, roll, school, stop"
-                  className="w-full outline-none text-sm"
+                  placeholder="Search students..."
+                  className="w-full outline-none text-xs sm:text-sm"
                 />
               </div>
               <button
                 onClick={() => setShowAddModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] transition-colors text-sm font-semibold"
+                className="inline-flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] transition-colors text-xs sm:text-sm font-semibold"
               >
                 <Plus className="w-4 h-4" /> Add Student
               </button>
@@ -143,50 +143,52 @@ function MyChild({ onMenuClick, setActiveTab }) {
 
           {/* List */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+            <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <h3 className="font-bold text-gray-900">Students ({myStudents.length})</h3>
-              <span className="text-sm text-gray-600">Parent ID: {currentParentId}</span>
+              <span className="text-xs sm:text-sm text-gray-600">Parent ID: {currentParentId}</span>
             </div>
             <div className="divide-y divide-gray-100">
               {myStudents.map(s => (
                 <div key={s.id} className="p-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-yellow-100 text-yellow-700 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-yellow-100 text-yellow-700 flex items-center justify-center flex-shrink-0">
                         <User className="w-6 h-6" />
                       </div>
-                      <div>
-                        <div className="font-semibold text-gray-900">{s.name}</div>
-                        <div className="text-xs text-gray-600 flex items-center gap-2">
-                          <School className="w-3 h-3" />
-                          <span>{s.school}</span>
-                          <span className="mx-2">•</span>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900 text-sm sm:text-base">{s.name}</div>
+                        <div className="text-xs text-gray-600 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                          <span className="flex items-center gap-1">
+                            <School className="w-3 h-3" />
+                            {s.school}
+                          </span>
+                          <span className="hidden sm:inline">•</span>
                           <span>Roll: {s.rollNumber}</span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-700 font-semibold inline-flex items-center gap-1">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                      <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-700 font-semibold inline-flex items-center justify-center sm:justify-start gap-1">
                         <BadgeCheck className="w-3 h-3" /> Active
                       </span>
                       <button
                         onClick={() => handleEditClick(s)}
-                        className="px-3 py-1.5 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] text-xs font-medium inline-flex items-center gap-1"
+                        className="px-3 py-1.5 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] text-xs font-medium inline-flex items-center justify-center gap-1"
                       >
                         <Edit2 className="w-3 h-3" /> Update
                       </button>
                     </div>
                   </div>
-                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 text-xs sm:text-sm">
                     <div className="flex items-center gap-2 text-gray-700">
-                      <MapPin className="w-4 h-4 text-gray-500" />
+                      <MapPin className="w-4 h-4 text-gray-500 flex-shrink-0" />
                       <span>Stop: {s.stop}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-700">
-                      <Phone className="w-4 h-4 text-gray-500" />
-                      <span>{s.parentPhone}</span>
+                      <Phone className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                      <span className="truncate">{s.parentPhone}</span>
                     </div>
-                    <div className="text-gray-500">Student ID: {s.id}</div>
+                    <div className="text-gray-500">ID: {s.id}</div>
                   </div>
                 </div>
               ))}

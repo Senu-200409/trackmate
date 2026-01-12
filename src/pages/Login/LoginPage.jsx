@@ -195,31 +195,31 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] p-3 sm:p-4">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-[#F5C518] rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-[#FFE066] rounded-full blur-3xl"></div>
+        <div className="absolute top-10 sm:top-20 left-5 sm:left-10 w-20 sm:w-32 h-20 sm:h-32 bg-[#F5C518] rounded-full blur-3xl"></div>
+        <div className="absolute bottom-10 sm:bottom-20 right-5 sm:right-10 w-24 sm:w-40 h-24 sm:h-40 bg-[#FFE066] rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-md">
         {/* Top accent bar */}
         <div className="h-2 bg-gradient-to-r from-[#F5C518] via-[#FFE066] to-[#F5C518]"></div>
         
-        <div className="p-8">
-          <div className="text-center mb-8">
+        <div className="p-6 sm:p-8">
+          <div className="text-center mb-6 sm:mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="p-3 rounded-xl bg-[#F5C518] shadow-lg">
-                <GraduationCap className="w-8 h-8 text-[#1E3A5F]" />
+              <div className="p-2 sm:p-3 rounded-xl bg-[#F5C518] shadow-lg">
+                <GraduationCap className="w-6 sm:w-8 h-6 sm:h-8 text-[#1E3A5F]" />
               </div>
-              <h1 className="text-3xl font-bold text-[#1E3A5F]">TrackMate</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#1E3A5F]">TrackMate</h1>
             </div>
-            <p className="text-[#3B6FB6] font-medium mb-1">School Bus Management System</p>
-            <p className="text-[#5C5C5C] text-sm">Login to access your portal</p>
+            <p className="text-[#3B6FB6] font-medium mb-1 text-xs sm:text-sm">School Bus Management System</p>
+            <p className="text-[#5C5C5C] text-xs sm:text-sm">Login to access your portal</p>
           </div>
 
           {/* Show demo credentials */}
-          <div className="mt-4 p-4 bg-[#FFF9E6] rounded-lg border border-[#F5C518]/30 mb-6">
+          <div className="mt-4 p-3 sm:p-4 bg-[#FFF9E6] rounded-lg border border-[#F5C518]/30 mb-6">
               <p className="text-xs font-bold text-[#1E3A5F] mb-2">Demo Credentials:</p>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="text-left">
@@ -263,16 +263,16 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
 
             {/* LOGIN FORM */}
             <div>
-                <h2 className="text-xl font-semibold text-[#1E3A5F] mb-2">Enter Phone Number</h2>
-                <p className="text-[#5C5C5C] mb-6">We'll send you an OTP to verify</p>
+                <h2 className="text-lg sm:text-xl font-semibold text-[#1E3A5F] mb-2">Enter Phone Number</h2>
+                <p className="text-xs sm:text-sm text-[#5C5C5C] mb-6">We'll send you an OTP to verify</p>
                 
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-[#1E3A5F] mb-2">
+                    <label htmlFor="phone" className="block text-xs sm:text-sm font-medium text-[#1E3A5F] mb-2">
                       Phone Number
                     </label>
                     <div className="relative">
-                      <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#3B6FB6]" />
+                      <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-[#3B6FB6]" />
                       <input
                         id="phone"
                         type="tel"
@@ -282,7 +282,7 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
                         placeholder="Enter your phone number"
                         aria-label="Phone number"
                         aria-invalid={phoneError ? 'true' : 'false'}
-                        className={`w-full px-12 py-3 border-2 rounded-xl outline-none transition-all ${
+                        className={`w-full px-10 sm:px-12 py-2 sm:py-3 border-2 rounded-xl outline-none transition-all text-sm sm:text-base ${
                           phoneError
                             ? 'border-red-400 focus:ring-2 focus:ring-red-300'
                             : isPhoneValid
@@ -291,12 +291,12 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
                         } ${showOtp ? 'bg-gray-100 text-gray-500' : ''}`}
                       />
                       {isPhoneValid && !showOtp && (
-                        <CheckCircle className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-green-600" />
+                        <CheckCircle className="absolute right-4 top-1/2 transform -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-green-600" />
                       )}
                     </div>
                     {phoneError && (
-                      <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
+                      <p className="text-xs sm:text-sm text-red-600 mt-2 flex items-center gap-1">
+                        <AlertCircle className="w-3 sm:w-4 h-3 sm:h-4" />
                         {phoneError}
                       </p>
                     )}

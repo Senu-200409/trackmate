@@ -183,15 +183,15 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
         <div className="space-y-6 max-w-7xl mx-auto">
           
           {/* Welcome Header with Key Route Info */}
-          <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-6 border-b-4 border-[#F5C518]">
-            <div className="flex items-center justify-between">
+          <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-4 sm:p-6 border-b-4 border-[#F5C518]">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <h1 className="text-3xl font-bold mb-2">Good Morning, Michael! 🚌</h1>
-                <p className="text-[#FFE066]">{routeInfo.currentRoute} • On Duty</p>
+                <h1 className="text-xl sm:text-3xl font-bold mb-2">Good Morning, Michael! 🚌</h1>
+                <p className="text-sm sm:text-base text-[#FFE066]">{routeInfo.currentRoute} • On Duty</p>
               </div>
-              <div className="hidden md:block text-right">
-                <div className="text-2xl font-bold">{routeInfo.nextStop}</div>
-                <div className="text-sm text-[#FFE066]">Next Stop - {routeInfo.eta}</div>
+              <div className="text-right">
+                <div className="text-lg sm:text-2xl font-bold">{routeInfo.nextStop}</div>
+                <div className="text-xs sm:text-sm text-[#FFE066]">Next Stop - {routeInfo.eta}</div>
               </div>
             </div>
           </div>
@@ -199,7 +199,7 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
           
 
           {/* Quick Status Cards Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
 
             {/* Students Aboard Card */}
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
@@ -208,8 +208,8 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
                   <Users className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600">Students</div>
-                  <div className="text-xl font-bold text-gray-900">{routeInfo.studentsAboard}/{routeInfo.totalStudents}</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Students</div>
+                  <div className="text-lg sm:text-xl font-bold text-gray-900">{routeInfo.studentsAboard}/{routeInfo.totalStudents}</div>
                   <div className="text-xs text-gray-500">Onboard</div>
                 </div>
               </div>
@@ -222,8 +222,8 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
                   <CheckCircle className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600">Status</div>
-                  <div className="text-xl font-bold text-green-600">Normal</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Status</div>
+                  <div className="text-lg sm:text-xl font-bold text-green-600">Normal</div>
                   <div className="text-xs text-gray-500">All systems OK</div>
                 </div>
               </div>
