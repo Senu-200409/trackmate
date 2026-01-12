@@ -10,13 +10,16 @@ import {
   CheckCircle,
   Phone,
   ChevronRight,
-  AlertCircle
+  AlertCircle,
+  Calendar
 } from 'lucide-react';
 import ParentHeader from '../../components/Parent/ParentHeader';
 import ParentFooter from '../../components/Parent/ParentFooter';
 
 function ParentDashboard({ onMenuClick, setActiveTab, onLogout }) {
   const [notifications] = useState([]);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
   const [childStatus] = useState({
     name: "Alex Johnson",
     grade: "6th Grade",
@@ -31,6 +34,22 @@ function ParentDashboard({ onMenuClick, setActiveTab, onLogout }) {
     busNumberPlate: "ABC-1234",
     driverImage: "https://via.placeholder.com/64x64?text=Driver"
   });
+
+  // Update date/time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+  };
 
   const alerts = [
     { id: 1, type: 'warning', title: 'Bus Delayed', message: 'BUS-001 delayed by 5 minutes due to traffic', time: '2 mins ago' },
@@ -82,15 +101,25 @@ function ParentDashboard({ onMenuClick, setActiveTab, onLogout }) {
         <div className="space-y-6 max-w-7xl mx-auto">
           
           {/* Welcome Header */}
-          <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-6 border-b-4 border-[#F5C518]">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold mb-2">Welcome, Parent! 👋</h1>
-                <p className="text-[#FFE066]">Track {childStatus.name}'s journey in real-time</p>
+          <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-4 sm:p-6 border-b-4 border-[#F5C518]">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="text-xl sm:text-3xl font-bold mb-2">Welcome, Parent! 👋</h1>
+                <p className="text-xs sm:text-base text-[#FFE066]">Track {childStatus.name}'s journey in real-time</p>
               </div>
-              <div className="hidden md:block text-right">
-                <div className="text-2xl font-bold">{childStatus.arrival}</div>
-                <div className="text-sm text-[#FFE066]">Expected Arrival</div>
+              <div className="flex flex-col gap-2">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-[#FFE066]" />
+                    <span className="text-xs sm:text-sm font-medium text-white">{formatDate(currentDateTime)}</span>
+                  </div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[#FFE066]" />
+                    <span className="text-xs sm:text-sm font-mono font-medium text-white">{formatTime(currentDateTime)}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -15,7 +15,9 @@ import {
   ArrowRight,
   BarChart3,
   School,
-  Radio
+  Radio,
+  Calendar,
+  Clock
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
@@ -23,6 +25,7 @@ import OwnerFooter from '../../components/Owner/OwnerFooter';
 function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
   const [notifications] = useState([]);
   const [currentAlertIndex, setCurrentAlertIndex] = useState(0);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
   
   const [businessStats] = useState({
     activeBuses: 24,
@@ -32,6 +35,22 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
     totalStudents: 1248,
     activeRoutes: 8
   });
+
+  // Update date/time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+  };
 
   // Live alerts for marquee
   const liveAlerts = [
@@ -85,9 +104,25 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
           
           {/* Welcome Header */}
           <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-4 sm:p-5 md:p-6 border-b-4 border-[#F5C518]">
-            <div className="mb-4 sm:mb-5">
-              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold mb-1">Welcome back, David! 👋</h1>
-              <p className="text-xs sm:text-sm md:text-base text-[#FFE066]">Here's what's happening with your buses today</p>
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold mb-1">Welcome back, David! 👋</h1>
+                <p className="text-xs sm:text-sm md:text-base text-[#FFE066]">Here's what's happening with your buses today</p>
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-[#FFE066]" />
+                    <span className="text-xs sm:text-sm font-medium text-white">{formatDate(currentDateTime)}</span>
+                  </div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[#FFE066]" />
+                    <span className="text-xs sm:text-sm font-mono font-medium text-white">{formatTime(currentDateTime)}</span>
+                  </div>
+                </div>
+              </div>
             </div>
             
             {/* Quick Access Buttons */}

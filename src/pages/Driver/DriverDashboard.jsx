@@ -13,13 +13,16 @@ import {
   CheckCircle,
   AlertTriangle,
   Users,
-  ChevronRight
+  ChevronRight,
+  Calendar
 } from 'lucide-react';
 import DriverHeader from '../../components/Driver/DriverHeader';
 import DriverFooter from '../../components/Driver/DriverFooter';
 
 function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
   const [notifications] = useState([]);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
   const [routeInfo] = useState({
     currentRoute: "Route A - Morning Shift",
     studentsAboard: 24,
@@ -29,6 +32,22 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
     busStatus: "Normal",
     currentLocation: "Maple Street"
   });
+
+  // Update date/time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+  };
 
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -189,9 +208,19 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
                 <h1 className="text-xl sm:text-3xl font-bold mb-2">Good Morning, Michael! 🚌</h1>
                 <p className="text-sm sm:text-base text-[#FFE066]">{routeInfo.currentRoute} • On Duty</p>
               </div>
-              <div className="text-right">
-                <div className="text-lg sm:text-2xl font-bold">{routeInfo.nextStop}</div>
-                <div className="text-xs sm:text-sm text-[#FFE066]">Next Stop - {routeInfo.eta}</div>
+              <div className="flex flex-col sm:flex-col items-start sm:items-end gap-2">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-[#FFE066]" />
+                    <span className="text-xs sm:text-sm font-medium text-white">{formatDate(currentDateTime)}</span>
+                  </div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[#FFE066]" />
+                    <span className="text-xs sm:text-sm font-mono font-medium text-white">{formatTime(currentDateTime)}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
