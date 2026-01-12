@@ -12,7 +12,10 @@ import {
   Bell,
   CheckCircle,
   XCircle,
-  ArrowRight
+  ArrowRight,
+  BarChart3,
+  School,
+  Radio
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
@@ -82,9 +85,33 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
           
           {/* Welcome Header */}
           <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-5 md:p-6 border-b-4 border-[#F5C518]">
-            <div>
+            <div className="mb-5">
               <h1 className="text-2xl md:text-3xl font-bold mb-1">Welcome back, David! 👋</h1>
               <p className="text-[#FFE066] text-sm md:text-base">Here's what's happening with your fleet today</p>
+            </div>
+            
+            {/* Quick Access Buttons */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              <button onClick={() => setActiveTab('parents')} className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-br from-pink-400 to-rose-500 hover:from-pink-500 hover:to-rose-600 shadow-lg hover:shadow-xl transition-all text-white font-medium text-sm">
+                <User className="w-4 h-4" />
+                <span>Parents</span>
+              </button>
+              <button onClick={() => setActiveTab('students')} className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-500 hover:from-blue-500 hover:to-cyan-600 shadow-lg hover:shadow-xl transition-all text-white font-medium text-sm">
+                <Users className="w-4 h-4" />
+                <span>Students</span>
+              </button>
+              <button onClick={() => setActiveTab('schools')} className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-br from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 shadow-lg hover:shadow-xl transition-all text-white font-medium text-sm">
+                <School className="w-4 h-4" />
+                <span>Schools</span>
+              </button>
+              <button onClick={() => setActiveTab('devices')} className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-br from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 shadow-lg hover:shadow-xl transition-all text-white font-medium text-sm">
+                <Radio className="w-4 h-4" />
+                <span>Devices</span>
+              </button>
+              <button onClick={() => setActiveTab('analytics')} className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-br from-indigo-400 to-purple-500 hover:from-indigo-500 hover:to-purple-600 shadow-lg hover:shadow-xl transition-all text-white font-medium text-sm">
+                <BarChart3 className="w-4 h-4" />
+                <span>Analytics</span>
+              </button>
             </div>
           </div>
 

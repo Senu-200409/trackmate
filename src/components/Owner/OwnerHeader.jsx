@@ -13,84 +13,59 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
       <div className="h-1 bg-gradient-to-r from-[#F5C518] via-[#FFE066] to-[#F5C518]"></div>
       
       {/* Desktop & Tablet Header */}
-      <div className="px-4 sm:px-6 lg:px-8 py-4">
+      <div className="px-6 sm:px-8 lg:px-10 py-5">
         <div className="flex items-center justify-between">
           {/* Sidebar Toggle + Logo & Brand */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {/* Sidebar Toggle Button */}
             <button
               onClick={onMenuClick}
-              className="p-2 rounded-lg hover:bg-white/10 transition-colors border border-white/20 group"
+              className="p-2.5 rounded-lg hover:bg-white/10 transition-colors border border-white/20 group"
               title="Open Menu"
             >
               <AlignJustify className="w-5 h-5 group-hover:text-[#FFE066] transition-colors" />
             </button>
             
-            <div className="bg-[#F5C518] rounded-lg p-2 shadow-md">
+            <div className="bg-[#F5C518] rounded-lg p-2.5 shadow-md">
               <Building2 className="w-6 h-6 text-[#1E3A5F]" />
             </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight">TrackMate</h1>
-              <p className="text-xs sm:text-sm text-[#FFE066]">Fleet Management Portal</p>
+            <div className="space-y-0.5">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight leading-none">TrackMate</h1>
+              <p className="text-sm sm:text-base text-[#FFE066] font-medium">Fleet Management Portal</p>
             </div>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
-            <button onClick={() => setActiveTab('analytics')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
-              <BarChart3 className="w-4 h-4" />
-              Analytics
+          <nav className="hidden md:flex items-center gap-8 lg:gap-10">
+            <button onClick={() => setActiveTab('dashboard')} className="text-white/85 hover:text-[#FFE066] transition-colors font-semibold flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1.5 text-sm">
+              <BarChart3 className="w-5 h-5" />
+              <span>Dashboard</span>
             </button>
-            <button onClick={() => setActiveTab('fleet')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
-              <Bus className="w-4 h-4" />
-              Fleet
+            <button onClick={() => setActiveTab('fleet')} className="text-white/85 hover:text-[#FFE066] transition-colors font-semibold flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1.5 text-sm">
+              <Bus className="w-5 h-5" />
+              <span>Fleet</span>
             </button>
-            <button onClick={() => setActiveTab('devices')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
-              <Radio className="w-4 h-4" />
-              Devices
+            <button onClick={() => setActiveTab('drivers')} className="text-white/85 hover:text-[#FFE066] transition-colors font-semibold flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1.5 text-sm">
+              <Users className="w-5 h-5" />
+              <span>Drivers</span>
             </button>
-            <button onClick={() => setActiveTab('drivers')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
-              <Users className="w-4 h-4" />
-              Drivers
-            </button>
-            <button onClick={() => setActiveTab('schools')} className="text-white/90 hover:text-[#FFE066] transition-colors font-medium flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1">
-              <School className="w-4 h-4" />
-              Schools
+            <button onClick={() => setActiveTab('routes')} className="text-white/85 hover:text-[#FFE066] transition-colors font-semibold flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1.5 text-sm">
+              <AlignJustify className="w-5 h-5" />
+              <span>Routes</span>
             </button>
           </nav>
 
-          {/* More Options Menu */}
-          <div className="hidden lg:flex items-center gap-2">
-            <div className="relative group">
-              <button className="text-white/90 hover:text-[#FFE066] transition-colors font-medium px-3 py-2 rounded-lg hover:bg-white/10 border-b-2 border-transparent hover:border-[#F5C518]">
-                More ▼
-              </button>
-              <div className="absolute right-0 mt-0 w-48 bg-[#1E3A5F] text-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-[#3B6FB6]">
-                <button onClick={() => setActiveTab('students')} className="w-full text-left px-4 py-3 hover:bg-[#3B6FB6] transition-colors flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  Students
-                </button>
-                <button onClick={() => setActiveTab('parents')} className="w-full text-left px-4 py-3 hover:bg-[#3B6FB6] transition-colors flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  Parents
-                </button>
-                <button onClick={() => setActiveTab('routes')} className="w-full text-left px-4 py-3 hover:bg-[#3B6FB6] transition-colors">Routes</button>
-                <button onClick={() => setActiveTab('dashboard')} className="w-full text-left px-4 py-3 hover:bg-[#3B6FB6] transition-colors border-t border-[#3B6FB6]">Dashboard</button>
-              </div>
-            </div>
-          </div>
-
           {/* Right Section - Desktop */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-5 lg:gap-6">
             {/* Company Badge */}
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#F5C518]/20 border border-[#F5C518]/40 rounded-lg">
-              <Building2 className="w-4 h-4 text-[#FFE066]" />
-              <span className="text-sm text-[#FFE066] font-medium">{companyName}</span>
+            <div className="flex items-center gap-2.5 px-4 py-2 bg-[#F5C518]/20 border border-[#F5C518]/40 rounded-lg">
+              <Building2 className="w-5 h-5 text-[#FFE066]" />
+              <span className="text-sm font-semibold text-[#FFE066]">{companyName}</span>
             </div>
 
             {/* Notifications */}
             <div className="relative">
-              <button className="relative p-2 rounded-lg hover:bg-white/10 transition-colors border border-white/20">
+              <button className="relative p-2.5 rounded-lg hover:bg-white/10 transition-colors border border-white/20">
                 <Bell className="w-5 h-5" />
                 {notifications.length > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#F5C518] text-[#1E3A5F] text-xs rounded-full flex items-center justify-center font-bold shadow-lg">
@@ -104,22 +79,22 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
             <div className="relative">
               <button
                 onClick={() => setProfileOpen(true)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors border border-white/20 group"
+                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors border border-white/20 group"
               >
                 {ownerImage ? (
                   <img 
                     src={ownerImage} 
                     alt={ownerName}
-                    className="w-8 h-8 rounded-full object-cover group-hover:ring-2 ring-[#F5C518] transition-all"
+                    className="w-9 h-9 rounded-full object-cover group-hover:ring-2 ring-[#F5C518] transition-all"
                   />
                 ) : (
-                  <div className="w-8 h-8 bg-[#F5C518] rounded-full flex items-center justify-center group-hover:ring-2 ring-[#F5C518] transition-all">
+                  <div className="w-9 h-9 bg-[#F5C518] rounded-full flex items-center justify-center group-hover:ring-2 ring-[#F5C518] transition-all">
                     <User className="w-5 h-5 text-[#1E3A5F]" />
                   </div>
                 )}
                 <div className="text-left">
-                  <span className="text-sm font-medium block">{ownerName}</span>
-                  <span className="text-xs text-[#FFE066]">Administrator</span>
+                  <span className="text-sm font-semibold block leading-tight">{ownerName}</span>
+                  <span className="text-xs text-[#FFE066] font-medium">Administrator</span>
                 </div>
               </button>
             </div>
@@ -148,38 +123,48 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
             <span className="text-sm text-[#FFE066] font-medium">{companyName}</span>
           </div>
 
-          <button onClick={() => { setActiveTab('analytics'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
+          <button onClick={() => { setActiveTab('dashboard'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
             <BarChart3 className="w-5 h-5 text-[#FFE066]" />
-            Analytics
+            Dashboard
           </button>
           <button onClick={() => { setActiveTab('fleet'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
             <Bus className="w-5 h-5 text-[#FFE066]" />
             Fleet
           </button>
-          <button onClick={() => { setActiveTab('devices'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
-            <Radio className="w-5 h-5 text-[#FFE066]" />
-            Devices
-          </button>
           <button onClick={() => { setActiveTab('drivers'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
             <Users className="w-5 h-5 text-[#FFE066]" />
             Drivers
           </button>
-          <button onClick={() => { setActiveTab('schools'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
-            <School className="w-5 h-5 text-[#FFE066]" />
-            Schools
+          <button onClick={() => { setActiveTab('routes'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
+            <AlignJustify className="w-5 h-5 text-[#FFE066]" />
+            Routes
           </button>
-          <button onClick={() => { setActiveTab('students'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
-            <Users className="w-5 h-5 text-[#FFE066]" />
-            Students
-          </button>
-          <button onClick={() => { setActiveTab('parents'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
-            <User className="w-5 h-5 text-[#FFE066]" />
-            Parents
-          </button>
-          <button onClick={() => { setActiveTab('routes'); setMobileMenuOpen(false); }} className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">Routes</button>
-          <button onClick={() => { setActiveTab('dashboard'); setMobileMenuOpen(false); }} className="block px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">Dashboard</button>
-          
+
           <div className="border-t border-[#3B6FB6] pt-4 mt-4">
+            <span className="text-xs text-[#FFE066] font-semibold px-4 block mb-2">MORE OPTIONS</span>
+            <button onClick={() => { setActiveTab('analytics'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
+              <BarChart3 className="w-5 h-5 text-[#FFE066]" />
+              Analytics
+            </button>
+            <button onClick={() => { setActiveTab('schools'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
+              <School className="w-5 h-5 text-[#FFE066]" />
+              Schools
+            </button>
+            <button onClick={() => { setActiveTab('students'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
+              <Users className="w-5 h-5 text-[#FFE066]" />
+              Students
+            </button>
+            <button onClick={() => { setActiveTab('parents'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
+              <User className="w-5 h-5 text-[#FFE066]" />
+              Parents
+            </button>
+            <button onClick={() => { setActiveTab('devices'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
+              <Radio className="w-5 h-5 text-[#FFE066]" />
+              Devices
+            </button>
+          </div>
+
+          <div className="border-t border-[#3B6FB6] mt-4 pt-4">
             <button className="w-full flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium">
               <User className="w-5 h-5 text-[#FFE066]" />
               <span>My Profile</span>
