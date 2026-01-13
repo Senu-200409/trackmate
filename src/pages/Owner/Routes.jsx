@@ -15,17 +15,22 @@ import {
   Pause,
   Eye,
   Edit,
-  Navigation
+  Navigation,
+  QrCode
 } from 'lucide-react';
+import QRCode from 'qrcode';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
 
 function Routes({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [showQrModal, setShowQrModal] = useState(false);
 
   const routes = [
     { 
+      id: 1,
       name: "Route A - Morning",
       status: "Active",
       bus: "BUS-001",
@@ -35,6 +40,7 @@ function Routes({ onMenuClick, setActiveTab }) {
       time: "7:00 AM"
     },
     { 
+      id: 2,
       name: "Route B - Morning",
       status: "Active",
       bus: "BUS-002",
@@ -44,6 +50,7 @@ function Routes({ onMenuClick, setActiveTab }) {
       time: "7:15 AM"
     },
     { 
+      id: 3,
       name: "Route C - Morning",
       status: "Delayed",
       bus: "BUS-003",
@@ -53,6 +60,7 @@ function Routes({ onMenuClick, setActiveTab }) {
       time: "7:30 AM"
     },
     { 
+      id: 4,
       name: "Route A - Afternoon",
       status: "Scheduled",
       bus: "BUS-001",
@@ -62,6 +70,7 @@ function Routes({ onMenuClick, setActiveTab }) {
       time: "3:00 PM"
     },
     { 
+      id: 5,
       name: "Route D - Morning",
       status: "Inactive",
       bus: "BUS-004",
@@ -98,6 +107,17 @@ function Routes({ onMenuClick, setActiveTab }) {
     const matchesFilter = filterStatus === 'all' || route.status.toLowerCase() === filterStatus;
     return matchesSearch && matchesFilter;
   });
+
+  const generateQrCode = async (route) => {
+    try {
+      const qrData = JSON.stringify(route);
+      const url = await QRCode.toDataURL(qrData);
+      setQrCodeUrl(url);
+      setShowQrModal(true);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const stats = {
     total: routes.length,
@@ -234,6 +254,13 @@ function Routes({ onMenuClick, setActiveTab }) {
                       <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors" title="Edit">
                         <Edit className="w-5 h-5 text-gray-600" />
                       </button>
+                      <button 
+                        onClick={() => generateQrCode(route)}
+                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors" 
+                        title="Generate QR Code"
+                      >
+                        <QrCode className="w-5 h-5 text-gray-600" />
+                      </button>
                       <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors" title="More">
                         <MoreVertical className="w-5 h-5 text-gray-600" />
                       </button>
@@ -265,6 +292,27 @@ function Routes({ onMenuClick, setActiveTab }) {
 
         </div>
       </main>
+
+      {/* QR Code Modal */}
+      {showQrModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-sm mx-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Route QR Code</h3>
+            <div className="flex justify-center mb-4">
+              <img src={qrCodeUrl} alt="QR Code" className="w-48 h-48" />
+            </div>
+            <p className="text-sm text-gray-600 mb-4">Scan this QR code with the driver app to load the route.</p>
+            <div className="flex justify-end gap-2">
+              <button 
+                onClick={() => setShowQrModal(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <OwnerFooter />
     </div>

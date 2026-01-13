@@ -17,8 +17,10 @@ import {
   Calendar,
   Phone,
   Check,
-  X
+  X,
+  QrCode
 } from 'lucide-react';
+import { Html5QrcodeScanner } from 'html5-qrcode';
 import DriverHeader from '../../components/Driver/DriverHeader';
 import DriverFooter from '../../components/Driver/DriverFooter';
 
@@ -27,8 +29,27 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
   const [studentAttendance, setStudentAttendance] = useState({});
+  const [scanning, setScanning] = useState(false);
+  const scannerRef = useRef(null);
 
-  const [routeInfo] = useState({
+  useEffect(() => {
+    if (scanning) {
+      scannerRef.current = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+      scannerRef.current.render(handleScan, handleScanError);
+    } else {
+      if (scannerRef.current) {
+        scannerRef.current.clear().catch(console.error);
+        scannerRef.current = null;
+      }
+    }
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.clear().catch(console.error);
+      }
+    };
+  }, [scanning]);
+
+  const [routeInfo, setRouteInfo] = useState({
     currentRoute: "Route A - Morning Shift",
     studentsAboard: 24,
     totalStudents: 28,
@@ -98,6 +119,38 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
     console.log(`Calling ${studentName} at ${studentPhone}`);
     alert(`Initiating call to ${studentName} (${studentPhone})`);
     // In production, this would integrate with phone/calling API
+  };
+
+  // Handle QR scan
+  const handleScan = (decodedText) => {
+    try {
+      const route = JSON.parse(decodedText);
+      setRouteInfo({
+        currentRoute: route.name,
+        studentsAboard: 0, // reset
+        totalStudents: route.students,
+        nextStop: "Starting Point", // default
+        eta: route.time,
+        busStatus: "Normal",
+        currentLocation: "Starting Location"
+      });
+      setScanning(false);
+      alert(`Route loaded: ${route.name}`);
+    } catch (err) {
+      console.error('Invalid QR code data', err);
+    }
+  };
+
+  const handleScanError = (errorMessage) => {
+    console.error(errorMessage);
+  };
+
+  // For testing without camera
+  const handleManualInput = () => {
+    const input = prompt("Enter route JSON for testing:");
+    if (input) {
+      handleScan(input);
+    }
   };
 
   const mapRef = useRef(null);
@@ -272,6 +325,13 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
                     <span className="text-xs sm:text-sm font-mono font-medium text-white">{formatTime(currentDateTime)}</span>
                   </div>
                 </div>
+                <button 
+                  onClick={() => setScanning(true)}
+                  className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20 hover:bg-white/20 transition-colors"
+                  title="Scan Route QR Code"
+                >
+                  <QrCode className="w-4 h-4 text-[#FFE066]" />
+                </button>
               </div>
             </div>
           </div>
@@ -507,6 +567,30 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
 
         </div>
       </main>
+
+      {/* QR Scanner Modal */}
+      {scanning && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-sm mx-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Scan Route QR Code</h3>
+            <div id="reader" style={{ width: '100%' }}></div>
+            <div className="flex justify-between gap-2 mt-4">
+              <button 
+                onClick={handleManualInput}
+                className="px-4 py-2 bg-blue-200 text-blue-800 rounded-lg hover:bg-blue-300"
+              >
+                Manual Input (Test)
+              </button>
+              <button 
+                onClick={() => setScanning(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <DriverFooter />
     </div>
