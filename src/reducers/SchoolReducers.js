@@ -123,3 +123,6 @@ export const PutSchoolDetails = (state = initialState, action) => {
             return state;
     }
 };
+
+// Default export for compatibility with store.js
+export default GetAllSchool;

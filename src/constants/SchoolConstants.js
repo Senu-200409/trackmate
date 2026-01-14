@@ -16,7 +16,7 @@ export const AddSchoolDetails_SUCCESS = "AddSchoolDetails_SUCCESS";
 export const AddSchoolDetails_FAIL = "AddSchoolDetails_FAIL";
 
 // Put School----
-export const PutSchoolvDetails_REQUEST = "PutSchoolDetails_REQUEST";
+export const PutSchoolDetails_REQUEST = "PutSchoolDetails_REQUEST";
 export const PutSchoolDetails_SUCCESS = "PutSchoolDetails_SUCCESS";
 export const PutSchoolDetails_FAIL = "PutSchoolDetails_FAIL";
 
