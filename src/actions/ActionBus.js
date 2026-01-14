@@ -1,3 +1,5 @@
+import BusServices from '../services/BusServices';
+
 // Bus Actions
 
 export const setBus = (bus) => ({
@@ -42,8 +44,11 @@ export const busError = (error) => ({
 export const fetchBus = (busId) => async (dispatch) => {
   dispatch(busLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(busSuccess());
+    const response = await BusServices.getBus(busId);
+    if (response.success) {
+      dispatch(setBus(response.data));
+      dispatch(busSuccess());
+    }
   } catch (error) {
     dispatch(busError(error.message));
   }
@@ -52,9 +57,11 @@ export const fetchBus = (busId) => async (dispatch) => {
 export const fetchBuses = () => async (dispatch) => {
   dispatch(busLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setBuses([]));
-    dispatch(busSuccess());
+    const response = await BusServices.getAllBuses();
+    if (response.success) {
+      dispatch(setBuses(response.data));
+      dispatch(busSuccess());
+    }
   } catch (error) {
     dispatch(busError(error.message));
   }
@@ -63,9 +70,11 @@ export const fetchBuses = () => async (dispatch) => {
 export const fetchBusHealth = (busId) => async (dispatch) => {
   dispatch(busLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setBusHealth({}));
-    dispatch(busSuccess());
+    const response = await BusServices.getBusStatus(busId);
+    if (response.success) {
+      dispatch(setBusHealth(response.data));
+      dispatch(busSuccess());
+    }
   } catch (error) {
     dispatch(busError(error.message));
   }
@@ -74,9 +83,11 @@ export const fetchBusHealth = (busId) => async (dispatch) => {
 export const fetchMaintenanceRecords = (busId) => async (dispatch) => {
   dispatch(busLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setMaintenance([]));
-    dispatch(busSuccess());
+    const response = await BusServices.getMaintenanceRecords(busId);
+    if (response.success) {
+      dispatch(setMaintenance(response.data));
+      dispatch(busSuccess());
+    }
   } catch (error) {
     dispatch(busError(error.message));
   }
@@ -85,8 +96,11 @@ export const fetchMaintenanceRecords = (busId) => async (dispatch) => {
 export const addBus = (busData) => async (dispatch) => {
   dispatch(busLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(busSuccess());
+    const response = await BusServices.addBus(busData);
+    if (response.success) {
+      // dispatch(fetchBuses()); // Refresh list ?
+      dispatch(busSuccess());
+    }
   } catch (error) {
     dispatch(busError(error.message));
   }
@@ -95,9 +109,11 @@ export const addBus = (busData) => async (dispatch) => {
 export const updateBusData = (busId, busData) => async (dispatch) => {
   dispatch(busLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(updateBus(busData));
-    dispatch(busSuccess());
+    const response = await BusServices.updateBus(busId, busData);
+    if (response.success) {
+      dispatch(updateBus(response.data));
+      dispatch(busSuccess());
+    }
   } catch (error) {
     dispatch(busError(error.message));
   }

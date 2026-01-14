@@ -1,3 +1,5 @@
+import DeviceServices from '../services/DeviceServices';
+
 // Device Actions
 
 export const setDevice = (device) => ({
@@ -47,8 +49,11 @@ export const deviceError = (error) => ({
 export const fetchDevice = (deviceId) => async (dispatch) => {
   dispatch(deviceLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(deviceSuccess());
+    const response = await DeviceServices.getDevice(deviceId);
+    if (response.success) {
+      dispatch(setDevice(response.data));
+      dispatch(deviceSuccess());
+    }
   } catch (error) {
     dispatch(deviceError(error.message));
   }
@@ -57,9 +62,11 @@ export const fetchDevice = (deviceId) => async (dispatch) => {
 export const fetchDevices = () => async (dispatch) => {
   dispatch(deviceLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setDevices([]));
-    dispatch(deviceSuccess());
+    const response = await DeviceServices.getAllDevices();
+    if (response.success) {
+      dispatch(setDevices(response.data));
+      dispatch(deviceSuccess());
+    }
   } catch (error) {
     dispatch(deviceError(error.message));
   }
@@ -68,9 +75,11 @@ export const fetchDevices = () => async (dispatch) => {
 export const fetchDevicesByBus = (busId) => async (dispatch) => {
   dispatch(deviceLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setDevices([]));
-    dispatch(deviceSuccess());
+    const response = await DeviceServices.getDevicesByBus(busId);
+    if (response.success) {
+      dispatch(setDevices(response.data));
+      dispatch(deviceSuccess());
+    }
   } catch (error) {
     dispatch(deviceError(error.message));
   }
@@ -79,51 +88,38 @@ export const fetchDevicesByBus = (busId) => async (dispatch) => {
 export const fetchDeviceStatus = (deviceId) => async (dispatch) => {
   dispatch(deviceLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setDeviceStatus({}));
-    dispatch(deviceSuccess());
+    const response = await DeviceServices.getDeviceStatus(deviceId);
+    if (response.success) {
+      dispatch(setDeviceStatus(response.data));
+      dispatch(deviceSuccess());
+    }
   } catch (error) {
     dispatch(deviceError(error.message));
   }
 };
 
 export const updateDeviceLocationThunk = (deviceId, location) => async (dispatch) => {
-  dispatch(deviceLoading());
+  // dispatch(deviceLoading()); // Can skip for real-time
   try {
-    // TODO: Replace with actual API call - should be called frequently for real-time tracking
-    dispatch(updateDeviceLocation(deviceId, location));
-    dispatch(deviceSuccess());
+    const response = await DeviceServices.updateLocation(deviceId, location);
+    if (response.success) {
+      dispatch(updateDeviceLocation(deviceId, location));
+      // dispatch(deviceSuccess());
+    }
   } catch (error) {
     dispatch(deviceError(error.message));
   }
 };
 
-export const subscribeToGpsTracking = (busId) => async (dispatch) => {
+export const registerDevice = (deviceData) => async (dispatch) => {
   dispatch(deviceLoading());
   try {
-    // TODO: Replace with WebSocket subscription when backend is ready
-    dispatch(deviceSuccess());
-  } catch (error) {
-    dispatch(deviceError(error.message));
-  }
-};
-
-export const addDevice = (deviceData) => async (dispatch) => {
-  dispatch(deviceLoading());
-  try {
-    // TODO: Replace with actual API call
-    dispatch(deviceSuccess());
-  } catch (error) {
-    dispatch(deviceError(error.message));
-  }
-};
-
-export const updateDeviceData = (deviceId, deviceData) => async (dispatch) => {
-  dispatch(deviceLoading());
-  try {
-    // TODO: Replace with actual API call
-    dispatch(updateDevice(deviceData));
-    dispatch(deviceSuccess());
+    const response = await DeviceServices.registerDevice(deviceData);
+    if (response.success) {
+      dispatch(deviceSuccess());
+      // Refresh list
+      dispatch(fetchDevices());
+    }
   } catch (error) {
     dispatch(deviceError(error.message));
   }

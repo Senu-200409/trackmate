@@ -1,3 +1,5 @@
+import ParentServices from '../services/ParentServices';
+
 // Parent Actions
 
 export const setParent = (parent) => ({
@@ -52,8 +54,11 @@ export const parentError = (error) => ({
 export const fetchParent = (parentId) => async (dispatch) => {
   dispatch(parentLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(parentSuccess());
+    const response = await ParentServices.getParent(parentId);
+    if (response.success) {
+      dispatch(setParent(response.data));
+      dispatch(parentSuccess());
+    }
   } catch (error) {
     dispatch(parentError(error.message));
   }
@@ -62,9 +67,11 @@ export const fetchParent = (parentId) => async (dispatch) => {
 export const fetchMyChildren = (parentId) => async (dispatch) => {
   dispatch(parentLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setMyChildren([]));
-    dispatch(parentSuccess());
+    const response = await ParentServices.getChildren(parentId);
+    if (response.success) {
+      dispatch(setMyChildren(response.data));
+      dispatch(parentSuccess());
+    }
   } catch (error) {
     dispatch(parentError(error.message));
   }
@@ -73,9 +80,11 @@ export const fetchMyChildren = (parentId) => async (dispatch) => {
 export const fetchAlerts = (parentId) => async (dispatch) => {
   dispatch(parentLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setAlerts([]));
-    dispatch(parentSuccess());
+    const response = await ParentServices.getAlerts(parentId);
+    if (response.success) {
+      dispatch(setAlerts(response.data));
+      dispatch(parentSuccess());
+    }
   } catch (error) {
     dispatch(parentError(error.message));
   }
@@ -84,30 +93,26 @@ export const fetchAlerts = (parentId) => async (dispatch) => {
 export const fetchHistory = (parentId) => async (dispatch) => {
   dispatch(parentLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setHistory([]));
-    dispatch(parentSuccess());
+    const response = await ParentServices.getTripHistory(parentId);
+    if (response.success) {
+      dispatch(setHistory(response.data));
+      dispatch(parentSuccess());
+    }
   } catch (error) {
     dispatch(parentError(error.message));
   }
 };
 
 export const getChildLocation = (childId) => async (dispatch) => {
-  dispatch(parentLoading());
+  // Can be used to just fetch location once or initiate polling
   try {
-    // TODO: Replace with actual API call - real-time location
-    dispatch(parentSuccess());
-  } catch (error) {
-    dispatch(parentError(error.message));
-  }
-};
-
-export const updateParentProfile = (parentData) => async (dispatch) => {
-  dispatch(parentLoading());
-  try {
-    // TODO: Replace with actual API call
-    dispatch(updateParent(parentData));
-    dispatch(parentSuccess());
+    const response = await ParentServices.getChildLocation(childId);
+    if (response.success) {
+       // Could dispatch an update to a child object or a specific location state
+       // For now, just success
+      dispatch(parentSuccess());
+      return response.data;
+    }
   } catch (error) {
     dispatch(parentError(error.message));
   }

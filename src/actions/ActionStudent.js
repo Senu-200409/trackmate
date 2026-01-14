@@ -1,3 +1,5 @@
+import StudentServices from '../services/StudentServices';
+
 // Student Actions
 
 export const setStudent = (student) => ({
@@ -42,8 +44,11 @@ export const studentError = (error) => ({
 export const fetchStudent = (studentId) => async (dispatch) => {
   dispatch(studentLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(studentSuccess());
+    const response = await StudentServices.getStudent(studentId);
+    if (response.success) {
+      dispatch(setStudent(response.data));
+      dispatch(studentSuccess());
+    }
   } catch (error) {
     dispatch(studentError(error.message));
   }
@@ -52,9 +57,11 @@ export const fetchStudent = (studentId) => async (dispatch) => {
 export const fetchStudents = () => async (dispatch) => {
   dispatch(studentLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setStudents([]));
-    dispatch(studentSuccess());
+    const response = await StudentServices.getAllStudents();
+    if (response.success) {
+      dispatch(setStudents(response.data));
+      dispatch(studentSuccess());
+    }
   } catch (error) {
     dispatch(studentError(error.message));
   }
@@ -63,9 +70,11 @@ export const fetchStudents = () => async (dispatch) => {
 export const fetchStudentsBySchool = (schoolId) => async (dispatch) => {
   dispatch(studentLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setStudents([]));
-    dispatch(studentSuccess());
+    const response = await StudentServices.getStudentsBySchool(schoolId);
+    if (response.success) {
+      dispatch(setStudents(response.data));
+      dispatch(studentSuccess());
+    }
   } catch (error) {
     dispatch(studentError(error.message));
   }
@@ -74,8 +83,11 @@ export const fetchStudentsBySchool = (schoolId) => async (dispatch) => {
 export const fetchEnrollments = (studentId) => async (dispatch) => {
   dispatch(studentLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setEnrollments([]));
+    // Assuming a service method exists or returns inside getStudent
+    const response = await StudentServices.getStudent(studentId);
+    if (response.success && response.data.enrollments) {
+        dispatch(setEnrollments(response.data.enrollments));
+    }
     dispatch(studentSuccess());
   } catch (error) {
     dispatch(studentError(error.message));
@@ -85,9 +97,11 @@ export const fetchEnrollments = (studentId) => async (dispatch) => {
 export const fetchAttendance = (studentId) => async (dispatch) => {
   dispatch(studentLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setAttendance([]));
-    dispatch(studentSuccess());
+    const response = await StudentServices.getAttendance(studentId);
+    if (response.success) {
+      dispatch(setAttendance(response.data));
+      dispatch(studentSuccess());
+    }
   } catch (error) {
     dispatch(studentError(error.message));
   }
@@ -96,19 +110,10 @@ export const fetchAttendance = (studentId) => async (dispatch) => {
 export const enrollStudent = (studentData) => async (dispatch) => {
   dispatch(studentLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(studentSuccess());
-  } catch (error) {
-    dispatch(studentError(error.message));
-  }
-};
-
-export const updateStudentData = (studentId, studentData) => async (dispatch) => {
-  dispatch(studentLoading());
-  try {
-    // TODO: Replace with actual API call
-    dispatch(updateStudent(studentData));
-    dispatch(studentSuccess());
+    const response = await StudentServices.addStudent(studentData);
+    if (response.success) {
+      dispatch(studentSuccess());
+    }
   } catch (error) {
     dispatch(studentError(error.message));
   }

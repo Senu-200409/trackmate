@@ -1,3 +1,5 @@
+import UserServices from '../services/UserServices';
+
 // User Actions
 
 export const setUser = (user) => ({
@@ -41,41 +43,32 @@ export const userError = (error) => ({
 export const loginUser = (phoneNumber, otp) => async (dispatch) => {
   dispatch(userLoading());
   try {
-    // TODO: Replace with actual API call when backend is ready
-    // const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ phoneNumber, otp }),
-    // });
-    // const data = await response.json();
-    
-    // Temporary mock response
-    const mockUser = {
-      id: Date.now(),
-      phoneNumber,
-      role: 'parent',
-      name: 'User',
-    };
-    
-    dispatch(setUser(mockUser));
-    dispatch(setToken('mock-token-' + Date.now()));
-    dispatch(userSuccess());
+    const response = await UserServices.login(phoneNumber, otp);
+    if (response.success) {
+      dispatch(setUser(response.data.user));
+      dispatch(setToken(response.data.token));
+      dispatch(userSuccess());
+    } else {
+      dispatch(userError(response.message || 'Login failed'));
+    }
   } catch (error) {
     dispatch(userError(error.message));
   }
 };
 
 export const logoutUser = () => (dispatch) => {
+  UserServices.logout();
   dispatch(clearUser());
-  localStorage.removeItem('token');
 };
 
 export const fetchUsers = () => async (dispatch) => {
   dispatch(userLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setUsers([]));
-    dispatch(userSuccess());
+    const response = await UserServices.getAllUsers();
+    if (response.success) {
+      dispatch(setUsers(response.data));
+      dispatch(userSuccess());
+    }
   } catch (error) {
     dispatch(userError(error.message));
   }
@@ -84,9 +77,11 @@ export const fetchUsers = () => async (dispatch) => {
 export const updateUserProfile = (userData) => async (dispatch) => {
   dispatch(userLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(updateUser(userData));
-    dispatch(userSuccess());
+    const response = await UserServices.updateProfile(userData);
+    if (response.success) {
+      dispatch(updateUser(response.data));
+      dispatch(userSuccess());
+    }
   } catch (error) {
     dispatch(userError(error.message));
   }

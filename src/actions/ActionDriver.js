@@ -1,3 +1,5 @@
+import DriverServices from '../services/DriverServices';
+
 // Driver Actions
 
 export const setDriver = (driver) => ({
@@ -47,10 +49,14 @@ export const driverError = (error) => ({
 export const fetchDriver = (driverId) => async (dispatch) => {
   dispatch(driverLoading());
   try {
-    // TODO: Replace with actual API call
-    // const response = await fetch(`${process.env.REACT_APP_API_URL}/api/drivers/${driverId}`);
-    // const data = await response.json();
-    dispatch(driverSuccess());
+    const response = await DriverServices.getDriver(driverId);
+    if (response.success) {
+      dispatch(setDriver(response.data));
+      if (response.data.routeStatus) {
+        dispatch(setRouteStatus(response.data.routeStatus));
+      }
+      dispatch(driverSuccess());
+    }
   } catch (error) {
     dispatch(driverError(error.message));
   }
@@ -59,31 +65,35 @@ export const fetchDriver = (driverId) => async (dispatch) => {
 export const fetchDrivers = () => async (dispatch) => {
   dispatch(driverLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setDrivers([]));
-    dispatch(driverSuccess());
+    const response = await DriverServices.getAllDrivers();
+    if (response.success) {
+      dispatch(setDrivers(response.data));
+      dispatch(driverSuccess());
+    }
   } catch (error) {
     dispatch(driverError(error.message));
   }
 };
 
 export const updateDriverLocationThunk = (driverId, location) => async (dispatch) => {
-  dispatch(driverLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(updateDriverLocation(location));
-    dispatch(driverSuccess());
+    const response = await DriverServices.updateLocation(driverId, location);
+    if (response.success) {
+      dispatch(updateDriverLocation(location));
+    }
   } catch (error) {
-    dispatch(driverError(error.message));
+    console.error('Location update error:', error);
   }
 };
 
 export const startRoute = (driverId) => async (dispatch) => {
   dispatch(driverLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setRouteStatus('active'));
-    dispatch(driverSuccess());
+    const response = await DriverServices.startRoute(driverId);
+    if (response.success) {
+      dispatch(setRouteStatus('active'));
+      dispatch(driverSuccess());
+    }
   } catch (error) {
     dispatch(driverError(error.message));
   }
@@ -92,9 +102,11 @@ export const startRoute = (driverId) => async (dispatch) => {
 export const endRoute = (driverId) => async (dispatch) => {
   dispatch(driverLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setRouteStatus('completed'));
-    dispatch(driverSuccess());
+    const response = await DriverServices.endRoute(driverId);
+    if (response.success) {
+      dispatch(setRouteStatus('completed'));
+      dispatch(driverSuccess());
+    }
   } catch (error) {
     dispatch(driverError(error.message));
   }
@@ -103,9 +115,11 @@ export const endRoute = (driverId) => async (dispatch) => {
 export const fetchDriverStudents = (driverId) => async (dispatch) => {
   dispatch(driverLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setDriverStudents([]));
-    dispatch(driverSuccess());
+    const response = await DriverServices.getDriverStudents(driverId);
+    if (response.success) {
+      dispatch(setDriverStudents(response.data));
+      dispatch(driverSuccess());
+    }
   } catch (error) {
     dispatch(driverError(error.message));
   }

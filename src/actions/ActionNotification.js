@@ -1,3 +1,5 @@
+import NotificationServices from '../services/NotificationServices';
+
 // Notification Actions
 
 export const setNotification = (notification) => ({
@@ -42,9 +44,16 @@ export const notificationError = (error) => ({
 export const fetchNotifications = (userId) => async (dispatch) => {
   dispatch(notificationLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setNotifications([]));
-    dispatch(notificationSuccess());
+    const response = await NotificationServices.getNotifications(userId);
+    if (response.success) {
+      dispatch(setNotifications(response.data));
+      
+      // Calculate unread count mock logic if needed, or if API returns it
+      const unread = response.data.filter(n => !n.read).length;
+      dispatch(setUnreadCount(unread));
+
+      dispatch(notificationSuccess());
+    }
   } catch (error) {
     dispatch(notificationError(error.message));
   }
@@ -53,20 +62,26 @@ export const fetchNotifications = (userId) => async (dispatch) => {
 export const fetchUnreadCount = (userId) => async (dispatch) => {
   dispatch(notificationLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setUnreadCount(0));
-    dispatch(notificationSuccess());
+    const response = await NotificationServices.getUnreadCount(userId);
+    if (response.success) {
+      dispatch(setUnreadCount(response.data.count));
+      dispatch(notificationSuccess());
+    }
   } catch (error) {
-    dispatch(notificationError(error.message));
+    // Fallback if not implemented
+    console.warn("fetchUnreadCount might not be fully implemented in mock", error);
+    dispatch(notificationSuccess()); 
   }
 };
 
 export const markNotificationAsRead = (notificationId) => async (dispatch) => {
-  dispatch(notificationLoading());
+  // dispatch(notificationLoading()); // Optional, maybe too noisy for UI
   try {
-    // TODO: Replace with actual API call
-    dispatch(markAsRead(notificationId));
-    dispatch(notificationSuccess());
+    const response = await NotificationServices.markAsRead(notificationId);
+    if (response.success) {
+      dispatch(markAsRead(notificationId));
+      dispatch(notificationSuccess());
+    }
   } catch (error) {
     dispatch(notificationError(error.message));
   }
@@ -75,18 +90,22 @@ export const markNotificationAsRead = (notificationId) => async (dispatch) => {
 export const sendNotification = (notificationData) => async (dispatch) => {
   dispatch(notificationLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(addNotification(notificationData));
-    dispatch(notificationSuccess());
+    const response = await NotificationServices.sendNotification(notificationData);
+    if (response.success) {
+      dispatch(addNotification(response.data));
+      dispatch(notificationSuccess());
+    }
   } catch (error) {
     dispatch(notificationError(error.message));
   }
 };
 
 export const subscribeToNotifications = (userId) => async (dispatch) => {
-  dispatch(notificationLoading());
+  // dispatch(notificationLoading());
   try {
     // TODO: Replace with WebSocket subscription when backend is ready
+    // For now, maybe just fetch once
+    dispatch(fetchNotifications(userId));
     dispatch(notificationSuccess());
   } catch (error) {
     dispatch(notificationError(error.message));

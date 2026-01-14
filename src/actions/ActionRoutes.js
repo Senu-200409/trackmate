@@ -1,3 +1,5 @@
+import RoutesServices from '../services/RoutesServices';
+
 // Route Actions
 
 export const setRoute = (route) => ({
@@ -42,8 +44,11 @@ export const routesError = (error) => ({
 export const fetchRoute = (routeId) => async (dispatch) => {
   dispatch(routesLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(routesSuccess());
+    const response = await RoutesServices.getRoute(routeId);
+    if (response.success) {
+      dispatch(setRoute(response.data));
+      dispatch(routesSuccess());
+    }
   } catch (error) {
     dispatch(routesError(error.message));
   }
@@ -52,9 +57,11 @@ export const fetchRoute = (routeId) => async (dispatch) => {
 export const fetchRoutes = () => async (dispatch) => {
   dispatch(routesLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setRoutes([]));
-    dispatch(routesSuccess());
+    const response = await RoutesServices.getAllRoutes();
+    if (response.success) {
+      dispatch(setRoutes(response.data));
+      dispatch(routesSuccess());
+    }
   } catch (error) {
     dispatch(routesError(error.message));
   }
@@ -63,9 +70,11 @@ export const fetchRoutes = () => async (dispatch) => {
 export const fetchActiveRoutes = () => async (dispatch) => {
   dispatch(routesLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setActiveRoutes([]));
-    dispatch(routesSuccess());
+    const response = await RoutesServices.getActiveRoutes();
+    if (response.success) {
+      dispatch(setActiveRoutes(response.data));
+      dispatch(routesSuccess());
+    }
   } catch (error) {
     dispatch(routesError(error.message));
   }
@@ -74,9 +83,11 @@ export const fetchActiveRoutes = () => async (dispatch) => {
 export const fetchRouteDetails = (routeId) => async (dispatch) => {
   dispatch(routesLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setRouteDetails({}));
-    dispatch(routesSuccess());
+    const response = await RoutesServices.getRouteDetails(routeId);
+    if (response.success) {
+      dispatch(setRouteDetails(response.data));
+      dispatch(routesSuccess());
+    }
   } catch (error) {
     dispatch(routesError(error.message));
   }
@@ -85,9 +96,11 @@ export const fetchRouteDetails = (routeId) => async (dispatch) => {
 export const fetchRoutesBySchool = (schoolId) => async (dispatch) => {
   dispatch(routesLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setRoutes([]));
-    dispatch(routesSuccess());
+    const response = await RoutesServices.getRoutesBySchool(schoolId);
+    if (response.success) {
+      dispatch(setRoutes(response.data));
+      dispatch(routesSuccess());
+    }
   } catch (error) {
     dispatch(routesError(error.message));
   }
@@ -96,19 +109,10 @@ export const fetchRoutesBySchool = (schoolId) => async (dispatch) => {
 export const addRoute = (routeData) => async (dispatch) => {
   dispatch(routesLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(routesSuccess());
-  } catch (error) {
-    dispatch(routesError(error.message));
-  }
-};
-
-export const updateRouteData = (routeId, routeData) => async (dispatch) => {
-  dispatch(routesLoading());
-  try {
-    // TODO: Replace with actual API call
-    dispatch(updateRoute(routeData));
-    dispatch(routesSuccess());
+    const response = await RoutesServices.addRoute(routeData);
+    if (response.success) {
+      dispatch(routesSuccess());
+    }
   } catch (error) {
     dispatch(routesError(error.message));
   }

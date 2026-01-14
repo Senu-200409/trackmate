@@ -1,3 +1,5 @@
+import OwnerServices from '../services/OwnerServices';
+
 // Owner Actions
 
 export const setOwner = (owner) => ({
@@ -42,8 +44,11 @@ export const ownerError = (error) => ({
 export const fetchOwner = (ownerId) => async (dispatch) => {
   dispatch(ownerLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(ownerSuccess());
+    const response = await OwnerServices.getOwner(ownerId);
+    if (response.success) {
+      dispatch(setOwner(response.data));
+      dispatch(ownerSuccess());
+    }
   } catch (error) {
     dispatch(ownerError(error.message));
   }
@@ -52,9 +57,11 @@ export const fetchOwner = (ownerId) => async (dispatch) => {
 export const fetchOwners = () => async (dispatch) => {
   dispatch(ownerLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setOwners([]));
-    dispatch(ownerSuccess());
+    const response = await OwnerServices.getAllOwners();
+    if (response.success) {
+      dispatch(setOwners(response.data));
+      dispatch(ownerSuccess());
+    }
   } catch (error) {
     dispatch(ownerError(error.message));
   }
@@ -63,9 +70,11 @@ export const fetchOwners = () => async (dispatch) => {
 export const fetchFleet = (ownerId) => async (dispatch) => {
   dispatch(ownerLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(setFleet([]));
-    dispatch(ownerSuccess());
+    const response = await OwnerServices.getFleet(ownerId);
+    if (response.success) {
+      dispatch(setFleet(response.data));
+      dispatch(ownerSuccess());
+    }
   } catch (error) {
     dispatch(ownerError(error.message));
   }
@@ -74,36 +83,28 @@ export const fetchFleet = (ownerId) => async (dispatch) => {
 export const fetchAnalytics = (ownerId) => async (dispatch) => {
   dispatch(ownerLoading());
   try {
-    // TODO: Replace with actual API call
-    const mockAnalytics = {
-      totalBuses: 0,
-      totalDrivers: 0,
-      totalStudents: 0,
-      activeRoutes: 0,
-    };
-    dispatch(setAnalytics(mockAnalytics));
-    dispatch(ownerSuccess());
+    const response = await OwnerServices.getAnalytics(ownerId);
+    if (response.success) {
+      dispatch(setAnalytics(response.data));
+      dispatch(ownerSuccess());
+    }
   } catch (error) {
     dispatch(ownerError(error.message));
   }
 };
 
-export const addBusToFleet = (busData) => async (dispatch) => {
+export const addBusToFleet = (ownerId, busData) => async (dispatch) => {
   dispatch(ownerLoading());
   try {
-    // TODO: Replace with actual API call
-    dispatch(ownerSuccess());
-  } catch (error) {
-    dispatch(ownerError(error.message));
-  }
-};
-
-export const updateOwnerProfile = (ownerData) => async (dispatch) => {
-  dispatch(ownerLoading());
-  try {
-    // TODO: Replace with actual API call
-    dispatch(updateOwner(ownerData));
-    dispatch(ownerSuccess());
+    const response = await OwnerServices.addBusToFleet(ownerId, busData);
+    if (response.success) {
+       // Refresh fleet after adding
+       const fleetResponse = await OwnerServices.getFleet(ownerId);
+       if (fleetResponse.success) {
+         dispatch(setFleet(fleetResponse.data));
+       }
+      dispatch(ownerSuccess());
+    }
   } catch (error) {
     dispatch(ownerError(error.message));
   }
