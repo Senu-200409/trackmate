@@ -33,6 +33,11 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
   const [scanning, setScanning] = useState(false);
   const scannerRef = useRef(null);
 
+  // Manual student entry modal state
+  const [showManualEntry, setShowManualEntry] = useState(false);
+  const [manualRfid, setManualRfid] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState('');
+
   useEffect(() => {
     if (scanning) {
       scannerRef.current = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
@@ -62,11 +67,11 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
 
   // Student roster for route
   const [students] = useState([
-    { id: 1, name: "Emma Wilson", grade: "5", stop: "Maple St", image: "https://via.placeholder.com/48x48?text=Emma", phone: "+1-555-0101", status: "pending" },
-    { id: 2, name: "Noah Johnson", grade: "6", stop: "Oak Ave", image: "https://via.placeholder.com/48x48?text=Noah", phone: "+1-555-0102", status: "pending" },
-    { id: 3, name: "Olivia Brown", grade: "5", stop: "Pine Rd", image: "https://via.placeholder.com/48x48?text=Olivia", phone: "+1-555-0103", status: "pending" },
-    { id: 4, name: "Liam Garcia", grade: "6", stop: "Cedar Ln", image: "https://via.placeholder.com/48x48?text=Liam", phone: "+1-555-0104", status: "pending" },
-    { id: 5, name: "Ava Martinez", grade: "5", stop: "Elm St", image: "https://via.placeholder.com/48x48?text=Ava", phone: "+1-555-0105", status: "pending" },
+    { id: 1, name: "Emma Wilson", grade: "5", stop: "Maple St", image: "https://via.placeholder.com/48x48?text=Emma", phone: "+1-555-0101", status: "pending", rfid: "RFID001" },
+    { id: 2, name: "Noah Johnson", grade: "6", stop: "Oak Ave", image: "https://via.placeholder.com/48x48?text=Noah", phone: "+1-555-0102", status: "pending", rfid: "RFID002" },
+    { id: 3, name: "Olivia Brown", grade: "5", stop: "Pine Rd", image: "https://via.placeholder.com/48x48?text=Olivia", phone: "+1-555-0103", status: "pending", rfid: "RFID003" },
+    { id: 4, name: "Liam Garcia", grade: "6", stop: "Cedar Ln", image: "https://via.placeholder.com/48x48?text=Liam", phone: "+1-555-0104", status: "pending", rfid: "RFID004" },
+    { id: 5, name: "Ava Martinez", grade: "5", stop: "Elm St", image: "https://via.placeholder.com/48x48?text=Ava", phone: "+1-555-0105", status: "pending", rfid: "RFID005" },
   ]);
 
   // Initialize attendance
@@ -180,6 +185,58 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
         alert('Error sending emergency alert. Please check your connection.');
       }
     }
+  };
+
+  // Handle manual student entry
+  const handleManualEntry = () => {
+    setShowManualEntry(true);
+  };
+
+  // Handle student selection from dropdown
+  const handleStudentSelect = (studentId) => {
+    const student = students.find(s => s.id === parseInt(studentId));
+    if (student) {
+      setSelectedStudent(studentId);
+      setManualRfid(student.rfid);
+    }
+  };
+
+  // Handle manual RFID input
+  const handleRfidChange = (rfid) => {
+    setManualRfid(rfid);
+    // Clear selected student if RFID is manually changed
+    const student = students.find(s => s.rfid === rfid);
+    if (student) {
+      setSelectedStudent(student.id.toString());
+    } else {
+      setSelectedStudent('');
+    }
+  };
+
+  // Submit manual entry
+  const handleManualSubmit = () => {
+    if (!manualRfid.trim()) {
+      alert('Please enter an RFID number');
+      return;
+    }
+
+    const student = students.find(s => s.rfid === manualRfid.trim());
+    if (student) {
+      handleStudentAction(student.id, 'picked-up');
+      setShowManualEntry(false);
+      setManualRfid('');
+      setSelectedStudent('');
+      alert(`Student ${student.name} marked as picked up successfully!`);
+    } else {
+      alert('RFID number not found. Please check the number and try again.');
+    }
+  };
+
+  // Close manual entry modal
+  const handleCloseManualEntry = () => {
+    setShowManualEntry(false);
+    setManualRfid('');
+    setSelectedStudent('');
   };
 
   const mapRef = useRef(null);
@@ -335,31 +392,80 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
         <div className="space-y-6 max-w-7xl mx-auto">
           
           {/* Welcome Header with Key Route Info */}
-          <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-4 sm:p-6 border-b-4 border-[#F5C518]">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div>
-                <h1 className="text-xl sm:text-3xl font-bold mb-2">Good Morning, Michael! 🚌</h1>
-                <p className="text-sm sm:text-base text-[#FFE066]">{routeInfo.currentRoute} • On Duty</p>
+          <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-xl sm:rounded-2xl p-3 sm:p-6 border-b-4 border-[#F5C518]">
+            <div className="flex flex-col gap-2 sm:gap-3">
+              {/* Top row: Greeting and Route Info */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3">
+                <div>
+                  <h1 className="text-lg sm:text-3xl font-bold">Good Morning, Michael! 🚌</h1>
+                  <p className="text-xs sm:text-base text-[#FFE066]">{routeInfo.currentRoute} • On Duty</p>
+                </div>
+                {/* Mobile: Date/Time in top right, Desktop: Separate row */}
+                <div className="flex sm:hidden items-center gap-3">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1 border border-white/20">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-[#FFE066]" />
+                      <span className="text-xs font-medium text-white">{formatDate(currentDateTime)}</span>
+                    </div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg px-2 py-1 border border-white/20">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-[#FFE066]" />
+                      <span className="text-xs font-mono font-medium text-white">{formatTime(currentDateTime)}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-col sm:flex-col items-start sm:items-end gap-2">
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-[#FFE066]" />
-                    <span className="text-xs sm:text-sm font-medium text-white">{formatDate(currentDateTime)}</span>
+
+              {/* Bottom row: Date/Time and Action Buttons */}
+              <div className="hidden sm:flex sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-[#FFE066]" />
+                      <span className="text-xs sm:text-sm font-medium text-white">{formatDate(currentDateTime)}</span>
+                    </div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-[#FFE066]" />
+                      <span className="text-xs sm:text-sm font-mono font-medium text-white">{formatTime(currentDateTime)}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-[#FFE066]" />
-                    <span className="text-xs sm:text-sm font-mono font-medium text-white">{formatTime(currentDateTime)}</span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => setScanning(true)}
+                    className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20 hover:bg-white/20 transition-colors"
+                    title="Scan Route QR Code"
+                  >
+                    <QrCode className="w-4 h-4 text-[#FFE066]" />
+                  </button>
+                  <button 
+                    onClick={handleManualEntry}
+                    className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20 hover:bg-white/20 transition-colors"
+                    title="Manual Student Entry"
+                  >
+                    <Users className="w-4 h-4 text-[#FFE066]" />
+                  </button>
                 </div>
+              </div>
+
+              {/* Mobile: Action buttons in separate row */}
+              <div className="flex sm:hidden justify-center gap-2">
                 <button 
                   onClick={() => setScanning(true)}
-                  className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20 hover:bg-white/20 transition-colors"
+                  className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20 hover:bg-white/20 transition-colors flex-1 max-w-[120px]"
                   title="Scan Route QR Code"
                 >
-                  <QrCode className="w-4 h-4 text-[#FFE066]" />
+                  <QrCode className="w-4 h-4 text-[#FFE066] mx-auto" />
+                </button>
+                <button 
+                  onClick={handleManualEntry}
+                  className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20 hover:bg-white/20 transition-colors flex-1 max-w-[120px]"
+                  title="Manual Student Entry"
+                >
+                  <Users className="w-4 h-4 text-[#FFE066] mx-auto" />
                 </button>
               </div>
             </div>
@@ -625,6 +731,67 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
                 className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Manual Student Entry Modal */}
+      {showManualEntry && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-4 sm:p-6 max-w-md mx-auto w-full max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Manual Student Entry</h3>
+            <p className="text-sm text-gray-600 mb-4 sm:mb-6">Enter RFID number or select student from the list</p>
+            
+            <div className="space-y-4 sm:space-y-6">
+              {/* Student Dropdown */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Student (Optional)
+                </label>
+                <select
+                  value={selectedStudent}
+                  onChange={(e) => handleStudentSelect(e.target.value)}
+                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
+                >
+                  <option value="">Choose a student...</option>
+                  {students.map((student) => (
+                    <option key={student.id} value={student.id}>
+                      {student.name} - Grade {student.grade} ({student.stop})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* RFID Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  RFID Number *
+                </label>
+                <input
+                  type="text"
+                  value={manualRfid}
+                  onChange={(e) => handleRfidChange(e.target.value)}
+                  placeholder="Enter RFID number"
+                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-2 mt-6 sm:mt-8">
+              <button 
+                onClick={handleCloseManualEntry}
+                className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 text-sm sm:text-base font-medium"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleManualSubmit}
+                className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm sm:text-base font-medium"
+              >
+                Mark as Picked Up
               </button>
             </div>
           </div>
