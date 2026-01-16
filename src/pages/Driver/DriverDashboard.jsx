@@ -23,6 +23,7 @@ import {
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import DriverHeader from '../../components/Driver/DriverHeader';
 import DriverFooter from '../../components/Driver/DriverFooter';
+import NotificationServices from '../../services/NotificationServices';
 
 function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
   const [notifications] = useState([]);
@@ -150,6 +151,34 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
     const input = prompt("Enter route JSON for testing:");
     if (input) {
       handleScan(input);
+    }
+  };
+
+  // Handle emergency alert
+  const handleEmergencyAlert = async () => {
+    const emergencyMessage = prompt('Enter emergency message to send to owner:');
+    if (emergencyMessage && emergencyMessage.trim()) {
+      try {
+        const notificationData = {
+          type: 'emergency',
+          title: 'Emergency Alert from Driver',
+          message: emergencyMessage.trim(),
+          recipientType: 'owner',
+          senderId: 'driver-1', // In a real app, this would come from auth context
+          timestamp: new Date().toISOString(),
+          priority: 'high'
+        };
+        
+        const response = await NotificationServices.sendNotification(notificationData);
+        if (response.success) {
+          alert('Emergency alert sent to owner successfully!');
+        } else {
+          alert('Failed to send emergency alert. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error sending emergency alert:', error);
+        alert('Error sending emergency alert. Please check your connection.');
+      }
     }
   };
 
@@ -512,6 +541,16 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6">
               <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Quick Actions</h3>
               <div className="space-y-2">
+                <button 
+                  onClick={handleEmergencyAlert}
+                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-red-50 transition-colors border border-red-200 bg-red-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="w-5 h-5 text-red-600" />
+                    <span className="font-medium text-red-900 text-sm sm:text-base">Emergency Alert</span>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-red-400" />
+                </button>
                 <button 
                   onClick={() => setActiveTab && setActiveTab('navigation')}
                   className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
