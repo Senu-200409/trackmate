@@ -3,19 +3,16 @@
  * API calls for parent management
  */
 
-import { buildURL, API_ENDPOINTS, httpClient } from '../config/apiConfig';
+import apiClient, { API_ENDPOINTS } from './AuthService';
 
 const ParentServices = {
   // Get all parents
-  getAllParents: async (filter = {}) => {
+  getAllParents: async () => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.PARENTS.LIST);
-      // return await httpClient.get(url, { params: filter });
-
+      const response = await apiClient.get(API_ENDPOINTS.PARENT.GET_ALL);
       return {
         success: true,
-        data: [],
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching parents:', error);
@@ -26,13 +23,12 @@ const ParentServices = {
   // Get parent by ID
   getParent: async (parentId) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.PARENTS.GET, { id: parentId });
-      // return await httpClient.get(url);
-
+      const response = await apiClient.get(API_ENDPOINTS.PARENT.GET_BY_ID, {
+        params: { ParentID: parentId },
+      });
       return {
         success: true,
-        data: { id: parentId },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching parent:', error);

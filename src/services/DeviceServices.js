@@ -3,19 +3,16 @@
  * API calls for device/GPS management
  */
 
-import { buildURL, API_ENDPOINTS, httpClient } from '../config/apiConfig';
+import apiClient, { API_ENDPOINTS } from './AuthService';
 
 const DeviceServices = {
   // Get all devices
-  getAllDevices: async (filter = {}) => {
+  getAllDevices: async () => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.DEVICES.LIST);
-      // return await httpClient.get(url, { params: filter });
-
+      const response = await apiClient.get(API_ENDPOINTS.DEVICE.GET_ALL);
       return {
         success: true,
-        data: [],
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching devices:', error);
@@ -26,13 +23,12 @@ const DeviceServices = {
   // Get device by ID
   getDevice: async (deviceId) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.DEVICES.GET, { id: deviceId });
-      // return await httpClient.get(url);
-
+      const response = await apiClient.get(API_ENDPOINTS.DEVICE.GET_BY_ID, {
+        params: { DeviceID: deviceId },
+      });
       return {
         success: true,
-        data: { id: deviceId },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching device:', error);

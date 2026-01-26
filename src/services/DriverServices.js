@@ -3,33 +3,16 @@
  * API calls for driver management
  */
 
-import { buildURL, API_ENDPOINTS, httpClient } from '../config/apiConfig';
-
-// Mock driver data for development
-const mockDrivers = [
-  {
-    id: 1,
-    name: 'Mike Driver',
-    phoneNumber: '2222222222',
-    email: 'driver@example.com',
-    busId: 1,
-    currentLocation: { lat: 28.7041, lng: 77.1025 },
-    routeStatus: 'active',
-    totalTrips: 45,
-  },
-];
+import apiClient, { API_ENDPOINTS } from './AuthService';
 
 const DriverServices = {
   // Get all drivers
-  getAllDrivers: async (filter = {}) => {
+  getAllDrivers: async () => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.DRIVERS.LIST);
-      // return await httpClient.get(url, { params: filter });
-
+      const response = await apiClient.get(API_ENDPOINTS.DRIVER.GET_ALL);
       return {
         success: true,
-        data: mockDrivers,
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching drivers:', error);
@@ -40,13 +23,12 @@ const DriverServices = {
   // Get driver by ID
   getDriver: async (driverId) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.DRIVERS.GET, { id: driverId });
-      // return await httpClient.get(url);
-
+      const response = await apiClient.get(API_ENDPOINTS.DRIVER.GET_BY_ID, {
+        params: { DriverID: driverId },
+      });
       return {
         success: true,
-        data: mockDrivers.find(d => d.id === driverId) || { id: driverId },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching driver:', error);

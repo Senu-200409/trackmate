@@ -3,39 +3,19 @@
  * API calls for notification management
  */
 
-import { buildURL, API_ENDPOINTS, httpClient } from '../config/apiConfig';
+import apiClient, { API_ENDPOINTS } from './AuthService';
 
 const NotificationServices = {
   // Get all notifications
-  getAllNotifications: async (userId, filter = {}) => {
+  getAllNotifications: async () => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.NOTIFICATIONS.LIST);
-      // return await httpClient.get(url, { params: filter });
-
+      const response = await apiClient.get(API_ENDPOINTS.NOTIFICATION.GET_ALL);
       return {
         success: true,
-        data: [],
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      throw error;
-    }
-  },
-
-  // Get notification by ID
-  getNotification: async (notificationId) => {
-    try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.NOTIFICATIONS.GET, { id: notificationId });
-      // return await httpClient.get(url);
-
-      return {
-        success: true,
-        data: { id: notificationId },
-      };
-    } catch (error) {
-      console.error('Error fetching notification:', error);
       throw error;
     }
   },

@@ -3,39 +3,19 @@
  * API calls for student management
  */
 
-import { buildURL, API_ENDPOINTS, httpClient } from '../config/apiConfig';
+import apiClient, { API_ENDPOINTS } from './AuthService';
 
 const StudentServices = {
   // Get all students
-  getAllStudents: async (filter = {}) => {
+  getAllStudents: async () => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.STUDENTS.LIST);
-      // return await httpClient.get(url, { params: filter });
-
+      const response = await apiClient.get(API_ENDPOINTS.STUDENT.GET_ALL);
       return {
         success: true,
-        data: [],
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching students:', error);
-      throw error;
-    }
-  },
-
-  // Get student by ID
-  getStudent: async (studentId) => {
-    try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.STUDENTS.GET, { id: studentId });
-      // return await httpClient.get(url);
-
-      return {
-        success: true,
-        data: { id: studentId },
-      };
-    } catch (error) {
-      console.error('Error fetching student:', error);
       throw error;
     }
   },

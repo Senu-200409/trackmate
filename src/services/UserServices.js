@@ -3,32 +3,7 @@
  * API calls for user authentication and profile management
  */
 
-import { buildURL, API_ENDPOINTS, httpClient } from '../config/apiConfig';
-
-// Mock user data for development
-const mockUsers = [
-  {
-    id: 1,
-    phoneNumber: '1111111111',
-    name: 'John Parent',
-    role: 'parent',
-    email: 'parent@example.com',
-  },
-  {
-    id: 2,
-    phoneNumber: '2222222222',
-    name: 'Mike Driver',
-    role: 'driver',
-    email: 'driver@example.com',
-  },
-  {
-    id: 3,
-    phoneNumber: '3333333333',
-    name: 'Sarah Owner',
-    role: 'owner',
-    email: 'owner@example.com',
-  },
-];
+import apiClient, { API_ENDPOINTS } from './AuthService';
 
 // User Services
 const UserServices = {
@@ -164,18 +139,31 @@ const UserServices = {
   },
 
   // Get all users (admin only)
-  getAllUsers: async (filter = {}) => {
+  getAllUsers: async () => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.AUTH.LIST);
-      // return await httpClient.get(url, { params: filter });
-
+      const response = await apiClient.get(API_ENDPOINTS.USER.GET_ALL);
       return {
         success: true,
-        data: mockUsers,
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching users:', error);
+      throw error;
+    }
+  },
+
+  // Get user by ID
+  getUserById: async (userId) => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.USER.GET_BY_ID, {
+        params: { UserID: userId },
+      });
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      console.error('Error fetching user:', error);
       throw error;
     }
   },

@@ -3,32 +3,16 @@
  * API calls for owner/school management
  */
 
-import { buildURL, API_ENDPOINTS, httpClient } from '../config/apiConfig';
-
-// Mock owner data for development
-const mockOwners = [
-  {
-    id: 1,
-    name: 'Sarah Owner',
-    phoneNumber: '3333333333',
-    email: 'owner@example.com',
-    companyName: 'Safety Bus Transport',
-    totalBuses: 5,
-    totalDrivers: 5,
-  },
-];
+import apiClient, { API_ENDPOINTS } from './AuthService';
 
 const OwnerServices = {
   // Get all owners
-  getAllOwners: async (filter = {}) => {
+  getAllOwners: async () => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.OWNERS.LIST);
-      // return await httpClient.get(url, { params: filter });
-
+      const response = await apiClient.get(API_ENDPOINTS.OWNER.GET_ALL);
       return {
         success: true,
-        data: mockOwners,
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching owners:', error);
@@ -39,13 +23,12 @@ const OwnerServices = {
   // Get owner by ID
   getOwner: async (ownerId) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.OWNERS.GET, { id: ownerId });
-      // return await httpClient.get(url);
-
+      const response = await apiClient.get(API_ENDPOINTS.OWNER.GET_BY_ID, {
+        params: { OwnerID: ownerId },
+      });
       return {
         success: true,
-        data: mockOwners.find(o => o.id === ownerId) || { id: ownerId },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching owner:', error);

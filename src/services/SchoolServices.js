@@ -3,19 +3,16 @@
  * API calls for school management
  */
 
-import { buildURL, API_ENDPOINTS, httpClient } from '../config/apiConfig';
+import apiClient, { API_ENDPOINTS } from './AuthService';
 
 const SchoolServices = {
   // Get all schools
-  getAllSchools: async (filter = {}) => {
+  getAllSchools: async () => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.SCHOOLS.LIST);
-      // return await httpClient.get(url, { params: filter });
-
+      const response = await apiClient.get(API_ENDPOINTS.SCHOOL.GET_ALL);
       return {
         success: true,
-        data: [],
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching schools:', error);
@@ -26,13 +23,12 @@ const SchoolServices = {
   // Get school by ID
   getSchool: async (schoolId) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.SCHOOLS.GET, { id: schoolId });
-      // return await httpClient.get(url);
-
+      const response = await apiClient.get(API_ENDPOINTS.SCHOOL.GET_BY_ID, {
+        params: { SchoolID: schoolId },
+      });
       return {
         success: true,
-        data: { id: schoolId },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching school:', error);

@@ -3,19 +3,16 @@
  * API calls for bus management
  */
 
-import { buildURL, API_ENDPOINTS, httpClient } from '../config/apiConfig';
+import apiClient, { API_ENDPOINTS } from './AuthService';
 
 const BusServices = {
   // Get all buses
-  getAllBuses: async (filter = {}) => {
+  getAllBuses: async () => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.BUSES.LIST);
-      // return await httpClient.get(url, { params: filter });
-
+      const response = await apiClient.get(API_ENDPOINTS.BUS.GET_ALL);
       return {
         success: true,
-        data: [],
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching buses:', error);
@@ -23,16 +20,15 @@ const BusServices = {
     }
   },
 
-  // Get bus by ID
-  getBus: async (busId) => {
+  // Get bus by number plate
+  getBusByNumberPlate: async (numberPlate) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.BUSES.GET, { id: busId });
-      // return await httpClient.get(url);
-
+      const response = await apiClient.get(API_ENDPOINTS.BUS.GET_BY_NUMBERPLATE, {
+        params: { NumberPlate: numberPlate },
+      });
       return {
         success: true,
-        data: { id: busId },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching bus:', error);
