@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Bus, 
   User, 
@@ -15,14 +15,41 @@ import {
   Save,
   FileText,
   Wrench,
-  Calendar
+  Calendar,
+  Loader2
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
+import BusServices from '../../services/BusServices';
 
 function Fleet({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [busFleet, setBusFleet] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch buses from API
+  useEffect(() => {
+    const fetchBuses = async () => {
+      try {
+        setLoading(true);
+        const response = await BusServices.getAllBuses();
+        if (response.success && Array.isArray(response.data)) {
+          setBusFleet(response.data);
+        } else {
+          setBusFleet([]);
+        }
+      } catch (err) {
+        console.error('Error fetching buses:', err);
+        setError('Failed to load buses');
+        setBusFleet([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBuses();
+  }, []);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingBus, setEditingBus] = useState(null);
@@ -87,54 +114,6 @@ function Fleet({ onMenuClick, setActiveTab }) {
     { id: 'DRV-003', name: 'Robert Brown' },
     { id: 'DRV-004', name: 'Lisa Davis' },
     { id: 'DRV-005', name: 'James Wilson' },
-  ];
-
-  const busFleet = [
-    { 
-      plate: "ABC 1234",
-      vehicle: "Blue Bird Vision",
-      status: "Active",
-      driver: "Michael Smith",
-      capacity: 45,
-      insuranceExpiry: "2024-12-31",
-      licenseExpiry: "2025-06-30"
-    },
-    { 
-      plate: "DEF 5678",
-      vehicle: "IC Bus CE",
-      status: "Active",
-      driver: "Sarah Johnson",
-      capacity: 45,
-      insuranceExpiry: "2024-11-15",
-      licenseExpiry: "2025-05-20"
-    },
-    { 
-      plate: "GHI 9012",
-      vehicle: "Thomas Built C2",
-      status: "Delayed",
-      driver: "Robert Brown",
-      capacity: 40,
-      insuranceExpiry: "2024-10-30",
-      licenseExpiry: "2025-04-15"
-    },
-    { 
-      plate: "JKL 3456",
-      vehicle: "Blue Bird Vision",
-      status: "Maintenance",
-      driver: "Unassigned",
-      capacity: 45,
-      insuranceExpiry: "2025-01-20",
-      licenseExpiry: "2025-07-10"
-    },
-    { 
-      plate: "MNO 7890",
-      vehicle: "IC Bus CE MaxForce",
-      status: "Active",
-      driver: "James Wilson",
-      capacity: 50,
-      insuranceExpiry: "2024-12-15",
-      licenseExpiry: "2025-06-01"
-    },
   ];
 
   const getStatusColor = (status) => {

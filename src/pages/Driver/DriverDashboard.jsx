@@ -24,9 +24,45 @@ import { Html5QrcodeScanner } from 'html5-qrcode';
 import DriverHeader from '../../components/Driver/DriverHeader';
 import DriverFooter from '../../components/Driver/DriverFooter';
 import NotificationServices from '../../services/NotificationServices';
+import StudentServices from '../../services/StudentServices';
 
 function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
-  const [notifications] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch data from APIs
+  useEffect(() => {
+    const fetchDriverData = async () => {
+      try {
+        setLoading(true);
+        const [notificationResponse, studentResponse] = await Promise.all([
+          NotificationServices.getAllNotifications(),
+          StudentServices.getAllStudents()
+        ]);
+
+        if (notificationResponse.success && Array.isArray(notificationResponse.data)) {
+          setNotifications(notificationResponse.data);
+        } else {
+          setNotifications([]);
+        }
+        if (studentResponse.success && Array.isArray(studentResponse.data)) {
+          setStudents(studentResponse.data);
+        } else {
+          setStudents([]);
+        }
+      } catch (err) {
+        console.error('Error fetching driver data:', err);
+        setError('Failed to load driver data');
+        setNotifications([]);
+        setStudents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDriverData();
+  }, []);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
   const [studentAttendance, setStudentAttendance] = useState({});
@@ -65,14 +101,7 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
     currentLocation: "Maple Street"
   });
 
-  // Student roster for route
-  const [students] = useState([
-    { id: 1, name: "Emma Wilson", grade: "5", stop: "Maple St", image: "https://via.placeholder.com/48x48?text=Emma", phone: "+1-555-0101", status: "pending", rfid: "RFID001" },
-    { id: 2, name: "Noah Johnson", grade: "6", stop: "Oak Ave", image: "https://via.placeholder.com/48x48?text=Noah", phone: "+1-555-0102", status: "pending", rfid: "RFID002" },
-    { id: 3, name: "Olivia Brown", grade: "5", stop: "Pine Rd", image: "https://via.placeholder.com/48x48?text=Olivia", phone: "+1-555-0103", status: "pending", rfid: "RFID003" },
-    { id: 4, name: "Liam Garcia", grade: "6", stop: "Cedar Ln", image: "https://via.placeholder.com/48x48?text=Liam", phone: "+1-555-0104", status: "pending", rfid: "RFID004" },
-    { id: 5, name: "Ava Martinez", grade: "5", stop: "Elm St", image: "https://via.placeholder.com/48x48?text=Ava", phone: "+1-555-0105", status: "pending", rfid: "RFID005" },
-  ]);
+  // Student roster for route (remove hardcoded data)
 
   // Initialize attendance
   useEffect(() => {

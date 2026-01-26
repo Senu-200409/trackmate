@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Route as RouteIcon,
   MapPin,
@@ -16,70 +16,83 @@ import {
   Eye,
   Edit,
   Navigation,
-  QrCode
+  QrCode,
+  Loader2
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
+// Note: Routes API not available yet, using mock data
 
 function Routes({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [showQrModal, setShowQrModal] = useState(false);
+  const [routes, setRoutes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const routes = [
-    { 
-      id: 1,
-      name: "Route A - Morning",
-      status: "Active",
-      bus: "BUS-001",
-      driver: "Michael Smith",
-      students: 42,
-      distance: "15.5 km",
-      time: "7:00 AM"
-    },
-    { 
-      id: 2,
-      name: "Route B - Morning",
-      status: "Active",
-      bus: "BUS-002",
-      driver: "Sarah Johnson",
-      students: 38,
-      distance: "12.8 km",
-      time: "7:15 AM"
-    },
-    { 
-      id: 3,
-      name: "Route C - Morning",
-      status: "Delayed",
-      bus: "BUS-003",
-      driver: "Robert Brown",
-      students: 31,
-      distance: "10.2 km",
-      time: "7:30 AM"
-    },
-    { 
-      id: 4,
-      name: "Route A - Afternoon",
-      status: "Scheduled",
-      bus: "BUS-001",
-      driver: "Michael Smith",
-      students: 42,
-      distance: "15.5 km",
-      time: "3:00 PM"
-    },
-    { 
-      id: 5,
-      name: "Route D - Morning",
-      status: "Inactive",
-      bus: "BUS-004",
-      driver: "Unassigned",
-      students: 0,
-      distance: "8.5 km",
-      time: "7:45 AM"
-    },
-  ];
+  // Mock data until routes API is available
+  useEffect(() => {
+    const fetchRoutes = () => {
+      setTimeout(() => {
+        setRoutes([
+          { 
+            id: 1,
+            name: "Route A - Morning",
+            status: "Active",
+            bus: "BUS-001",
+            driver: "Michael Smith",
+            students: 42,
+            distance: "15.5 km",
+            time: "7:00 AM"
+          },
+          { 
+            id: 2,
+            name: "Route B - Morning",
+            status: "Active",
+            bus: "BUS-002",
+            driver: "Sarah Johnson",
+            students: 38,
+            distance: "12.8 km",
+            time: "7:15 AM"
+          },
+          { 
+            id: 3,
+            name: "Route C - Morning",
+            status: "Delayed",
+            bus: "BUS-003",
+            driver: "Robert Brown",
+            students: 31,
+            distance: "10.2 km",
+            time: "7:30 AM"
+          },
+          { 
+            id: 4,
+            name: "Route A - Afternoon",
+            status: "Scheduled",
+            bus: "BUS-001",
+            driver: "Michael Smith",
+            students: 42,
+            distance: "15.5 km",
+            time: "3:00 PM"
+          },
+          { 
+            id: 5,
+            name: "Route D - Morning",
+            status: "Inactive",
+            bus: "BUS-004",
+            driver: "Unassigned",
+            students: 0,
+            distance: "8.5 km",
+            time: "7:45 AM"
+          }
+        ]);
+        setLoading(false);
+      }, 1000);
+    };
+    fetchRoutes();
+  }, []);
 
   const getStatusColor = (status) => {
     switch(status) {

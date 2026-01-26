@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   User,
@@ -17,14 +17,41 @@ import {
   X,
   Save,
   FileText,
-  Shield
+  Shield,
+  Loader2
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
+import DriverServices from '../../services/DriverServices';
 
 function Drivers({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [drivers, setDrivers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch drivers from API
+  useEffect(() => {
+    const fetchDrivers = async () => {
+      try {
+        setLoading(true);
+        const response = await DriverServices.getAllDrivers();
+        if (response.success && Array.isArray(response.data)) {
+          setDrivers(response.data);
+        } else {
+          setDrivers([]);
+        }
+      } catch (err) {
+        console.error('Error fetching drivers:', err);
+        setError('Failed to load drivers');
+        setDrivers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDrivers();
+  }, []);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingDriver, setEditingDriver] = useState(null);
@@ -85,69 +112,6 @@ function Drivers({ onMenuClick, setActiveTab }) {
     setShowEditModal(false);
     setEditingDriver(null);
   };
-
-  const drivers = [
-    { 
-      id: "DRV-001",
-      name: "Michael Smith", 
-      phone: "+1 234-567-8901",
-      licenseNumber: "CDL-A-12345",
-      license: "CDL-A",
-      status: "On Duty",
-      trips: 156,
-      attendance: 98,
-      assignedBus: "BUS-001",
-      route: "Route A"
-    },
-    { 
-      id: "DRV-002",
-      name: "Sarah Johnson", 
-      phone: "+1 234-567-8902",
-      licenseNumber: "CDL-B-23456",
-      license: "CDL-B",
-      status: "On Duty",
-      trips: 142,
-      attendance: 96,
-      assignedBus: "BUS-002",
-      route: "Route B"
-    },
-    { 
-      id: "DRV-003",
-      name: "Robert Brown", 
-      phone: "+1 234-567-8903",
-      licenseNumber: "CDL-A-34567",
-      license: "CDL-A",
-      status: "On Route",
-      trips: 138,
-      attendance: 94,
-      assignedBus: "BUS-003",
-      route: "Route C"
-    },
-    { 
-      id: "DRV-004",
-      name: "Lisa Davis", 
-      phone: "+1 234-567-8904",
-      licenseNumber: "CDL-B-45678",
-      license: "CDL-B",
-      status: "Off Duty",
-      trips: 125,
-      attendance: 92,
-      assignedBus: "BUS-005",
-      route: "Route E"
-    },
-    { 
-      id: "DRV-005",
-      name: "James Wilson", 
-      phone: "+1 234-567-8905",
-      licenseNumber: "CDL-A-56789",
-      license: "CDL-A",
-      status: "On Leave",
-      trips: 118,
-      attendance: 90,
-      assignedBus: "Unassigned",
-      route: "N/A"
-    },
-  ];
 
   const getStatusColor = (status) => {
     switch(status) {

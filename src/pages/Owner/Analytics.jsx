@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -13,13 +13,56 @@ import {
   ArrowDownRight,
   PieChart,
   Activity,
-  Target
+  Target,
+  Loader2
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
+import BusServices from '../../services/BusServices';
+import DriverServices from '../../services/DriverServices';
+import StudentServices from '../../services/StudentServices';
 
 function Analytics({ onMenuClick, setActiveTab }) {
   const [selectedPeriod, setSelectedPeriod] = useState('monthly');
+  const [analyticsData, setAnalyticsData] = useState({
+    totalBuses: 0,
+    totalDrivers: 0,
+    totalStudents: 0,
+    activeBuses: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch analytics data from APIs
+  useEffect(() => {
+    const fetchAnalyticsData = async () => {
+      try {
+        setLoading(true);
+        const [busResponse, driverResponse, studentResponse] = await Promise.all([
+          BusServices.getAllBuses(),
+          DriverServices.getAllDrivers(),
+          StudentServices.getAllStudents()
+        ]);
+
+        const busData = busResponse.success && Array.isArray(busResponse.data) ? busResponse.data : [];
+        const driverData = driverResponse.success && Array.isArray(driverResponse.data) ? driverResponse.data : [];
+        const studentData = studentResponse.success && Array.isArray(studentResponse.data) ? studentResponse.data : [];
+
+        setAnalyticsData({
+          totalBuses: busData.length,
+          activeBuses: busData.filter(bus => bus.status === 'Active').length,
+          totalDrivers: driverData.length,
+          totalStudents: studentData.length
+        });
+      } catch (err) {
+        console.error('Error fetching analytics data:', err);
+        setError('Failed to load analytics data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnalyticsData();
+  }, []);
   
   const financialData = [
     { month: "Jan", revenue: 38000, expenses: 28000, profit: 10000 },

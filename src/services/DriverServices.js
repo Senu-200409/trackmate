@@ -114,10 +114,10 @@ const DriverServices = {
       // const url = buildURL(API_ENDPOINTS.DRIVERS.LOCATION, { id: driverId });
       // return await httpClient.get(url);
 
-      const driver = mockDrivers.find(d => d.id === driverId);
+      // Mock location until API is available
       return {
         success: true,
-        data: driver?.currentLocation || { lat: 28.7041, lng: 77.1025 },
+        data: { lat: 28.7041, lng: 77.1025 },
       };
     } catch (error) {
       console.error('Error fetching location:', error);

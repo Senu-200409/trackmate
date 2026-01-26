@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   Activity,
   Bus,
@@ -10,10 +10,12 @@ import {
   Radio,
   Save,
   Search,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
+import DeviceServices from '../../services/DeviceServices';
 
 const availableBuses = [
   { id: 'BUS-101', name: 'Bus 101' },
@@ -21,38 +23,32 @@ const availableBuses = [
   { id: 'BUS-305', name: 'Bus 305' }
 ];
 
-const initialDevices = [
-  {
-    deviceId: 'DEV-001',
-    deviceName: 'North Gate RFID',
-    deviceType: 'RFID',
-    status: 'active',
-    busId: 'BUS-101',
-    installationDate: '2023-08-01',
-    lastMaintenance: '2023-12-10'
-  },
-  {
-    deviceId: 'DEV-002',
-    deviceName: 'Route 5 GPS',
-    deviceType: 'GPS',
-    status: 'maintenance',
-    busId: '',
-    installationDate: '2023-06-15',
-    lastMaintenance: '2024-01-05'
-  },
-  {
-    deviceId: 'DEV-003',
-    deviceName: 'West Lot Camera',
-    deviceType: 'Camera',
-    status: 'offline',
-    busId: 'BUS-203',
-    installationDate: '2023-10-20',
-    lastMaintenance: '2024-02-18'
-  }
-];
-
 function Devices({ onMenuClick, setActiveTab }) {
-  const [devices, setDevices] = useState(initialDevices);
+  const [devices, setDevices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch devices from API
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        setLoading(true);
+        const response = await DeviceServices.getAllDevices();
+        if (response.success && Array.isArray(response.data)) {
+          setDevices(response.data);
+        } else {
+          setDevices([]);
+        }
+      } catch (err) {
+        console.error('Error fetching devices:', err);
+        setError('Failed to load devices');
+        setDevices([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDevices();
+  }, []);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);

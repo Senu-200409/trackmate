@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   Phone,
@@ -14,13 +14,40 @@ import {
   FileText,
   Building,
   Edit,
-  UserPlus
+  UserPlus,
+  Loader2
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
+import ParentServices from '../../services/ParentServices';
 
 function Parents({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [parentsList, setParentsList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch parents from API
+  useEffect(() => {
+    const fetchParents = async () => {
+      try {
+        setLoading(true);
+        const response = await ParentServices.getAllParents();
+        if (response.success && Array.isArray(response.data)) {
+          setParentsList(response.data);
+        } else {
+          setParentsList([]);
+        }
+      } catch (err) {
+        console.error('Error fetching parents:', err);
+        setError('Failed to load parents');
+        setParentsList([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchParents();
+  }, []);
   const [filterStatus, setFilterStatus] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -77,69 +104,6 @@ function Parents({ onMenuClick, setActiveTab }) {
     setShowEditModal(false);
     setEditingParent(null);
   };
-
-  const parentsList = [
-    {
-      id: 'PAR-001',
-      name: 'Robert Johnson',
-      email: 'robert.j@email.com',
-      phone: '+1 212-555-0100',
-      address: '123 Oak Street',
-      city: 'New York',
-      children: 1,
-      status: 'Active'
-    },
-    {
-      id: 'PAR-002',
-      name: 'Michael Chen',
-      email: 'michael.c@email.com',
-      phone: '+1 212-555-0101',
-      address: '456 Pine Avenue',
-      city: 'New York',
-      children: 1,
-      status: 'Active'
-    },
-    {
-      id: 'PAR-003',
-      name: 'Carlos Martinez',
-      email: 'carlos.m@email.com',
-      phone: '+1 617-555-0102',
-      address: '789 Elm Road',
-      city: 'Boston',
-      children: 1,
-      status: 'Active'
-    },
-    {
-      id: 'PAR-004',
-      name: 'James Williams',
-      email: 'james.w@email.com',
-      phone: '+1 215-555-0103',
-      address: '321 Maple Lane',
-      city: 'Philadelphia',
-      children: 1,
-      status: 'Active'
-    },
-    {
-      id: 'PAR-005',
-      name: 'Diego Garcia',
-      email: 'diego.g@email.com',
-      phone: '+1 312-555-0104',
-      address: '654 Birch Court',
-      city: 'Chicago',
-      children: 1,
-      status: 'Active'
-    },
-    {
-      id: 'PAR-006',
-      name: 'Susan Anderson',
-      email: 'susan.a@email.com',
-      phone: '+1 303-555-0105',
-      address: '987 Cedar Drive',
-      city: 'Denver',
-      children: 2,
-      status: 'Active'
-    }
-  ];
 
   const filteredParents = parentsList.filter(parent => {
     const matchesSearch = parent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

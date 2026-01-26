@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, GraduationCap, Shield, Clock, Users, AlertCircle, CheckCircle, Loader } from 'lucide-react';
+import UserServices from '../../services/UserServices';
 
 function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp, setShowOtp, onNavigateToRegister }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -240,7 +241,7 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
                 </div>
               </div>
             </div>
-          )}
+          
 
           <div className="space-y-6">
 

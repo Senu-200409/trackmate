@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   School, 
   MapPin, 
@@ -14,13 +14,40 @@ import {
   FileText,
   Building,
   Edit,
-  Edit2
+  Edit2,
+  Loader2
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
+import SchoolServices from '../../services/SchoolServices';
 
 function Schools({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [schoolsList, setSchoolsList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch schools from API
+  useEffect(() => {
+    const fetchSchools = async () => {
+      try {
+        setLoading(true);
+        const response = await SchoolServices.getAllSchools();
+        if (response.success && Array.isArray(response.data)) {
+          setSchoolsList(response.data);
+        } else {
+          setSchoolsList([]);
+        }
+      } catch (err) {
+        console.error('Error fetching schools:', err);
+        setError('Failed to load schools');
+        setSchoolsList([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSchools();
+  }, []);
   const [filterStatus, setFilterStatus] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -75,54 +102,6 @@ function Schools({ onMenuClick, setActiveTab }) {
     setShowEditModal(false);
     setEditingSchool(null);
   };
-
-  const schoolsList = [
-    {
-      id: 1,
-      name: 'Riverside Academy',
-      address: '123 River Street',
-      city: 'New York',
-      phone: '+1 212-555-0100',
-      students: 450,
-      status: 'Active'
-    },
-    {
-      id: 2,
-      name: 'Greenfield International',
-      address: '456 Green Avenue',
-      city: 'Boston',
-      phone: '+1 617-555-0101',
-      students: 680,
-      status: 'Active'
-    },
-    {
-      id: 3,
-      name: 'Sunridge Public School',
-      address: '789 Sun Boulevard',
-      city: 'Philadelphia',
-      phone: '+1 215-555-0102',
-      students: 320,
-      status: 'Active'
-    },
-    {
-      id: 4,
-      name: 'Lakeside High School',
-      address: '321 Lake Drive',
-      city: 'Chicago',
-      phone: '+1 312-555-0103',
-      students: 750,
-      status: 'Active'
-    },
-    {
-      id: 5,
-      name: 'Mountain View School',
-      address: '654 Mountain Road',
-      city: 'Denver',
-      phone: '+1 303-555-0104',
-      students: 290,
-      status: 'Active'
-    }
-  ];
 
   const filteredSchools = schoolsList.filter(school => {
     const matchesSearch = school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

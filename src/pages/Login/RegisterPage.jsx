@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Phone, GraduationCap, Shield, Clock, Users, AlertCircle, Loader, ArrowLeft } from 'lucide-react';
+import UserServices from '../../services/UserServices';
 
 function RegisterPage({ onNavigateToLogin }) {
   const [isLoading, setIsLoading] = useState(false);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   School,
@@ -12,13 +12,40 @@ import {
   X,
   Save,
   FileText,
-  Edit
+  Edit,
+  Loader2
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
+import StudentServices from '../../services/StudentServices';
 
 function Students({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [studentsList, setStudentsList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch students from API
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
+        const response = await StudentServices.getAllStudents();
+        if (response.success && Array.isArray(response.data)) {
+          setStudentsList(response.data);
+        } else {
+          setStudentsList([]);
+        }
+      } catch (err) {
+        console.error('Error fetching students:', err);
+        setError('Failed to load students');
+        setStudentsList([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStudents();
+  }, []);
   const [filterSchool, setFilterSchool] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -101,64 +128,6 @@ function Students({ onMenuClick, setActiveTab }) {
     { id: 'PAR-003', name: 'Carlos Martinez' },
     { id: 'PAR-004', name: 'James Williams' },
     { id: 'PAR-005', name: 'Sarah Taylor' },
-  ];
-
-  const studentsList = [
-    {
-      id: 'STU-001',
-      name: 'Emma Johnson',
-      phone: '+1 212-555-0100',
-      email: 'emma.j@email.com',
-      address: '123 Oak Street',
-      city: 'New York',
-      parentId: 'PAR-001',
-      schoolId: 'SCH-001',
-      status: 'Active'
-    },
-    {
-      id: 'STU-002',
-      name: 'Liam Chen',
-      phone: '+1 212-555-0101',
-      email: 'liam.c@email.com',
-      address: '456 Pine Avenue',
-      city: 'New York',
-      parentId: 'PAR-002',
-      schoolId: 'SCH-001',
-      status: 'Active'
-    },
-    {
-      id: 'STU-003',
-      name: 'Olivia Martinez',
-      phone: '+1 617-555-0102',
-      email: 'olivia.m@email.com',
-      address: '789 Elm Road',
-      city: 'Boston',
-      parentId: 'PAR-003',
-      schoolId: 'SCH-002',
-      status: 'Active'
-    },
-    {
-      id: 'STU-004',
-      name: 'Noah Williams',
-      phone: '+1 215-555-0103',
-      email: 'noah.w@email.com',
-      address: '321 Maple Lane',
-      city: 'Philadelphia',
-      parentId: 'PAR-004',
-      schoolId: 'SCH-003',
-      status: 'Active'
-    },
-    {
-      id: 'STU-005',
-      name: 'Ava Taylor',
-      phone: '+1 773-555-0104',
-      email: 'ava.t@email.com',
-      address: '654 Birch Court',
-      city: 'Chicago',
-      parentId: 'PAR-005',
-      schoolId: 'SCH-004',
-      status: 'Active'
-    }
   ];
 
   const filteredStudents = studentsList.filter(student => {

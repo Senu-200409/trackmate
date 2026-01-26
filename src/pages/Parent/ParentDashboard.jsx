@@ -15,9 +15,34 @@ import {
 } from 'lucide-react';
 import ParentHeader from '../../components/Parent/ParentHeader';
 import ParentFooter from '../../components/Parent/ParentFooter';
+import NotificationServices from '../../services/NotificationServices';
 
 function ParentDashboard({ onMenuClick, setActiveTab, onLogout }) {
-  const [notifications] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch notifications from API
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true);
+        const response = await NotificationServices.getAllNotifications();
+        if (response.success && Array.isArray(response.data)) {
+          setNotifications(response.data);
+        } else {
+          setNotifications([]);
+        }
+      } catch (err) {
+        console.error('Error fetching notifications:', err);
+        setError('Failed to load notifications');
+        setNotifications([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNotifications();
+  }, []);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
   const [childStatus] = useState({

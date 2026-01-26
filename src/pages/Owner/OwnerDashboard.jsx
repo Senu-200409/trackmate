@@ -21,20 +21,59 @@ import {
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
+import BusServices from '../../services/BusServices';
+import DriverServices from '../../services/DriverServices';
+import StudentServices from '../../services/StudentServices';
+import NotificationServices from '../../services/NotificationServices';
 
 function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
   const [notifications] = useState([]);
   const [currentAlertIndex, setCurrentAlertIndex] = useState(0);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
-  
-  const [businessStats] = useState({
-    activeBuses: 24,
-    totalBuses: 28,
-    totalDrivers: 32,
-    driversOnDuty: 28,
-    totalStudents: 1248,
-    activeRoutes: 8
+  const [businessStats, setBusinessStats] = useState({
+    activeBuses: 0,
+    totalBuses: 0,
+    totalDrivers: 0,
+    driversOnDuty: 0,
+    totalStudents: 0,
+    activeRoutes: 0
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch dashboard data from APIs
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const [busResponse, driverResponse, studentResponse] = await Promise.all([
+          BusServices.getAllBuses(),
+          DriverServices.getAllDrivers(),
+          StudentServices.getAllStudents()
+        ]);
+
+        const busData = busResponse.success && Array.isArray(busResponse.data) ? busResponse.data : [];
+        const driverData = driverResponse.success && Array.isArray(driverResponse.data) ? driverResponse.data : [];
+        const studentData = studentResponse.success && Array.isArray(studentResponse.data) ? studentResponse.data : [];
+
+        const stats = {
+          totalBuses: busData.length,
+          activeBuses: busData.filter(bus => bus.status === 'Active' || bus.status === 'active').length,
+          totalDrivers: driverData.length,
+          driversOnDuty: driverData.filter(driver => driver.status === 'On Duty' || driver.status === 'On Route').length,
+          totalStudents: studentData.length,
+          activeRoutes: 8 // This would come from routes API when available
+        };
+        setBusinessStats(stats);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboardData();
+  }, []);
 
   // Update date/time every second
   useEffect(() => {

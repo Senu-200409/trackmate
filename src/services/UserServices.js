@@ -33,8 +33,8 @@ const UserServices = {
       // const url = buildURL(API_ENDPOINTS.AUTH.VERIFY_OTP);
       // return await httpClient.post(url, { phoneNumber, otp });
 
-      // Mock response
-      const mockUser = mockUsers.find(u => u.phoneNumber === phoneNumber) || {
+      // Mock response until API is available
+      const mockUser = {
         id: Date.now(),
         phoneNumber,
         name: 'User',
@@ -109,10 +109,10 @@ const UserServices = {
       // const url = buildURL(API_ENDPOINTS.AUTH.PROFILE);
       // return await httpClient.get(url);
 
-      const user = mockUsers.find(u => u.id === userId);
+      // Mock user until API is available
       return {
         success: true,
-        data: user || { id: userId, name: 'User' },
+        data: { id: userId, name: 'User' },
       };
     } catch (error) {
       console.error('Error fetching profile:', error);
