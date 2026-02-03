@@ -74,6 +74,12 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
   const [manualRfid, setManualRfid] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');
 
+  // Special messaging modal state
+  const [showMessaging, setShowMessaging] = useState(false);
+  const [messageType, setMessageType] = useState(''); // 'individual' or 'broadcast'
+  const [selectedStudentForMessage, setSelectedStudentForMessage] = useState('');
+  const [messageContent, setMessageContent] = useState('');
+
   useEffect(() => {
     if (scanning) {
       scannerRef.current = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
@@ -266,6 +272,87 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
     setShowManualEntry(false);
     setManualRfid('');
     setSelectedStudent('');
+  };
+
+  // Special messaging handlers
+  const handleSpecialMessage = () => {
+    setShowMessaging(true);
+    setMessageType('');
+    setSelectedStudentForMessage('');
+    setMessageContent('');
+  };
+
+  const handleMessageTypeSelect = (type) => {
+    setMessageType(type);
+  };
+
+  const handleSendMessage = async () => {
+    if (!messageContent.trim()) {
+      alert('Please enter a message');
+      return;
+    }
+
+    try {
+      if (messageType === 'individual') {
+        if (!selectedStudentForMessage) {
+          alert('Please select a student');
+          return;
+        }
+        const student = students.find(s => s.id === parseInt(selectedStudentForMessage));
+        if (student) {
+          const notificationData = {
+            type: 'special-message',
+            title: 'Special Message from Driver',
+            message: messageContent.trim(),
+            recipientType: 'individual',
+            recipientId: student.id,
+            senderId: 'driver-1',
+            timestamp: new Date().toISOString(),
+            priority: 'normal'
+          };
+          
+          const response = await NotificationServices.sendNotification(notificationData);
+          if (response.success) {
+            alert(`Message sent to ${student.name} successfully!`);
+          } else {
+            alert('Failed to send message. Please try again.');
+          }
+        }
+      } else if (messageType === 'broadcast') {
+        const notificationData = {
+          type: 'special-message',
+          title: 'Special Message from Driver',
+          message: messageContent.trim(),
+          recipientType: 'broadcast',
+          senderId: 'driver-1',
+          timestamp: new Date().toISOString(),
+          priority: 'normal'
+        };
+        
+        const response = await NotificationServices.sendNotification(notificationData);
+        if (response.success) {
+          alert('Broadcast message sent to all students successfully!');
+        } else {
+          alert('Failed to send broadcast message. Please try again.');
+        }
+      }
+      
+      // Close modal and reset state
+      setShowMessaging(false);
+      setMessageType('');
+      setSelectedStudentForMessage('');
+      setMessageContent('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Error sending message. Please check your connection.');
+    }
+  };
+
+  const handleCloseMessaging = () => {
+    setShowMessaging(false);
+    setMessageType('');
+    setSelectedStudentForMessage('');
+    setMessageContent('');
   };
 
   const mapRef = useRef(null);
@@ -477,6 +564,13 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
                   >
                     <Users className="w-4 h-4 text-[#FFE066]" />
                   </button>
+                  <button 
+                    onClick={handleSpecialMessage}
+                    className="bg-gradient-to-r from-[#F5C518] to-[#FFE066] rounded-lg px-3 py-2 border border-[#F5C518]/20 hover:from-[#FFE066] hover:to-[#F5C518] transition-colors shadow-sm"
+                    title="Special Message"
+                  >
+                    <span className="text-xs font-medium text-[#1E3A5F]">Special Message</span>
+                  </button>
                 </div>
               </div>
 
@@ -495,6 +589,13 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
                   title="Manual Student Entry"
                 >
                   <Users className="w-4 h-4 text-[#FFE066] mx-auto" />
+                </button>
+                <button 
+                  onClick={handleSpecialMessage}
+                  className="bg-gradient-to-r from-[#F5C518] to-[#FFE066] rounded-lg px-3 py-2 border border-[#F5C518]/20 hover:from-[#FFE066] hover:to-[#F5C518] transition-colors shadow-sm flex-1 max-w-[120px]"
+                  title="Special Message"
+                >
+                  <span className="text-xs font-medium text-[#1E3A5F] text-center">Special Message</span>
                 </button>
               </div>
             </div>
@@ -823,6 +924,178 @@ function DriverDashboard({ onMenuClick, setActiveTab, onLogout }) {
                 Mark as Picked Up
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Special Messaging Modal */}
+      {showMessaging && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-4 sm:p-6 max-w-lg mx-auto w-full max-h-[90vh] overflow-y-auto">
+            {!messageType ? (
+              // Message Type Selection
+              <>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Special Message</h3>
+                <p className="text-sm text-gray-600 mb-4 sm:mb-6">Choose how you want to send your message</p>
+                
+                <div className="space-y-3 sm:space-y-4">
+                  <button
+                    onClick={() => handleMessageTypeSelect('individual')}
+                    className="w-full p-4 border-2 border-blue-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Users className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Individual Message</h4>
+                        <p className="text-sm text-gray-600">Send message to a specific student</p>
+                      </div>
+                    </div>
+                  </button>
+                  
+                  <button
+                    onClick={() => handleMessageTypeSelect('broadcast')}
+                    className="w-full p-4 border-2 border-green-200 rounded-lg hover:border-green-400 hover:bg-green-50 transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <AlertTriangle className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Broadcast Message</h4>
+                        <p className="text-sm text-gray-600">Send message to all students on this route</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+                
+                <div className="flex justify-end mt-6">
+                  <button 
+                    onClick={handleCloseMessaging}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : messageType === 'individual' ? (
+              // Individual Message Interface
+              <>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Send Individual Message</h3>
+                <p className="text-sm text-gray-600 mb-4 sm:mb-6">Select a student and compose your message</p>
+                
+                <div className="space-y-4 sm:space-y-6">
+                  {/* Student Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Student *
+                    </label>
+                    <select
+                      value={selectedStudentForMessage}
+                      onChange={(e) => setSelectedStudentForMessage(e.target.value)}
+                      className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
+                      required
+                    >
+                      <option value="">Choose a student...</option>
+                      {students.map((student) => (
+                        <option key={student.id} value={student.id}>
+                          {student.name} - Grade {student.grade} ({student.stop})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Message Content */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Message *
+                    </label>
+                    <textarea
+                      value={messageContent}
+                      onChange={(e) => setMessageContent(e.target.value)}
+                      placeholder="Enter your message..."
+                      rows={4}
+                      className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base resize-none"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-2 mt-6 sm:mt-8">
+                  <button 
+                    onClick={() => setMessageType('')}
+                    className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 text-sm sm:text-base font-medium"
+                  >
+                    Back
+                  </button>
+                  <button 
+                    onClick={handleCloseMessaging}
+                    className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 text-sm sm:text-base font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleSendMessage}
+                    className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm sm:text-base font-medium"
+                  >
+                    Send Message
+                  </button>
+                </div>
+              </>
+            ) : (
+              // Broadcast Message Interface
+              <>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Send Broadcast Message</h3>
+                <p className="text-sm text-gray-600 mb-4 sm:mb-6">This message will be sent to all students on this route</p>
+                
+                <div className="space-y-4 sm:space-y-6">
+                  {/* Message Content */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Message *
+                    </label>
+                    <textarea
+                      value={messageContent}
+                      onChange={(e) => setMessageContent(e.target.value)}
+                      placeholder="Enter your broadcast message..."
+                      rows={4}
+                      className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base resize-none"
+                      required
+                    />
+                  </div>
+                  
+                  {/* Recipients Info */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="flex items-center gap-2 text-green-800">
+                      <Users className="w-4 h-4" />
+                      <span className="text-sm font-medium">Recipients: All {students.length} students on this route</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-2 mt-6 sm:mt-8">
+                  <button 
+                    onClick={() => setMessageType('')}
+                    className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 text-sm sm:text-base font-medium"
+                  >
+                    Back
+                  </button>
+                  <button 
+                    onClick={handleCloseMessaging}
+                    className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 text-sm sm:text-base font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleSendMessage}
+                    className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm sm:text-base font-medium"
+                  >
+                    Send Broadcast
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
