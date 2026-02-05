@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Phone, GraduationCap, Shield, Clock, Users, AlertCircle, Loader, ArrowLeft } from 'lucide-react';
+import { Phone, GraduationCap, Shield, Clock, Users, AlertCircle, Loader, ArrowLeft, Upload, X } from 'lucide-react';
 import UserServices from '../../services/UserServices';
+import ImageCropper from '../../components/ImageCropper';
 
 function RegisterPage({ onNavigateToLogin }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,6 +14,8 @@ function RegisterPage({ onNavigateToLogin }) {
   const [registerErrors, setRegisterErrors] = useState({});
   const [registerSuccess, setRegisterSuccess] = useState('');
   const [error, setError] = useState('');
+  const [showImageCropper, setShowImageCropper] = useState(false);
+  const [croppedImagePreview, setCroppedImagePreview] = useState(null);
 
   const handleRegisterChange = (e) => {
     const { name, value } = e.target;
@@ -23,6 +26,26 @@ function RegisterPage({ onNavigateToLogin }) {
     }
     setRegisterSuccess('');
     setError('');
+  };
+
+  const handleImageSelect = () => {
+    setShowImageCropper(true);
+  };
+
+  const handleImageCropSave = (croppedImageDataUrl) => {
+    setCroppedImagePreview(croppedImageDataUrl);
+    // Convert data URL to blob for form submission
+    fetch(croppedImageDataUrl)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], 'profile-image.png', { type: 'image/png' });
+        setRegisterForm(prev => ({ ...prev, tud_profile_image: file }));
+      });
+  };
+
+  const handleRemoveImage = () => {
+    setCroppedImagePreview(null);
+    setRegisterForm(prev => ({ ...prev, tud_profile_image: null }));
   };
 
   const validateRegisterForm = () => {
@@ -60,24 +83,28 @@ function RegisterPage({ onNavigateToLogin }) {
 
     setIsLoading(true);
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await UserServices.register(registerForm);
       
-      setRegisterSuccess('Account created successfully! Redirecting to login...');
-      setRegisterForm({
-        tud_user_name: '',
-        tud_phone: '',
-        tud_user_type: 'P',
-        tud_profile_image: null
-      });
-      setRegisterErrors({});
+      if (response.success) {
+        setRegisterSuccess('Account created successfully! Redirecting to login...');
+        setRegisterForm({
+          tud_user_name: '',
+          tud_phone: '',
+          tud_user_type: 'P',
+          tud_profile_image: null
+        });
+        setRegisterErrors({});
 
-      // Auto-redirect to login after 2 seconds
-      setTimeout(() => {
-        onNavigateToLogin();
-      }, 2000);
+        // Auto-redirect to login after 2 seconds
+        setTimeout(() => {
+          onNavigateToLogin();
+        }, 2000);
+      } else {
+        setError('Failed to create account. Please try again.');
+      }
     } catch (err) {
-      setError('Failed to create account. Please try again.');
+      console.error('Registration error:', err);
+      setError(err.response?.data?.Message || 'Failed to create account. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -221,21 +248,57 @@ function RegisterPage({ onNavigateToLogin }) {
 
                 {/* Profile Image (Optional) */}
                 <div>
-                  <label htmlFor="profileImage" className="block text-sm font-medium text-[#1E3A5F] mb-2">
+                  <label className="block text-sm font-medium text-[#1E3A5F] mb-2">
                     Profile Image (Optional)
                   </label>
-                  <input
-                    id="profileImage"
-                    type="file"
-                    name="tud_profile_image"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      setRegisterForm(prev => ({ ...prev, tud_profile_image: file }));
-                    }}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl outline-none transition-all focus:ring-2 focus:ring-[#F5C518] focus:border-[#F5C518]"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Upload your profile picture (JPG, PNG, max 5MB)</p>
+
+                  {/* Image Preview and Upload Area */}
+                  <div className="space-y-3">
+                    {croppedImagePreview ? (
+                      <div className="flex items-center gap-4 p-4 border-2 border-gray-200 rounded-xl bg-gray-50">
+                        <div className="relative">
+                          <img
+                            src={croppedImagePreview}
+                            alt="Profile preview"
+                            className="w-16 h-16 rounded-full object-cover border-2 border-[#F5C518]"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                            title="Remove image"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-[#1E3A5F]">Profile image selected</p>
+                          <p className="text-xs text-gray-500">Click to change or remove</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleImageSelect}
+                          className="px-3 py-1 text-sm bg-[#1E3A5F] text-white rounded-lg hover:bg-[#3B6FB6] transition-colors"
+                        >
+                          Change
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleImageSelect}
+                        className="w-full flex flex-col items-center gap-3 p-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-[#F5C518] hover:bg-yellow-50 transition-colors"
+                      >
+                        <Upload className="w-8 h-8 text-gray-400" />
+                        <div className="text-center">
+                          <p className="text-sm font-medium text-[#1E3A5F]">Upload Profile Picture</p>
+                          <p className="text-xs text-gray-500">Click to select and crop your image</p>
+                        </div>
+                      </button>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-gray-500 mt-1">Upload your profile picture (JPG, PNG, max 5MB) - Will be cropped to circular shape</p>
                 </div>
 
                 <button
@@ -290,6 +353,14 @@ function RegisterPage({ onNavigateToLogin }) {
           </div>
         </div>
       </div>
+
+      {/* Image Cropper Modal */}
+      <ImageCropper
+        isOpen={showImageCropper}
+        onClose={() => setShowImageCropper(false)}
+        onSave={handleImageCropSave}
+        title="Crop Profile Picture"
+      />
     </div>
   );
 }

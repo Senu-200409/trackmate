@@ -87,14 +87,25 @@ const UserServices = {
   // Register new user
   register: async (userData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.AUTH.REGISTER);
-      // return await httpClient.post(url, userData);
+      const formData = new FormData();
+      formData.append('Phone', userData.tud_phone);
+      formData.append('UserType', userData.tud_user_type);
+      formData.append('UserName', userData.tud_user_name);
+      formData.append('ProfileImage', userData.tud_profile_image || '');
+
+      const response = await apiClient.post('/UserDetails/RegisterUser', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
       return {
         success: true,
-        message: 'Registration successful',
-        data: { ...userData, id: Date.now() },
+        message: response.data.Message,
+        data: { 
+          userId: response.data.UserID,
+          statusCode: response.data.StatusCode 
+        },
       };
     } catch (error) {
       console.error('Error registering:', error);
