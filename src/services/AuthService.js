@@ -6,7 +6,7 @@
 import axios from 'axios';
 
 // Base URL for all API calls
-export const API_BASE_URL = 'http://localhost:60748';
+export const API_BASE_URL = 'https://trackmate.dockyardsoftware.com';
 
 // Create axios instance with default configuration
 const apiClient = axios.create({
