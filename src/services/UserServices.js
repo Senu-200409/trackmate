@@ -13,6 +13,19 @@ const UserServices = {
       const response = await apiClient.post(
         `${API_ENDPOINTS.USER.SEND_OTP}?Phone=${phoneNumber}`
       );
+      
+      // Always store the phone number after successful OTP send
+      localStorage.setItem('otpPhone', phoneNumber);
+      
+      // Store OTP from ResultSet (backend returns OTP in ResultSet field)
+      if (response.data && response.data.ResultSet) {
+        localStorage.setItem('sentOtp', response.data.ResultSet);
+      }
+      
+      // Log for debugging
+      console.log('OTP sent to phone:', phoneNumber);
+      console.log('OTP response data:', response.data);
+      
       return {
         success: true,
         message: 'OTP sent successfully',
@@ -24,31 +37,65 @@ const UserServices = {
     }
   },
 
-  // Verify OTP
+  // Verify OTP by comparing with localStorage
   verifyOTP: async (phoneNumber, otp) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.AUTH.VERIFY_OTP);
-      // return await httpClient.post(url, { phoneNumber, otp });
-
-      // Mock response until API is available
-      const mockUser = {
-        id: Date.now(),
-        phoneNumber,
-        name: 'User',
-        role: 'parent',
-      };
-
+      // Get OTP from localStorage
+      const storedOtp = localStorage.getItem('sentOtp');
+      const storedPhone = localStorage.getItem('otpPhone');
+      
+      // Log for debugging
+      console.log('Verifying OTP...');
+      console.log('Stored phone:', storedPhone, 'Input phone:', phoneNumber);
+      console.log('Stored OTP:', storedOtp, 'Input OTP:', otp);
+      
+      // Check if phone number was stored
+      if (!storedPhone) {
+        throw new Error('No OTP session found. Please send OTP first.');
+      }
+      
+      // Compare phone numbers
+      if (storedPhone !== phoneNumber) {
+        throw new Error(`Phone number does not match. Expected: ${storedPhone}, Got: ${phoneNumber}`);
+      }
+      
+      // Compare OTPs
+      if (storedOtp !== otp) {
+        throw new Error('Invalid OTP');
+      }
+      
       return {
         success: true,
-        message: 'Login successful',
-        data: {
-          user: mockUser,
-          token: `mock-token-${Date.now()}`,
-        },
+        message: 'OTP verified successfully',
       };
     } catch (error) {
       console.error('Error verifying OTP:', error);
+      throw error;
+    }
+  },
+
+  // Get user by phone number
+  getUserByPhone: async (phoneNumber) => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.USER.GET_ALL);
+      
+      // Find user with matching phone number
+      if (response.data && response.data.ResultSet) {
+        const user = response.data.ResultSet.find(
+          u => u.Phone === phoneNumber
+        );
+        
+        if (user) {
+          return {
+            success: true,
+            data: user,
+          };
+        }
+      }
+      
+      throw new Error('User not found');
+    } catch (error) {
+      console.error('Error fetching user by phone:', error);
       throw error;
     }
   },

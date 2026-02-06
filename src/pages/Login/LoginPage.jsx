@@ -167,26 +167,38 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
 
     setIsLoading(true);
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Verify OTP from localStorage
+      await UserServices.verifyOTP(phoneNumber, otp);
       
-      let role = 'parent';
-      if (phoneNumber === '1111111111') {
-        role = 'parent';
-      } else if (phoneNumber === '2222222222') {
-        role = 'driver';
-      } else if (phoneNumber === '3333333333') {
+      // Fetch user details to get UserType
+      const userResponse = await UserServices.getUserByPhone(phoneNumber);
+      const user = userResponse.data;
+      
+      // Map UserType to role
+      let role = 'parent'; // default
+      if (user.UserType === 'O') {
         role = 'owner';
+      } else if (user.UserType === 'P') {
+        role = 'parent';
+      } else if (user.UserType === 'D') {
+        role = 'driver';
       }
+      
+      // Store user info in localStorage
+      localStorage.setItem('authToken', `token-${Date.now()}`);
+      localStorage.setItem('userPhone', phoneNumber);
+      localStorage.setItem('userRole', role);
+      localStorage.setItem('userType', user.UserType);
 
       setSuccessMessage('Login successful! Redirecting...');
       
-      // Simulate redirect delay
+      // Redirect after 500ms
       setTimeout(() => {
         onLogin(role);
       }, 500);
     } catch (err) {
-      setError('Invalid OTP. Please try again.');
+      setError('Invalid OTP. Please check and try again.');
+      setOtpError('OTP verification failed');
     } finally {
       setIsLoading(false);
     }

@@ -117,6 +117,7 @@ export const API_ENDPOINTS = {
     GET_ALL: '/UserDetails/GetAllUsers',
     GET_BY_ID: '/UserDetails/GetUserByUserID',
     SEND_OTP: '/UserDetails/SendOtp',
+    VERIFY_OTP: '/UserDetails/VerifyOtp',
   },
 };
 
