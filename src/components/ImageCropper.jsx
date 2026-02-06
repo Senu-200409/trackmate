@@ -3,7 +3,7 @@ import { X, Upload, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
 
 function ImageCropper({ isOpen, onClose, onSave, title = "Upload Profile Picture" }) {
   const [image, setImage] = useState(null);
-  const [croppedArea, setCroppedArea] = useState({ x: 0, y: 0, width: 200, height: 200 });
+  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -20,41 +20,72 @@ function ImageCropper({ isOpen, onClose, onSave, title = "Upload Profile Picture
         setImage(event.target.result);
         setZoom(1);
         setRotation(0);
-        setCroppedArea({ x: 0, y: 0, width: 200, height: 200 });
+        setImagePosition({ x: 0, y: 0 });
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleMouseDown = (e) => {
+  const handlePointerDown = (clientX, clientY) => {
     setIsDragging(true);
-    setDragStart({ x: e.clientX, y: e.clientY });
+    setDragStart({ x: clientX, y: clientY });
+  };
+
+  const handlePointerMove = (clientX, clientY) => {
+    if (!isDragging) return;
+    const deltaX = clientX - dragStart.x;
+    const deltaY = clientY - dragStart.y;
+
+    setImagePosition(prev => ({
+      x: prev.x + deltaX,
+      y: prev.y + deltaY,
+    }));
+
+    setDragStart({ x: clientX, y: clientY });
+  };
+
+  const handlePointerUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    handlePointerDown(e.clientX, e.clientY);
   };
 
   const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    
-    const deltaX = e.clientX - dragStart.x;
-    const deltaY = e.clientY - dragStart.y;
-
-    setCroppedArea(prev => ({
-      ...prev,
-      x: Math.max(-prev.width / 2, Math.min(prev.width / 2, prev.x + deltaX)),
-      y: Math.max(-prev.height / 2, Math.min(prev.height / 2, prev.y + deltaY))
-    }));
-
-    setDragStart({ x: e.clientX, y: e.clientY });
+    e.preventDefault();
+    handlePointerMove(e.clientX, e.clientY);
   };
 
   const handleMouseUp = () => {
-    setIsDragging(false);
+    handlePointerUp();
+  };
+
+  // Touch handlers
+  const handleTouchStart = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      const t = e.touches[0];
+      handlePointerDown(t.clientX, t.clientY);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      const t = e.touches[0];
+      handlePointerMove(t.clientX, t.clientY);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    handlePointerUp();
   };
 
   useEffect(() => {
     if (image && canvasRef.current) {
       drawPreview();
     }
-  }, [image, croppedArea, zoom, rotation]);
+  }, [image, imagePosition, zoom, rotation]);
 
   const drawPreview = () => {
     const canvas = canvasRef.current;
@@ -80,13 +111,13 @@ function ImageCropper({ isOpen, onClose, onSave, title = "Upload Profile Picture
       ctx.translate(canvasSize / 2, canvasSize / 2);
       ctx.rotate((rotation * Math.PI) / 180);
 
-      // Draw scaled image
+      // Draw scaled image at current position
       const imgWidth = img.width * zoom;
       const imgHeight = img.height * zoom;
       ctx.drawImage(
         img,
-        -imgWidth / 2 + croppedArea.x,
-        -imgHeight / 2 + croppedArea.y,
+        -imgWidth / 2 + imagePosition.x,
+        -imgHeight / 2 + imagePosition.y,
         imgWidth,
         imgHeight
       );
@@ -141,8 +172,8 @@ function ImageCropper({ isOpen, onClose, onSave, title = "Upload Profile Picture
       const imgHeight = img.height * zoom;
       ctx.drawImage(
         img,
-        -imgWidth / 2 + croppedArea.x,
-        -imgHeight / 2 + croppedArea.y,
+        -imgWidth / 2 + imagePosition.x,
+        -imgHeight / 2 + imagePosition.y,
         imgWidth,
         imgHeight
       );
@@ -160,7 +191,7 @@ function ImageCropper({ isOpen, onClose, onSave, title = "Upload Profile Picture
     setImage(null);
     setZoom(1);
     setRotation(0);
-    setCroppedArea({ x: 0, y: 0, width: 200, height: 200 });
+    setImagePosition({ x: 0, y: 0 });
     onClose();
   };
 
@@ -217,7 +248,10 @@ function ImageCropper({ isOpen, onClose, onSave, title = "Upload Profile Picture
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
                   onMouseLeave={handleMouseUp}
-                  style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  style={{ cursor: isDragging ? 'grabbing' : 'grab', touchAction: 'none' }}
                 >
                   <canvas
                     ref={canvasRef}
