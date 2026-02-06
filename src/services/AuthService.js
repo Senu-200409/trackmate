@@ -6,11 +6,8 @@
 import axios from 'axios';
 
 // Base URL for all API calls
-// In development, use empty string to leverage proxy in package.json
-// In production, use the full URL
-export const API_BASE_URL = process.env.NODE_ENV === 'development' 
-  ? '' 
-  : 'https://trackmate.dockyardsoftware.com';
+// Use production URL for both development and production
+export const API_BASE_URL = 'https://trackmate.dockyardsoftware.com';
 
 // Create axios instance with default configuration
 const apiClient = axios.create({
