@@ -1,11 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, Menu, X, User, LogOut, Settings, Building2, BarChart3, Bus, Users, AlignJustify, School, Radio } from 'lucide-react';
 import ProfileSlideOver from '../ProfileSlideOver';
+import UserServices from '../../services/UserServices';
 
 function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyName = "TrackMate Fleet", onMenuClick, setActiveTab, onLogout, profileImage = null, onProfileImageUpdate = null }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [ownerImage, setOwnerImage] = useState(profileImage);
+  const [name, setName] = useState(ownerName);
+
+  useEffect(() => {
+    const savedName = localStorage.getItem('userName');
+    const savedImage = localStorage.getItem('profileImage');
+    const savedId = localStorage.getItem('userId');
+    if (savedName) setName(savedName);
+    if (savedImage) setOwnerImage(savedImage);
+
+    if (savedId) {
+      UserServices.getUserById(savedId)
+        .then(res => {
+          const d = res.data && res.data.ResultSet ? res.data.ResultSet[0] : null;
+          if (d) {
+            if (d.UserName) setName(d.UserName);
+            if (d.ProfileImage) {
+              setOwnerImage(d.ProfileImage);
+              localStorage.setItem('profileImage', d.ProfileImage);
+            }
+            if (d.UserID) localStorage.setItem('userId', d.UserID);
+            if (d.UserName) localStorage.setItem('userName', d.UserName);
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   return (
     <header className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white shadow-xl">
@@ -84,7 +111,7 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
                 {ownerImage ? (
                   <img 
                     src={ownerImage} 
-                    alt={ownerName}
+                    alt={name}
                     className="w-9 h-9 rounded-full object-cover group-hover:ring-2 ring-[#F5C518] transition-all"
                   />
                 ) : (
@@ -93,7 +120,7 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
                   </div>
                 )}
                 <div className="text-left">
-                  <span className="text-sm font-semibold block leading-tight">{ownerName}</span>
+                  <span className="text-sm font-semibold block leading-tight">{name}</span>
                   <span className="text-xs text-[#FFE066] font-medium">Administrator</span>
                 </div>
               </button>
@@ -189,11 +216,12 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
       <ProfileSlideOver
         isOpen={profileOpen}
         onClose={() => setProfileOpen(false)}
-        user={{ name: ownerName, role: 'Owner', company: companyName, profileImage: ownerImage }}
+        user={{ name: name, role: 'Owner', company: companyName, profileImage: ownerImage }}
         onSettings={() => { setActiveTab('settings'); setProfileOpen(false); }}
         onLogout={() => { onLogout && onLogout(); setProfileOpen(false); }}
         onImageUpdate={(image) => {
           setOwnerImage(image);
+          localStorage.setItem('profileImage', image);
           if (onProfileImageUpdate) onProfileImageUpdate(image);
         }}
       />

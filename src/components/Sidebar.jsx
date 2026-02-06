@@ -74,6 +74,9 @@ function Sidebar({ activeTab, setActiveTab, onLogout, isOpen, userRole, onClose 
     return names[userRole] || 'User';
   };
 
+  const persistedUserName = typeof window !== 'undefined' ? localStorage.getItem('userName') : null;
+  const persistedProfileImage = typeof window !== 'undefined' ? localStorage.getItem('profileImage') : null;
+
   return (
     <>
       {/* Dark overlay - only visible when sidebar is open */}
@@ -144,11 +147,17 @@ function Sidebar({ activeTab, setActiveTab, onLogout, isOpen, userRole, onClose 
         {/* User profile section */}
         <div className="p-4 border-t border-[#3B6FB6]/30 bg-[#162d4a]/50">
           <div className="flex items-center gap-3 mb-4 px-3 py-2.5 rounded-xl bg-[#3B6FB6]/20">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F5C518] to-[#FFE066] flex items-center justify-center shadow-lg">
-              <User className="w-5 h-5 text-[#1E3A5F]" />
+            <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-[#F5C518] to-[#FFE066] flex items-center justify-center shadow-lg">
+              {persistedProfileImage ? (
+                <img src={persistedProfileImage} alt={persistedUserName || 'User'} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-10 h-10 flex items-center justify-center">
+                  <User className="w-5 h-5 text-[#1E3A5F]" />
+                </div>
+              )}
             </div>
             <div>
-              <p className="font-semibold text-sm text-white">{getUserName()}</p>
+              <p className="font-semibold text-sm text-white">{persistedUserName || getUserName()}</p>
               <p className="text-[#FFE066] text-xs capitalize">{userRole}</p>
             </div>
           </div>

@@ -1,11 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, Menu, X, User, LogOut, Settings, GraduationCap, AlignJustify } from 'lucide-react';
 import ProfileSlideOver from '../ProfileSlideOver';
+import UserServices from '../../services/UserServices';
 
 function ParentHeader({ notifications = [], parentName = "Parent", onMenuClick, setActiveTab, onLogout, profileImage = null, onProfileImageUpdate = null }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [parentImage, setParentImage] = useState(profileImage);
+  const [name, setName] = useState(parentName);
+
+  useEffect(() => {
+    const savedName = localStorage.getItem('userName');
+    const savedImage = localStorage.getItem('profileImage');
+    const savedId = localStorage.getItem('userId');
+    if (savedName) setName(savedName);
+    if (savedImage) setParentImage(savedImage);
+
+    if (savedId) {
+      UserServices.getUserById(savedId)
+        .then(res => {
+          const d = res.data && res.data.ResultSet ? res.data.ResultSet[0] : null;
+          if (d) {
+            if (d.UserName) setName(d.UserName);
+            if (d.ProfileImage) {
+              setParentImage(d.ProfileImage);
+              localStorage.setItem('profileImage', d.ProfileImage);
+            }
+            if (d.UserID) localStorage.setItem('userId', d.UserID);
+            if (d.UserName) localStorage.setItem('userName', d.UserName);
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   return (
     <header className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white shadow-xl">
@@ -66,7 +93,7 @@ function ParentHeader({ notifications = [], parentName = "Parent", onMenuClick, 
                 {parentImage ? (
                   <img 
                     src={parentImage} 
-                    alt={parentName}
+                    alt={name}
                     className="w-8 h-8 rounded-full object-cover group-hover:ring-2 ring-[#F5C518] transition-all"
                   />
                 ) : (
@@ -74,7 +101,7 @@ function ParentHeader({ notifications = [], parentName = "Parent", onMenuClick, 
                     <User className="w-5 h-5 text-[#1E3A5F]" />
                   </div>
                 )}
-                <span className="text-sm font-medium">Profile</span>
+                <span className="text-sm font-medium">{name || 'Profile'}</span>
               </button>
             </div>
           </div>
@@ -122,11 +149,12 @@ function ParentHeader({ notifications = [], parentName = "Parent", onMenuClick, 
       <ProfileSlideOver
         isOpen={profileOpen}
         onClose={() => setProfileOpen(false)}
-        user={{ name: parentName, role: 'Parent', profileImage: parentImage }}
+        user={{ name: name, role: 'Parent', profileImage: parentImage }}
         onSettings={() => { setActiveTab('settings'); setProfileOpen(false); }}
         onLogout={() => { onLogout && onLogout(); setProfileOpen(false); }}
         onImageUpdate={(image) => {
           setParentImage(image);
+          localStorage.setItem('profileImage', image);
           if (onProfileImageUpdate) onProfileImageUpdate(image);
         }}
       />

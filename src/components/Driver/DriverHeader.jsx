@@ -1,11 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, Menu, X, User, LogOut, Settings, Navigation, Bus, AlignJustify, Home } from 'lucide-react';
 import ProfileSlideOver from '../ProfileSlideOver';
+import UserServices from '../../services/UserServices';
 
 function DriverHeader({ notifications = [], driverName = "Driver", onMenuClick, setActiveTab, onLogout, profileImage = null, onProfileImageUpdate = null }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [driverImage, setDriverImage] = useState(profileImage);
+  const [name, setName] = useState(driverName);
+
+  useEffect(() => {
+    // load persisted user info from localStorage
+    const savedName = localStorage.getItem('userName');
+    const savedImage = localStorage.getItem('profileImage');
+    const savedId = localStorage.getItem('userId');
+    if (savedName) setName(savedName);
+    if (savedImage) setDriverImage(savedImage);
+
+    // optionally refresh from API
+    if (savedId) {
+      UserServices.getUserById(savedId)
+        .then(res => {
+          const d = res.data && res.data.ResultSet ? res.data.ResultSet[0] : null;
+          if (d) {
+            if (d.UserName) setName(d.UserName);
+            if (d.ProfileImage) {
+              setDriverImage(d.ProfileImage);
+              localStorage.setItem('profileImage', d.ProfileImage);
+            }
+            if (d.UserID) localStorage.setItem('userId', d.UserID);
+            if (d.UserName) localStorage.setItem('userName', d.UserName);
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   return (
     <header className="bg-gradient-to-r from-[#1E3A5F] via-[#2D5A9E] to-[#1E3A5F] text-white shadow-xl">
@@ -67,7 +96,7 @@ function DriverHeader({ notifications = [], driverName = "Driver", onMenuClick, 
                 {driverImage ? (
                   <img 
                     src={driverImage} 
-                    alt={driverName}
+                    alt={name}
                     className="w-8 h-8 rounded-full object-cover group-hover:ring-2 ring-[#F5C518] transition-all"
                   />
                 ) : (
@@ -75,7 +104,7 @@ function DriverHeader({ notifications = [], driverName = "Driver", onMenuClick, 
                     <User className="w-5 h-5 text-[#1E3A5F]" />
                   </div>
                 )}
-                <span className="text-sm font-medium">{driverName}</span>
+                <span className="text-sm font-medium">{name}</span>
               </button>
             </div>
           </div>
@@ -136,12 +165,13 @@ function DriverHeader({ notifications = [], driverName = "Driver", onMenuClick, 
       <ProfileSlideOver
         isOpen={profileOpen}
         onClose={() => setProfileOpen(false)}
-        user={{ name: driverName, role: 'Driver', profileImage: driverImage }}
+        user={{ name: name, role: 'Driver', profileImage: driverImage }}
         onSettings={() => { setActiveTab('settings'); setProfileOpen(false); }}
         onLogout={() => { onLogout && onLogout(); setProfileOpen(false); }}
         onImageUpdate={(image) => {
-          setDriverImage(image);
-          if (onProfileImageUpdate) onProfileImageUpdate(image);
+            setDriverImage(image);
+            localStorage.setItem('profileImage', image);
+            if (onProfileImageUpdate) onProfileImageUpdate(image);
         }}
       />
         onLogout={() => { onLogout && onLogout(); setProfileOpen(false); }}

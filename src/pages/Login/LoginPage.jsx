@@ -189,6 +189,10 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
       localStorage.setItem('userPhone', phoneNumber);
       localStorage.setItem('userRole', role);
       localStorage.setItem('userType', user.UserType);
+      // Persist user details for dashboards
+      if (user.UserID) localStorage.setItem('userId', user.UserID);
+      if (user.UserName) localStorage.setItem('userName', user.UserName);
+      if (user.ProfileImage) localStorage.setItem('profileImage', user.ProfileImage);
 
       setSuccessMessage('Login successful! Redirecting...');
       
