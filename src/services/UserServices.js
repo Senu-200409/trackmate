@@ -10,7 +10,9 @@ const UserServices = {
   // Send OTP to phone number
   sendOTP: async (phoneNumber) => {
     try {
-      const response = await apiClient.get(`${API_ENDPOINTS.USER.SEND_OTP}?Phone=${phoneNumber}`);
+      const response = await apiClient.get(
+        `${API_ENDPOINTS.USER.SEND_OTP}?Phone=${phoneNumber}`
+      );
       return {
         success: true,
         message: 'OTP sent successfully',
