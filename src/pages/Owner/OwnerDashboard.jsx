@@ -17,7 +17,8 @@ import {
   School,
   Radio,
   Calendar,
-  Clock
+  Clock,
+  UserCheck
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
@@ -25,8 +26,10 @@ import BusServices from '../../services/BusServices';
 import DriverServices from '../../services/DriverServices';
 import StudentServices from '../../services/StudentServices';
 import NotificationServices from '../../services/NotificationServices';
+import AcceptNewUsers from './AcceptNewUsers';
 
 function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
+  const [showAcceptUsers, setShowAcceptUsers] = useState(false);
   const [notifications] = useState([]);
   const [currentAlertIndex, setCurrentAlertIndex] = useState(0);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
@@ -134,6 +137,17 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
     }
   };
 
+  if (showAcceptUsers) {
+    return (
+      <AcceptNewUsers 
+        onMenuClick={onMenuClick} 
+        setActiveTab={setActiveTab} 
+        onLogout={onLogout}
+        onBack={() => setShowAcceptUsers(false)}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
       <OwnerHeader notifications={notifications} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} onLogout={onLogout} />
@@ -143,11 +157,36 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
           
           {/* Welcome Header */}
           <div className="bg-gradient-to-r from-[#1E3A5F] via-[#3B6FB6] to-[#1E3A5F] text-white rounded-2xl p-4 sm:p-5 md:p-6 border-b-4 border-[#F5C518]">
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
               <div className="flex-1">
                 <h1 className="text-lg sm:text-2xl md:text-3xl font-bold mb-1">Welcome back, David! 👋</h1>
                 <p className="text-xs sm:text-sm md:text-base text-[#FFE066]">Here's what's happening with your buses today</p>
               </div>
+
+              {/* Accept New Users Attention Button - Center */}
+              <style>{`
+                @keyframes pulse-attention {
+                  0%, 100% {
+                    box-shadow: 0 0 20px rgba(255, 193, 7, 0.8), 0 4px 12px rgba(255, 193, 7, 0.4);
+                    transform: scale(1);
+                  }
+                  50% {
+                    box-shadow: 0 0 30px rgba(255, 193, 7, 1), 0 4px 20px rgba(255, 193, 7, 0.6);
+                    transform: scale(1.02);
+                  }
+                }
+                .accept-users-btn {
+                  animation: pulse-attention 2s ease-in-out infinite;
+                }
+              `}</style>
+              <button 
+                onClick={() => setShowAcceptUsers(true)}
+                className="accept-users-btn flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FFC107] to-[#FFD54F] hover:from-[#FFB300] hover:to-[#FFC107] text-[#1E3A5F] font-bold text-sm shadow-lg hover:shadow-2xl transition-all active:scale-95 border-2 border-white/30 whitespace-nowrap flex-shrink-0"
+              >
+                <UserCheck className="w-5 h-5 flex-shrink-0" />
+                <span>Accept New Users</span>
+              </button>
+
               <div className="flex flex-col gap-2">
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20">
                   <div className="flex items-center gap-2">
