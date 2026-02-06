@@ -161,14 +161,10 @@ const UserServices = {
   // Get user profile
   getProfile: async (userId) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.AUTH.PROFILE);
-      // return await httpClient.get(url);
-
-      // Mock user until API is available
+      const response = await apiClient.get(API_ENDPOINTS.USER.GET_BY_ID, { params: { UserID: userId } });
       return {
         success: true,
-        data: { id: userId, name: 'User' },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -179,17 +175,29 @@ const UserServices = {
   // Update user profile
   updateProfile: async (userId, userData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.AUTH.UPDATE_PROFILE);
-      // return await httpClient.put(url, userData);
-
+      // Ensure payload contains UserID if backend expects it
+      const payload = { UserID: userId, ...userData };
+      const response = await apiClient.put(API_ENDPOINTS.USER.PUT, payload);
       return {
         success: true,
-        message: 'Profile updated successfully',
-        data: { id: userId, ...userData },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error updating profile:', error);
+      throw error;
+    }
+  },
+
+  // Add new user
+  addUser: async (userData) => {
+    try {
+      const response = await apiClient.post(API_ENDPOINTS.USER.ADD, userData);
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      console.error('Error adding user:', error);
       throw error;
     }
   },

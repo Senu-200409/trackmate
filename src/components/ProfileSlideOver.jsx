@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, User, Mail, Phone, CreditCard, Building2, Bus, School, Settings, LogOut, Camera } from 'lucide-react';
 import ImageCropper from './ImageCropper';
+import UserServices from '../services/UserServices';
 
 function ProfileSlideOver({ isOpen, onClose, user = {}, onSettings, onLogout, onImageUpdate }) {
   const [showImageCropper, setShowImageCropper] = useState(false);
@@ -12,6 +13,20 @@ function ProfileSlideOver({ isOpen, onClose, user = {}, onSettings, onLogout, on
     setProfileImage(croppedImage);
     if (onImageUpdate) {
       onImageUpdate(croppedImage);
+    }
+    // Persist to backend if we have a logged-in user
+    const storedId = localStorage.getItem('userId');
+    if (storedId) {
+      // fire-and-forget, but update localStorage on success
+      UserServices.updateProfile(storedId, { ProfileImage: croppedImage })
+        .then(res => {
+          try {
+            if (res && res.data) {
+              localStorage.setItem('profileImage', croppedImage);
+            }
+          } catch (e) { /* noop */ }
+        })
+        .catch(err => console.error('Failed to persist profile image:', err));
     }
   };
 

@@ -39,14 +39,10 @@ const OwnerServices = {
   // Create owner
   createOwner: async (ownerData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.OWNERS.CREATE);
-      // return await httpClient.post(url, ownerData);
-
+      const response = await apiClient.post(API_ENDPOINTS.OWNER.ADD, ownerData);
       return {
         success: true,
-        message: 'Owner created successfully',
-        data: { id: Date.now(), ...ownerData },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error creating owner:', error);
@@ -57,14 +53,13 @@ const OwnerServices = {
   // Update owner
   updateOwner: async (ownerId, ownerData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.OWNERS.UPDATE, { id: ownerId });
-      // return await httpClient.put(url, ownerData);
-
+      // Some backends expect the id in payload
+      const payload = { OwnerID: ownerId, ...ownerData };
+      // API uses POST for PutOwnerDetails on this backend
+      const response = await apiClient.post(API_ENDPOINTS.OWNER.PUT, payload);
       return {
         success: true,
-        message: 'Owner updated successfully',
-        data: { id: ownerId, ...ownerData },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error updating owner:', error);

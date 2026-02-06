@@ -37,16 +37,12 @@ const SchoolServices = {
   },
 
   // Create school
-  createSchool: async (schoolData) => {
+  addSchool: async (schoolData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.SCHOOLS.CREATE);
-      // return await httpClient.post(url, schoolData);
-
+      const response = await apiClient.post(API_ENDPOINTS.SCHOOL.ADD, schoolData);
       return {
         success: true,
-        message: 'School created successfully',
-        data: { id: Date.now(), ...schoolData },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error creating school:', error);
@@ -57,14 +53,12 @@ const SchoolServices = {
   // Update school
   updateSchool: async (schoolId, schoolData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.SCHOOLS.UPDATE, { id: schoolId });
-      // return await httpClient.put(url, schoolData);
-
+      // Some APIs expect the ID as part of the payload for PUT
+      const payload = { SchoolID: schoolId, ...schoolData };
+      const response = await apiClient.put(API_ENDPOINTS.SCHOOL.PUT, payload);
       return {
         success: true,
-        message: 'School updated successfully',
-        data: { id: schoolId, ...schoolData },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error updating school:', error);

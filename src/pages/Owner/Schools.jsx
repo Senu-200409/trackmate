@@ -68,18 +68,38 @@ function Schools({ onMenuClick, setActiveTab }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('New School Data:', formData);
-    // Here you would typically send data to backend
-    alert('School added successfully!');
-    setShowAddModal(false);
-    setFormData({
-      schoolName: '',
-      address: '',
-      city: '',
-      phoneNumber: '',
-      totalStudents: '',
-      status: 'active'
-    });
+    (async () => {
+      try {
+        const payload = {
+          SchoolName: formData.schoolName,
+          Address: formData.address,
+          City: formData.city,
+          Phone: formData.phoneNumber,
+          Students: Number(formData.totalStudents) || 0,
+          Status: formData.status === 'active' ? 'Active' : 'Inactive'
+        };
+        const res = await SchoolServices.addSchool(payload);
+        if (res.success) {
+          alert('School added successfully!');
+          setShowAddModal(false);
+          // refresh list
+          const listRes = await SchoolServices.getAllSchools();
+          if (listRes.success && Array.isArray(listRes.data)) setSchoolsList(listRes.data);
+        }
+      } catch (err) {
+        console.error('Add school error:', err);
+        alert('Failed to add school');
+      } finally {
+        setFormData({
+          schoolName: '',
+          address: '',
+          city: '',
+          phoneNumber: '',
+          totalStudents: '',
+          status: 'active'
+        });
+      }
+    })();
   };
 
   const handleEditClick = (school) => {
@@ -97,10 +117,29 @@ function Schools({ onMenuClick, setActiveTab }) {
 
   const handleUpdateSubmit = (e) => {
     e.preventDefault();
-    console.log('Updated School Data:', formData);
-    alert('School updated successfully!');
-    setShowEditModal(false);
-    setEditingSchool(null);
+    (async () => {
+      try {
+        const payload = {
+          SchoolName: formData.schoolName,
+          Address: formData.address,
+          City: formData.city,
+          Phone: formData.phoneNumber,
+          Students: Number(formData.totalStudents) || 0,
+          Status: formData.status === 'active' ? 'Active' : 'Inactive'
+        };
+        const res = await SchoolServices.updateSchool(editingSchool.id || editingSchool.schoolId || editingSchool.id, payload);
+        if (res.success) {
+          alert('School updated successfully!');
+          setShowEditModal(false);
+          setEditingSchool(null);
+          const listRes = await SchoolServices.getAllSchools();
+          if (listRes.success && Array.isArray(listRes.data)) setSchoolsList(listRes.data);
+        }
+      } catch (err) {
+        console.error('Update school error:', err);
+        alert('Failed to update school');
+      }
+    })();
   };
 
   const filteredSchools = schoolsList.filter(school => {

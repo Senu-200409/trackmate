@@ -70,6 +70,8 @@ export const API_ENDPOINTS = {
   SCHOOL: {
     GET_ALL: '/SchoolDetails/GetAllSchoolDetails',
     GET_BY_ID: '/SchoolDetails/GetSchoolDetailsBySchoolID',
+    ADD: '/SchoolDetails/AddSchoolDetails',
+    PUT: '/SchoolDetails/PutSchoolDetails',
   },
 
   // Bus endpoints
@@ -99,12 +101,16 @@ export const API_ENDPOINTS = {
   OWNER: {
     GET_ALL: '/OwnerDetails/GetAllOwnerDetails',
     GET_BY_ID: '/OwnerDetails/GetOwnerDetailsByOwnerID',
+    ADD: '/OwnerDetails/AddOwnerDetails',
+    PUT: '/OwnerDetails/PutOwnerDetails',
   },
 
   // Parent endpoints
   PARENT: {
     GET_ALL: '/ParentDetails/GetAllParentDetails',
     GET_BY_ID: '/ParentDetails/GetParentDetailsByParentID',
+    ADD: '/ParentDetails/AddParentDetails',
+    PUT: '/ParentDetails/PutParentDetails',
   },
 
   // Student endpoints
@@ -118,6 +124,8 @@ export const API_ENDPOINTS = {
     GET_BY_ID: '/UserDetails/GetUserByUserID',
     SEND_OTP: '/UserDetails/SendOtp',
     VERIFY_OTP: '/UserDetails/VerifyOtp',
+    ADD: '/UserDetails/AddUserDetails',
+    PUT: '/UserDetails/PutUserDetails',
   },
 };
 
