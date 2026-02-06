@@ -10,15 +10,11 @@ const UserServices = {
   // Send OTP to phone number
   sendOTP: async (phoneNumber) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.AUTH.SEND_OTP);
-      // return await httpClient.post(url, { phoneNumber });
-
-      // Mock response
+      const response = await apiClient.get(`${API_ENDPOINTS.USER.SEND_OTP}?Phone=${phoneNumber}`);
       return {
         success: true,
         message: 'OTP sent successfully',
-        data: { phoneNumber, expiresIn: 300 },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error sending OTP:', error);

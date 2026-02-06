@@ -119,9 +119,7 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
 
     setIsLoading(true);
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      const response = await UserServices.sendOTP(phoneNumber);
       setOtpSent(true);
       setShowOtp(true);
       setResendTimer(30);
@@ -144,8 +142,7 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
 
     setIsLoading(true);
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await UserServices.sendOTP(phoneNumber);
       
       setResendTimer(30);
       setSuccessMessage('OTP resent successfully');
