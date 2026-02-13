@@ -43,15 +43,43 @@ function AcceptNewUsers({ onMenuClick, setActiveTab, onLogout, onBack }) {
   };
 
   const handleAcceptUser = async (userId, userName) => {
-    // TODO: Add API call to accept/activate user
-    console.log('Accepting user:', userId, userName);
-    // This would call an API to update user status from 'P' to 'A'
+    try {
+      setLoading(true);
+      const response = await UserServices.updateUserStatus(userId, 'A');
+      
+      if (response.success) {
+        // Remove accepted user from list
+        setPendingUsers(pendingUsers.filter(user => user.UserID !== userId));
+        alert(`${userName} has been accepted successfully!`);
+      } else {
+        setError(`Failed to accept ${userName}`);
+      }
+    } catch (err) {
+      console.error('Error accepting user:', err);
+      setError(err.message || 'Failed to accept user. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRejectUser = async (userId, userName) => {
-    // TODO: Add API call to reject user
-    console.log('Rejecting user:', userId, userName);
-    // This would call an API to delete or deactivate user
+    try {
+      setLoading(true);
+      const response = await UserServices.updateUserStatus(userId, 'R');
+      
+      if (response.success) {
+        // Remove rejected user from list
+        setPendingUsers(pendingUsers.filter(user => user.UserID !== userId));
+        alert(`${userName} has been rejected successfully!`);
+      } else {
+        setError(`Failed to reject ${userName}`);
+      }
+    } catch (err) {
+      console.error('Error rejecting user:', err);
+      setError(err.message || 'Failed to reject user. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const userTypeInfo = {

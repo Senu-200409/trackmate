@@ -126,6 +126,7 @@ export const API_ENDPOINTS = {
     VERIFY_OTP: '/UserDetails/VerifyOtp',
     ADD: '/UserDetails/AddUserDetails',
     PUT: '/UserDetails/PutUserDetails',
+    UPDATE_STATUS: '/UserDetails/UpdateUserStatus',
   },
 };
 

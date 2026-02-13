@@ -248,6 +248,27 @@ const UserServices = {
       throw error;
     }
   },
+
+  // Update user status
+  updateUserStatus: async (userId, status) => {
+    try {
+      const response = await apiClient.post(
+        API_ENDPOINTS.USER.UPDATE_STATUS,
+        {
+          UserID: userId,
+          Status: status,
+        }
+      );
+      return {
+        success: true,
+        message: response.data.Result || 'User status updated successfully',
+        data: response.data,
+      };
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      throw error;
+    }
+  },
 };
 
 export default UserServices;
