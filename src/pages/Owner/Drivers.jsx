@@ -23,6 +23,7 @@ import {
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
 import DriverServices from '../../services/DriverServices';
+import UserServices from '../../services/UserServices';
 
 function Drivers({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -30,22 +31,93 @@ function Drivers({ onMenuClick, setActiveTab }) {
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [users, setUsers] = useState([]);
+
+  // Normalize driver status coming from DriverDetails (e.g. 'A') to UI-friendly labels
+  const normalizeDriverStatus = (s) => {
+    if (!s) return 'Off Duty';
+    const v = String(s).trim();
+    const up = v.toUpperCase();
+    if (up === 'A' || up === 'ACTIVE') return 'On Duty';
+    if (up === 'ON ROUTE' || up === 'ONROUTE' || up === 'ON_ROUTE') return 'On Route';
+    if (up === 'I' || up === 'INACTIVE' || up === 'OFF' || up === 'OFF DUTY' || up === 'OFF_DUTY') return 'Off Duty';
+    return v;
+  };
+
+  // Map API driver response to UI format (support DriverDetails fields like LicenseNo, LicenseType)
+  const mapDriverData = (apiDriver) => ({
+    id: apiDriver.DriverID || apiDriver.id || apiDriver.ID || '',
+    userId: apiDriver.UserID || apiDriver.UserId || apiDriver.userId || '',
+    name: apiDriver.DriverName || apiDriver.name || apiDriver.UserName || 'Unknown',
+    phone: apiDriver.Phone || apiDriver.phone || '',
+    licenseNumber: apiDriver.LicenseNo || apiDriver.LicenseNumber || apiDriver.licenseNumber || '',
+    license: apiDriver.LicenseType || apiDriver.license || 'CDL-B',
+    status: normalizeDriverStatus(apiDriver.Status || apiDriver.status || ''),
+    createdDate: apiDriver.CreateDate || apiDriver.Create_Date || apiDriver.CreatedDate || apiDriver.createdDate || '',
+    updatedDate: apiDriver.UpdatedDate || apiDriver.updatedDate || '',
+    assignedBus: apiDriver.AssignedBus || apiDriver.assignedBus || apiDriver.BusID || 'N/A',
+    route: apiDriver.Route || apiDriver.route || 'N/A',
+    trips: apiDriver.Trips || apiDriver.trips || 0,
+    attendance: apiDriver.Attendance || apiDriver.attendance || 0,
+    ...apiDriver // Keep all original fields
+  });
 
   // Fetch drivers from API
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
         setLoading(true);
-        const response = await DriverServices.getAllDrivers();
-        if (response.success && Array.isArray(response.data)) {
-          setDrivers(response.data);
-        } else {
-          setDrivers([]);
-        }
+
+        // Fetch drivers + all users in parallel (DriverDetails + UserDetails)
+        const [driverResp, usersResp] = await Promise.all([
+          DriverServices.getAllDrivers(),
+          UserServices.getAllUsers()
+        ]);
+
+        const driverList = driverResp && driverResp.data
+          ? (Array.isArray(driverResp.data) ? driverResp.data : driverResp.data.ResultSet || [])
+          : [];
+
+        const usersList = usersResp && usersResp.data
+          ? (Array.isArray(usersResp.data) ? usersResp.data : usersResp.data.ResultSet || [])
+          : [];
+
+        // keep users available for any UI needs
+        setUsers(usersList);
+
+        // map drivers and try to link matching user (by UserID, Phone or UserName)
+        const mappedDrivers = driverList.map((d) => {
+          const mapped = mapDriverData(d);
+
+          const match = usersList.find(u => {
+            if (!u) return false;
+            // match by UserID (primary), then phone, then username
+            if (u.UserID && d.UserID && String(u.UserID) === String(d.UserID)) return true;
+            if (u.UserID && d.DriverID && String(u.UserID) === String(d.DriverID)) return true;
+            if (u.Phone && (String(u.Phone) === String(d.Phone) || String(u.Phone) === String(mapped.phone))) return true;
+            if (u.UserName && mapped.name && String(u.UserName) === String(mapped.name)) return true;
+            return false;
+          });
+
+          if (match) {
+            mapped.linkedUser = match;
+            mapped.profileImage = match.ProfileImage || mapped.ProfileImage || mapped.profileImage;
+            // prefer linked user values for display
+            if (match.Phone) mapped.phone = match.Phone;
+            if (match.UserName) mapped.name = match.UserName;
+            // expose UserID from users API
+            mapped.userId = match.UserID || mapped.userId || '';
+          }
+
+          return mapped;
+        });
+
+        setDrivers(mappedDrivers);
       } catch (err) {
         console.error('Error fetching drivers:', err);
         setError('Failed to load drivers');
         setDrivers([]);
+        setUsers([]);
       } finally {
         setLoading(false);
       }
@@ -234,8 +306,12 @@ function Drivers({ onMenuClick, setActiveTab }) {
                 <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-[#1E3A5F] to-[#3B6FB6]">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-[#F5C518] flex items-center justify-center">
-                        <User className="w-6 h-6 text-[#1E3A5F]" />
+                      <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white bg-[#F5C518] flex items-center justify-center">
+                        {driver.profileImage ? (
+                          <img src={driver.profileImage} alt={driver.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <User className="w-6 h-6 text-[#1E3A5F]" />
+                        )}
                       </div>
                       <div>
                         <h3 className="font-bold text-white">{driver.name}</h3>
