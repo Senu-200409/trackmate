@@ -21,6 +21,7 @@ import {
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
 import BusServices from '../../services/BusServices';
+import DriverServices from '../../services/DriverServices';
 
 function Fleet({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,17 +30,42 @@ function Fleet({ onMenuClick, setActiveTab }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Normalize bus status from API
+  const normalizeBusStatus = (s) => {
+    if (!s) return 'Unknown';
+    const v = String(s).trim().toUpperCase();
+    if (v === 'A' || v === 'ACTIVE') return 'Active';
+    if (v === 'M' || v === 'MAINTENANCE') return 'Maintenance';
+    if (v === 'D' || v === 'DELAYED') return 'Delayed';
+    return s;
+  };
+
+  // Map API bus response fields to UI model
+  const mapBusData = (b) => ({
+    plate: b.NumberPlate || b.Plate || b.LicensePlate || b.plate || b.Number || '',
+    vehicle: b.VehicleName || b.Model || b.vehicle || b.Vehicle || '',
+    capacity: b.SeatingCapacity || b.Capacity || b.capacity || b.Seats || 0,
+    driver: b.DriverName || b.Driver || b.driver || b.AssignedDriver || 'Unassigned',
+    insuranceExpiry: b.InsuranceExpiry || b.InsuranceExpiryDate || b.insuranceExpiry || '',
+    licenseExpiry: b.LicenseExpiry || b.RegistrationExpiry || b.licenseExpiry || '',
+    status: normalizeBusStatus(b.Status || b.status || ''),
+    // keep original fields for debugging
+    _raw: b
+  });
+
   // Fetch buses from API
   useEffect(() => {
     const fetchBuses = async () => {
       try {
         setLoading(true);
         const response = await BusServices.getAllBuses();
-        if (response.success && Array.isArray(response.data)) {
-          setBusFleet(response.data);
-        } else {
-          setBusFleet([]);
-        }
+
+        const list = response && response.data
+          ? (Array.isArray(response.data) ? response.data : response.data.ResultSet || [])
+          : [];
+
+        const mapped = list.map(mapBusData);
+        setBusFleet(mapped);
       } catch (err) {
         console.error('Error fetching buses:', err);
         setError('Failed to load buses');
@@ -68,21 +94,71 @@ function Fleet({ onMenuClick, setActiveTab }) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('New Bus Data:', formData);
-    // Here you would typically send data to backend
-    alert('Bus added successfully!');
-    setShowAddModal(false);
-    setFormData({
-      licensePlate: '',
-      vehicle: '',
-      capacity: '',
-      assignedDriver: '',
-      insuranceExpiry: '',
-      licenseExpiry: '',
-      status: 'active'
-    });
+  const [addLoading, setAddLoading] = useState(false);
+  const [addError, setAddError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e && e.preventDefault();
+    setAddError('');
+
+    // validate required fields
+    const required = [
+      { val: formData.licensePlate, name: 'License Plate' },
+      { val: formData.assignedDriver, name: 'Assigned Driver' },
+      { val: formData.vehicle, name: 'Vehicle' },
+      { val: formData.capacity, name: 'Seating Capacity' },
+      { val: formData.licenseExpiry, name: 'License Expiry' },
+      { val: formData.insuranceExpiry, name: 'Insurance Expiry' },
+    ];
+    const missing = required.filter(r => !r.val && r.val !== 0).map(r => r.name);
+    if (missing.length) {
+      setAddError(`${missing.join(', ')} are required.`);
+      return;
+    }
+
+    try {
+      setAddLoading(true);
+
+      // coerce numeric values to proper types before sending to API
+      const payload = {
+        NumberPlate: formData.licensePlate,
+        DriverID: formData.assignedDriver ? Number(formData.assignedDriver) : null,
+        Vehicle: formData.vehicle,
+        SheetCount: formData.capacity ? parseInt(String(formData.capacity), 10) : 0,
+        LicenseExpiry: formData.licenseExpiry,
+        InsuranceExpiry: formData.insuranceExpiry,
+        Latitude: formData.latitude ? parseFloat(String(formData.latitude)) : null,
+        Longitude: formData.longitude ? parseFloat(String(formData.longitude)) : null,
+      };
+
+      const resp = await BusServices.createBus(payload);
+      if (resp && resp.success) {
+        // refresh list from server to stay consistent
+        const all = await BusServices.getAllBuses();
+        const list = all && all.data ? (Array.isArray(all.data) ? all.data : all.data.ResultSet || []) : [];
+        setBusFleet(list.map(mapBusData));
+
+        // reset and close
+        setShowAddModal(false);
+        setFormData({
+          licensePlate: '',
+          vehicle: '',
+          capacity: '',
+          assignedDriver: '',
+          insuranceExpiry: '',
+          licenseExpiry: '',
+          status: 'active'
+        });
+        alert(resp.message || 'Bus added successfully');
+      } else {
+        setAddError('Failed to add bus. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error adding bus:', err);
+      setAddError(err?.message || 'Failed to add bus');
+    } finally {
+      setAddLoading(false);
+    }
   };
 
   const handleEditClick = (bus) => {
@@ -107,14 +183,26 @@ function Fleet({ onMenuClick, setActiveTab }) {
     setEditingBus(null);
   };
 
-  // Available drivers for dropdowns
-  const availableDrivers = [
-    { id: 'DRV-001', name: 'Michael Smith' },
-    { id: 'DRV-002', name: 'Sarah Johnson' },
-    { id: 'DRV-003', name: 'Robert Brown' },
-    { id: 'DRV-004', name: 'Lisa Davis' },
-    { id: 'DRV-005', name: 'James Wilson' },
-  ];
+  // Available drivers for dropdowns (fetched from API)
+  const [availableDrivers, setAvailableDrivers] = useState([]);
+
+  useEffect(() => {
+    const fetchDriversForSelect = async () => {
+      try {
+        const res = await DriverServices.getAllDrivers();
+        const list = res && res.data ? (Array.isArray(res.data) ? res.data : res.data.ResultSet || []) : [];
+        const opts = list.map(d => ({
+          id: d.DriverID || d.DriverId || d.id || d.UserID || '',
+          name: d.DriverName || d.UserName || d.name || `Driver ${d.DriverID || d.DriverId || d.id || ''}`
+        }));
+        setAvailableDrivers(opts);
+      } catch (err) {
+        console.error('Error loading drivers for select:', err);
+        setAvailableDrivers([]);
+      }
+    };
+    fetchDriversForSelect();
+  }, []);
 
   const getStatusColor = (status) => {
     switch(status) {
@@ -471,6 +559,9 @@ function Fleet({ onMenuClick, setActiveTab }) {
               </div>
             </form>
 
+            {addError && (
+              <div className="px-6 pt-2 text-sm text-red-600">{addError}</div>
+            )}
             {/* Modal Footer */}
             <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-3">
               <button
@@ -483,10 +574,11 @@ function Fleet({ onMenuClick, setActiveTab }) {
               <button
                 type="submit"
                 onClick={handleSubmit}
-                className="px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors font-medium flex items-center gap-2"
+                disabled={addLoading}
+                className={`px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors font-medium flex items-center gap-2 ${addLoading ? 'opacity-60 cursor-wait' : ''}`}
               >
                 <Save className="w-4 h-4" />
-                Save Bus
+                {addLoading ? 'Saving...' : 'Save Bus'}
               </button>
             </div>
           </div>

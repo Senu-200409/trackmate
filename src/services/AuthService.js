@@ -78,6 +78,7 @@ export const API_ENDPOINTS = {
   BUS: {
     GET_ALL: '/BusDetails/GetAllBusDetails',
     GET_BY_NUMBERPLATE: '/BusDetails/GetBusDetailsByNumberplate',
+    ADD: '/BusDetails/AddBusDetails',
   },
 
   // Device endpoints

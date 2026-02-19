@@ -55,9 +55,15 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
           StudentServices.getAllStudents()
         ]);
 
-        const busData = busResponse.success && Array.isArray(busResponse.data) ? busResponse.data : [];
-        const driverData = driverResponse.success && Array.isArray(driverResponse.data) ? driverResponse.data : [];
-        const studentData = studentResponse.success && Array.isArray(studentResponse.data) ? studentResponse.data : [];
+        const busData = busResponse && busResponse.success && busResponse.data
+          ? (Array.isArray(busResponse.data) ? busResponse.data : busResponse.data.ResultSet || [])
+          : [];
+        const driverData = driverResponse && driverResponse.success && driverResponse.data
+          ? (Array.isArray(driverResponse.data) ? driverResponse.data : driverResponse.data.ResultSet || [])
+          : [];
+        const studentData = studentResponse && studentResponse.success && studentResponse.data
+          ? (Array.isArray(studentResponse.data) ? studentResponse.data : studentResponse.data.ResultSet || [])
+          : [];
 
         const stats = {
           totalBuses: busData.length,

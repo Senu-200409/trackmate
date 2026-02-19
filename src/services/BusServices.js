@@ -36,17 +36,25 @@ const BusServices = {
     }
   },
 
-  // Create bus
+  // Create bus - calls /BusDetails/AddBusDetails
   createBus: async (busData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.BUSES.CREATE);
-      // return await httpClient.post(url, busData);
+      const payload = {
+        NumberPlate: busData.NumberPlate || busData.plate || busData.LicensePlate || '',
+        DriverID: busData.DriverID ? Number(busData.DriverID) : (busData.DriverId ? Number(busData.DriverId) : null),
+        Vehicle: busData.Vehicle || busData.vehicle || '',
+        SheetCount: busData.SheetCount ? Number(busData.SheetCount) : (busData.capacity ? Number(busData.capacity) : 0),
+        LicenseExpiry: busData.LicenseExpiry || busData.licenseExpiry || busData.LicenseExpiryDate || '',
+        InsuranceExpiry: busData.InsuranceExpiry || busData.insuranceExpiry || '',
+        Latitude: busData.Latitude != null ? Number(busData.Latitude) : null,
+        Longitude: busData.Longitude != null ? Number(busData.Longitude) : null,
+      };
 
+      const response = await apiClient.post(API_ENDPOINTS.BUS.ADD, payload);
       return {
         success: true,
-        message: 'Bus created successfully',
-        data: { id: Date.now(), ...busData },
+        message: response.data?.Result || 'Bus added successfully',
+        data: response.data,
       };
     } catch (error) {
       console.error('Error creating bus:', error);
