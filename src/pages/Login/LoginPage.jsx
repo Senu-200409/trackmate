@@ -232,30 +232,6 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
             <p className="text-[#5C5C5C] text-xs sm:text-sm">Login to access your portal</p>
           </div>
 
-          {/* Show demo credentials */}
-          <div className="mt-4 p-3 sm:p-4 bg-[#FFF9E6] rounded-lg border border-[#F5C518]/30 mb-6">
-              <p className="text-xs font-bold text-[#1E3A5F] mb-2">Demo Credentials:</p>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="text-left">
-                  <span className="text-[#5C5C5C]">Parent:</span>
-                  <span className="text-[#3B6FB6] font-medium ml-1">1111111111</span>
-                </div>
-                <div className="text-left">
-                  <span className="text-[#5C5C5C]">Driver:</span>
-                  <span className="text-[#3B6FB6] font-medium ml-1">2222222222</span>
-                </div>
-                <div className="text-left">
-                  <span className="text-[#5C5C5C]">Owner:</span>
-                  <span className="text-[#3B6FB6] font-medium ml-1">3333333333</span>
-                </div>
-                <div className="text-left">
-                  <span className="text-[#5C5C5C]">OTP:</span>
-                  <span className="text-[#3B6FB6] font-medium ml-1">Any 6 digits</span>
-                </div>
-              </div>
-            </div>
-          
-
           <div className="space-y-6">
 
           <div className="space-y-6">

@@ -39,18 +39,25 @@ const ParentServices = {
   // Create parent
   createParent: async (parentData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.PARENTS.CREATE);
-      // return await httpClient.post(url, parentData);
-
+      const response = await apiClient.post(API_ENDPOINTS.PARENT.ADD, {
+        UserID: parentData.UserID,
+        Address: parentData.Address,
+        ContactNo2: parentData.ContactNo2,
+        Role: parentData.Role,
+        Status: parentData.Status
+      });
       return {
         success: true,
         message: 'Parent created successfully',
-        data: { id: Date.now(), ...parentData },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error creating parent:', error);
-      throw error;
+      return {
+        success: false,
+        message: error.message || 'Failed to create parent',
+        data: null,
+      };
     }
   },
 

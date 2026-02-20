@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { Phone, GraduationCap, Shield, Clock, Users, AlertCircle, Loader, ArrowLeft, Upload, X } from 'lucide-react';
+import { Phone, GraduationCap, Shield, Clock, Users, AlertCircle, Loader, ArrowLeft, Upload, X, FileText, Building, MapPin } from 'lucide-react';
 import UserServices from '../../services/UserServices';
+import DriverServices from '../../services/DriverServices';
+import ParentServices from '../../services/ParentServices';
+import OwnerServices from '../../services/OwnerServices';
 import ImageCropper from '../../components/ImageCropper';
 
 function RegisterPage({ onNavigateToLogin }) {
@@ -9,7 +12,16 @@ function RegisterPage({ onNavigateToLogin }) {
     tud_user_name: '',
     tud_phone: '',
     tud_user_type: 'P',  // P = Parent, D = Driver, O = Owner
-    tud_profile_image: null
+    tud_profile_image: null,
+    // Driver-specific fields
+    licenseNo: '',
+    licenseType: 'CDL-B',
+    // Parent-specific fields
+    address: '',
+    contactNo2: '',
+    parentRole: 'Mother',
+    // Owner-specific fields
+    companyName: ''
   });
   const [registerErrors, setRegisterErrors] = useState({});
   const [registerSuccess, setRegisterSuccess] = useState('');
@@ -51,6 +63,7 @@ function RegisterPage({ onNavigateToLogin }) {
   const validateRegisterForm = () => {
     const errors = {};
 
+    // Common fields validation
     if (!registerForm.tud_user_name.trim()) {
       errors.tud_user_name = 'User name is required';
     } else if (registerForm.tud_user_name.trim().length < 3) {
@@ -65,6 +78,35 @@ function RegisterPage({ onNavigateToLogin }) {
 
     if (!registerForm.tud_user_type) {
       errors.tud_user_type = 'User type is required';
+    }
+
+    // Role-specific validation
+    if (registerForm.tud_user_type === 'D') {
+      // Driver validation
+      if (!registerForm.licenseNo.trim()) {
+        errors.licenseNo = 'License number is required';
+      }
+      if (!registerForm.licenseType) {
+        errors.licenseType = 'License type is required';
+      }
+    } else if (registerForm.tud_user_type === 'P') {
+      // Parent validation
+      if (!registerForm.address.trim()) {
+        errors.address = 'Address is required';
+      }
+      if (!registerForm.contactNo2) {
+        errors.contactNo2 = 'Secondary contact number is required';
+      } else if (!/^\d{10}$/.test(registerForm.contactNo2)) {
+        errors.contactNo2 = 'Secondary contact must be exactly 10 digits';
+      }
+      if (!registerForm.parentRole) {
+        errors.parentRole = 'Relationship is required';
+      }
+    } else if (registerForm.tud_user_type === 'O') {
+      // Owner validation
+      if (!registerForm.companyName.trim()) {
+        errors.companyName = 'Company name is required';
+      }
     }
 
     return errors;
@@ -83,17 +125,75 @@ function RegisterPage({ onNavigateToLogin }) {
 
     setIsLoading(true);
     try {
+      // Step 1: Create user account
       const response = await UserServices.register(registerForm);
       
       if (response.success) {
+        // Extract UserID from response
+        const userId = response.data?.UserID || response.data?.id;
+
+        // Step 2: Create role-specific record based on user type
+        let roleCreationSuccess = true;
+        let roleCreationError = '';
+
+        if (registerForm.tud_user_type === 'D') {
+          // Create Driver record
+          const driverResponse = await DriverServices.createDriver({
+            UserID: userId,
+            LicenseNo: registerForm.licenseNo,
+            LicenseType: registerForm.licenseType,
+            Status: 'Active'
+          });
+          if (!driverResponse.success) {
+            roleCreationSuccess = false;
+            roleCreationError = driverResponse.message || 'Failed to create driver record';
+          }
+        } else if (registerForm.tud_user_type === 'P') {
+          // Create Parent record
+          const parentResponse = await ParentServices.createParent({
+            UserID: userId,
+            Address: registerForm.address,
+            ContactNo2: registerForm.contactNo2,
+            Role: registerForm.parentRole,
+            Status: 'A'
+          });
+          if (!parentResponse.success) {
+            roleCreationSuccess = false;
+            roleCreationError = parentResponse.message || 'Failed to create parent record';
+          }
+        } else if (registerForm.tud_user_type === 'O') {
+          // Create Owner record
+          const ownerResponse = await OwnerServices.createOwner({
+            UserID: userId,
+            CompanyName: registerForm.companyName,
+            Status: 'A'
+          });
+          if (!ownerResponse.success) {
+            roleCreationSuccess = false;
+            roleCreationError = ownerResponse.message || 'Failed to create owner record';
+          }
+        }
+
+        if (!roleCreationSuccess) {
+          setError(`Account created but ${roleCreationError}. Please contact support.`);
+          return;
+        }
+
         setRegisterSuccess('Account created successfully! Redirecting to login...');
         setRegisterForm({
           tud_user_name: '',
           tud_phone: '',
           tud_user_type: 'P',
-          tud_profile_image: null
+          tud_profile_image: null,
+          licenseNo: '',
+          licenseType: 'CDL-B',
+          address: '',
+          contactNo2: '',
+          parentRole: 'Mother',
+          companyName: ''
         });
         setRegisterErrors({});
+        setCroppedImagePreview(null);
 
         // Auto-redirect to login after 2 seconds
         setTimeout(() => {
@@ -245,6 +345,174 @@ function RegisterPage({ onNavigateToLogin }) {
                     </p>
                   )}
                 </div>
+
+                {/* Driver-Specific Fields */}
+                {registerForm.tud_user_type === 'D' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E3A5F] mb-2 flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-[#3B6FB6]" />
+                        Driver License Number <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="licenseNo"
+                        value={registerForm.licenseNo}
+                        onChange={handleRegisterChange}
+                        placeholder="e.g., CDL-A-12345"
+                        className={`w-full px-4 py-3 border-2 rounded-xl outline-none transition-all ${
+                          registerErrors.licenseNo
+                            ? 'border-red-400 focus:ring-2 focus:ring-red-300'
+                            : 'border-gray-200 focus:ring-2 focus:ring-[#F5C518] focus:border-[#F5C518]'
+                        }`}
+                      />
+                      {registerErrors.licenseNo && (
+                        <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" />
+                          {registerErrors.licenseNo}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E3A5F] mb-2 flex items-center gap-2">
+                        <Shield className="w-4 h-4 text-[#3B6FB6]" />
+                        License Type <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        name="licenseType"
+                        value={registerForm.licenseType}
+                        onChange={handleRegisterChange}
+                        className={`w-full px-4 py-3 border-2 rounded-xl outline-none transition-all ${
+                          registerErrors.licenseType
+                            ? 'border-red-400 focus:ring-2 focus:ring-red-300'
+                            : 'border-gray-200 focus:ring-2 focus:ring-[#F5C518] focus:border-[#F5C518]'
+                        }`}
+                      >
+                        <option value="CDL-A">CDL-A (Class A)</option>
+                        <option value="CDL-B">CDL-B (Class B)</option>
+                        <option value="CDL-C">CDL-C (Class C)</option>
+                      </select>
+                      {registerErrors.licenseType && (
+                        <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" />
+                          {registerErrors.licenseType}
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Parent-Specific Fields */}
+                {registerForm.tud_user_type === 'P' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E3A5F] mb-2 flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-[#3B6FB6]" />
+                        Address <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        name="address"
+                        value={registerForm.address}
+                        onChange={handleRegisterChange}
+                        placeholder="Enter your full address"
+                        rows="2"
+                        className={`w-full px-4 py-3 border-2 rounded-xl outline-none transition-all resize-none ${
+                          registerErrors.address
+                            ? 'border-red-400 focus:ring-2 focus:ring-red-300'
+                            : 'border-gray-200 focus:ring-2 focus:ring-[#F5C518] focus:border-[#F5C518]'
+                        }`}
+                      />
+                      {registerErrors.address && (
+                        <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" />
+                          {registerErrors.address}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E3A5F] mb-2 flex items-center gap-2">
+                        <Phone className="w-4 h-4 text-[#3B6FB6]" />
+                        Secondary Contact Number <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        name="contactNo2"
+                        value={registerForm.contactNo2}
+                        onChange={handleRegisterChange}
+                        placeholder="10-digit phone number"
+                        maxLength={10}
+                        className={`w-full px-4 py-3 border-2 rounded-xl outline-none transition-all ${
+                          registerErrors.contactNo2
+                            ? 'border-red-400 focus:ring-2 focus:ring-red-300'
+                            : 'border-gray-200 focus:ring-2 focus:ring-[#F5C518] focus:border-[#F5C518]'
+                        }`}
+                      />
+                      {registerErrors.contactNo2 && (
+                        <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" />
+                          {registerErrors.contactNo2}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#1E3A5F] mb-2 flex items-center gap-2">
+                        <Users className="w-4 h-4 text-[#3B6FB6]" />
+                        Relationship <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        name="parentRole"
+                        value={registerForm.parentRole}
+                        onChange={handleRegisterChange}
+                        className={`w-full px-4 py-3 border-2 rounded-xl outline-none transition-all ${
+                          registerErrors.parentRole
+                            ? 'border-red-400 focus:ring-2 focus:ring-red-300'
+                            : 'border-gray-200 focus:ring-2 focus:ring-[#F5C518] focus:border-[#F5C518]'
+                        }`}
+                      >
+                        <option value="Mother">Mother</option>
+                        <option value="Father">Father</option>
+                        <option value="Guardian">Guardian</option>
+                      </select>
+                      {registerErrors.parentRole && (
+                        <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" />
+                          {registerErrors.parentRole}
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Owner-Specific Fields */}
+                {registerForm.tud_user_type === 'O' && (
+                  <div>
+                    <label className="block text-sm font-medium text-[#1E3A5F] mb-2 flex items-center gap-2">
+                      <Building className="w-4 h-4 text-[#3B6FB6]" />
+                      Company Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="companyName"
+                      value={registerForm.companyName}
+                      onChange={handleRegisterChange}
+                      placeholder="Enter your company name"
+                      className={`w-full px-4 py-3 border-2 rounded-xl outline-none transition-all ${
+                        registerErrors.companyName
+                          ? 'border-red-400 focus:ring-2 focus:ring-red-300'
+                          : 'border-gray-200 focus:ring-2 focus:ring-[#F5C518] focus:border-[#F5C518]'
+                      }`}
+                    />
+                    {registerErrors.companyName && (
+                      <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4" />
+                        {registerErrors.companyName}
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 {/* Profile Image (Optional) */}
                 <div>

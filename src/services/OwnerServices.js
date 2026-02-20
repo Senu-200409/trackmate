@@ -39,14 +39,22 @@ const OwnerServices = {
   // Create owner
   createOwner: async (ownerData) => {
     try {
-      const response = await apiClient.post(API_ENDPOINTS.OWNER.ADD, ownerData);
+      const response = await apiClient.post(API_ENDPOINTS.OWNER.ADD, {
+        UserID: ownerData.UserID,
+        CompanyName: ownerData.CompanyName,
+        Status: ownerData.Status
+      });
       return {
         success: true,
         data: response.data,
       };
     } catch (error) {
       console.error('Error creating owner:', error);
-      throw error;
+      return {
+        success: false,
+        message: error.message || 'Failed to create owner',
+        data: null,
+      };
     }
   },
 
