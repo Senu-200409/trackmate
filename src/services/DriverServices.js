@@ -63,14 +63,14 @@ const DriverServices = {
   // Update driver
   updateDriver: async (driverId, driverData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.DRIVERS.UPDATE, { id: driverId });
-      // return await httpClient.put(url, driverData);
-
+      // Some backends expect the id in payload
+      const payload = { DriverID: driverId, ...driverData };
+      // API uses POST for update on this backend
+      const response = await apiClient.post(API_ENDPOINTS.DRIVER.PUT, payload);
       return {
         success: true,
         message: 'Driver updated successfully',
-        data: { id: driverId, ...driverData },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error updating driver:', error);

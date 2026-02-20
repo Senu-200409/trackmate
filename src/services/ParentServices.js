@@ -64,14 +64,14 @@ const ParentServices = {
   // Update parent
   updateParent: async (parentId, parentData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.PARENTS.UPDATE, { id: parentId });
-      // return await httpClient.put(url, parentData);
-
+      // Some backends expect the id in payload
+      const payload = { ParentID: parentId, ...parentData };
+      // API uses POST for update on this backend
+      const response = await apiClient.post(API_ENDPOINTS.PARENT.PUT, payload);
       return {
         success: true,
         message: 'Parent updated successfully',
-        data: { id: parentId, ...parentData },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error updating parent:', error);
