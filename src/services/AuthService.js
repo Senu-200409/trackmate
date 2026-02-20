@@ -91,6 +91,7 @@ export const API_ENDPOINTS = {
   DRIVER: {
     GET_ALL: '/DriverDetails/GetAllDriverDetails',
     GET_BY_ID: '/DriverDetails/GetDriverDetailsByDriverID',
+    CREATE: '/DriverDetails/AddDriverDetails',
   },
 
   // Notification endpoints

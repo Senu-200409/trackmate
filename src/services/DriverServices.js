@@ -39,18 +39,24 @@ const DriverServices = {
   // Create driver
   createDriver: async (driverData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.DRIVERS.CREATE);
-      // return await httpClient.post(url, driverData);
-
+      const response = await apiClient.post(API_ENDPOINTS.DRIVER.CREATE, {
+        UserID: driverData.UserID,
+        LicenseNo: driverData.LicenseNo,
+        LicenseType: driverData.LicenseType,
+        Status: driverData.Status
+      });
       return {
         success: true,
         message: 'Driver created successfully',
-        data: { id: Date.now(), ...driverData },
+        data: response.data,
       };
     } catch (error) {
       console.error('Error creating driver:', error);
-      throw error;
+      return {
+        success: false,
+        message: error.message || 'Failed to create driver',
+        data: null,
+      };
     }
   },
 

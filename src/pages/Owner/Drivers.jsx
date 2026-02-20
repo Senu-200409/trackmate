@@ -128,31 +128,54 @@ function Drivers({ onMenuClick, setActiveTab }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingDriver, setEditingDriver] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    licenseNumber: '',
+    userID: '',
+    licenseNo: '',
     licenseType: 'CDL-B',
-    status: 'active'
+    status: 'Active'
   });
+  const [saveLoading, setSaveLoading] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('New Driver Data:', formData);
-    // Here you would typically send data to backend
-    alert('Driver added successfully!');
-    setShowAddModal(false);
-    setFormData({
-      name: '',
-      phone: '',
-      licenseNumber: '',
-      licenseType: 'CDL-B',
-      status: 'active'
-    });
+    setSaveLoading(true);
+    try {
+      const driverData = {
+        UserID: formData.userID,
+        LicenseNo: formData.licenseNo,
+        LicenseType: formData.licenseType,
+        Status: formData.status
+      };
+      const result = await DriverServices.createDriver(driverData);
+      if (result.success) {
+        alert('Driver saved successfully!');
+        setShowAddModal(false);
+        setFormData({
+          userID: '',
+          licenseNo: '',
+          licenseType: 'CDL-B',
+          status: 'Active'
+        });
+        // Refresh drivers list
+        const driverResp = await DriverServices.getAllDrivers();
+        const driverList = driverResp && driverResp.data
+          ? (Array.isArray(driverResp.data) ? driverResp.data : driverResp.data.ResultSet || [])
+          : [];
+        const mappedDrivers = driverList.map(mapDriverData);
+        setDrivers(mappedDrivers);
+      } else {
+        alert('Failed to save driver');
+      }
+    } catch (error) {
+      console.error('Error saving driver:', error);
+      alert('Error saving driver: ' + error.message);
+    } finally {
+      setSaveLoading(false);
+    }
   };
 
   // Available buses and routes for dropdowns
@@ -429,34 +452,20 @@ function Drivers({ onMenuClick, setActiveTab }) {
                 <div>
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
                     <FileText className="w-4 h-4" />
-                    Driver Information
+                    Driver Details
                   </h3>
                   <div className="grid grid-cols-1 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Full Name <span className="text-red-500">*</span>
+                        User ID <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        name="name"
-                        value={formData.name}
+                        name="userID"
+                        value={formData.userID}
                         onChange={handleInputChange}
                         required
-                        placeholder="e.g., John Smith"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., +1 234-567-8900"
+                        placeholder="e.g., USR-12345"
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
@@ -476,8 +485,8 @@ function Drivers({ onMenuClick, setActiveTab }) {
                       </label>
                       <input
                         type="text"
-                        name="licenseNumber"
-                        value={formData.licenseNumber}
+                        name="licenseNo"
+                        value={formData.licenseNo}
                         onChange={handleInputChange}
                         required
                         placeholder="e.g., CDL-A-12345"
@@ -508,17 +517,19 @@ function Drivers({ onMenuClick, setActiveTab }) {
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Status</h3>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Driver Status
+                      Status <span className="text-red-500">*</span>
                     </label>
                     <select
                       name="status"
                       value={formData.status}
                       onChange={handleInputChange}
+                      required
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
                     >
-                      <option value="active">Active</option>
-                      <option value="on-leave">On Leave</option>
-                      <option value="inactive">Inactive</option>
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                      <option value="On Leave">On Leave</option>
+                      <option value="Suspended">Suspended</option>
                     </select>
                   </div>
                 </div>
@@ -531,17 +542,28 @@ function Drivers({ onMenuClick, setActiveTab }) {
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium"
+                disabled={saveLoading}
+                className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 onClick={handleSubmit}
-                className="px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors font-medium flex items-center gap-2"
+                disabled={saveLoading}
+                className="px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors font-medium flex items-center gap-2 disabled:opacity-50"
               >
-                <Save className="w-4 h-4" />
-                Save Driver
+                {saveLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Save Driver
+                  </>
+                )}
               </button>
             </div>
           </div>
