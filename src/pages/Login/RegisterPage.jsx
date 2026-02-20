@@ -125,19 +125,26 @@ function RegisterPage({ onNavigateToLogin }) {
 
     setIsLoading(true);
     try {
-      // Step 1: Create user account
+      // Step 1: Create user record in Users table
       const response = await UserServices.register(registerForm);
       
       if (response.success) {
-        // Extract UserID from response
-        const userId = response.data?.UserID || response.data?.id;
+        // Extract the generated UserID (returned by the service)
+        const userId = response.data?.UserID;
+        console.log('Step 1 complete — UserID:', userId);
 
-        // Step 2: Create role-specific record based on user type
+        if (!userId) {
+          setError('Registration succeeded but UserID was not returned. Please contact support.');
+          return;
+        }
+
+        // Step 2: Insert role-specific data into the corresponding table using the UserID
         let roleCreationSuccess = true;
         let roleCreationError = '';
 
         if (registerForm.tud_user_type === 'D') {
-          // Create Driver record
+          // Insert into DriverDetails table
+          console.log('Step 2: Creating DriverDetails for UserID', userId);
           const driverResponse = await DriverServices.createDriver({
             UserID: userId,
             LicenseNo: registerForm.licenseNo,
@@ -149,20 +156,21 @@ function RegisterPage({ onNavigateToLogin }) {
             roleCreationError = driverResponse.message || 'Failed to create driver record';
           }
         } else if (registerForm.tud_user_type === 'P') {
-          // Create Parent record
+          // Insert into ParentDetails table
+          console.log('Step 2: Creating ParentDetails for UserID', userId);
           const parentResponse = await ParentServices.createParent({
             UserID: userId,
             Address: registerForm.address,
             ContactNo2: registerForm.contactNo2,
-            Role: registerForm.parentRole,
-            Status: 'A'
+            Role: registerForm.parentRole
           });
           if (!parentResponse.success) {
             roleCreationSuccess = false;
             roleCreationError = parentResponse.message || 'Failed to create parent record';
           }
         } else if (registerForm.tud_user_type === 'O') {
-          // Create Owner record
+          // Insert into OwnerDetails table
+          console.log('Step 2: Creating OwnerDetails for UserID', userId);
           const ownerResponse = await OwnerServices.createOwner({
             UserID: userId,
             CompanyName: registerForm.companyName,

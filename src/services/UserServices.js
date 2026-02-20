@@ -129,7 +129,7 @@ const UserServices = {
     }
   },
 
-  // Register new user
+  // Register new user (Step 1: create record in Users table)
   register: async (userData) => {
     try {
       const formData = new FormData();
@@ -144,12 +144,37 @@ const UserServices = {
         },
       });
 
+      // Try to extract UserID from various possible response shapes
+      let userId = response.data?.UserID
+        || response.data?.ResultSet?.UserID
+        || response.data?.userId;
+
+      // If UserID was not returned by RegisterUser, look it up by phone number
+      if (!userId) {
+        console.log('UserID not in register response, fetching by phone...');
+        const allUsersResp = await apiClient.get(API_ENDPOINTS.USER.GET_ALL);
+        if (allUsersResp.data && allUsersResp.data.ResultSet) {
+          const user = allUsersResp.data.ResultSet.find(
+            u => u.Phone === userData.tud_phone
+          );
+          if (user) {
+            userId = user.UserID;
+          }
+        }
+      }
+
+      if (!userId) {
+        throw new Error('Registration succeeded but could not retrieve UserID. Please contact support.');
+      }
+
+      console.log('User registered with UserID:', userId);
+
       return {
         success: true,
-        message: response.data.Message,
-        data: { 
-          userId: response.data.UserID,
-          statusCode: response.data.StatusCode 
+        message: response.data.Message || 'User registered successfully',
+        data: {
+          UserID: userId,
+          statusCode: response.data.StatusCode,
         },
       };
     } catch (error) {
