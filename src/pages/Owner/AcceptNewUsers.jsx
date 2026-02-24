@@ -7,8 +7,14 @@ import OwnerFooter from '../../components/Owner/OwnerFooter';
 function AcceptNewUsers({ onMenuClick, setActiveTab, onLogout, onBack }) {
   const [selectedUserType, setSelectedUserType] = useState(null);
   const [pendingUsers, setPendingUsers] = useState([]);
+  const [pendingCounts, setPendingCounts] = useState({ O: 0, P: 0, D: 0 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Fetch pending counts for cards on first load
+  useEffect(() => {
+    fetchPendingCounts();
+  }, []);
 
   // Fetch pending users based on type
   useEffect(() => {
@@ -17,18 +23,52 @@ function AcceptNewUsers({ onMenuClick, setActiveTab, onLogout, onBack }) {
     }
   }, [selectedUserType]);
 
+  const normalizeUsers = (responseData) => {
+    if (Array.isArray(responseData)) {
+      return responseData;
+    }
+    if (responseData?.ResultSet && Array.isArray(responseData.ResultSet)) {
+      return responseData.ResultSet;
+    }
+    return [];
+  };
+
+  const fetchPendingCounts = async () => {
+    try {
+      const response = await UserServices.getAllUsers();
+      const users = normalizeUsers(response?.data);
+
+      const counts = {
+        O: users.filter((user) => user.UserType === 'O' && user.Status === 'P').length,
+        P: users.filter((user) => user.UserType === 'P' && user.Status === 'P').length,
+        D: users.filter((user) => user.UserType === 'D' && user.Status === 'P').length,
+      };
+
+      setPendingCounts(counts);
+    } catch (err) {
+      console.error('Error fetching pending counts:', err);
+      setPendingCounts({ O: 0, P: 0, D: 0 });
+    }
+  };
+
   const fetchPendingUsers = async (userType) => {
     setLoading(true);
     setError('');
     try {
       const response = await UserServices.getAllUsers();
-      
-      if (response.success && response.data.ResultSet) {
+      const users = normalizeUsers(response?.data);
+
+      if (response.success) {
         // Filter users by type and status === 'P' (pending)
-        const filtered = response.data.ResultSet.filter(
+        const filtered = users.filter(
           user => user.UserType === userType && user.Status === 'P'
         );
         setPendingUsers(filtered);
+        setPendingCounts({
+          O: users.filter((user) => user.UserType === 'O' && user.Status === 'P').length,
+          P: users.filter((user) => user.UserType === 'P' && user.Status === 'P').length,
+          D: users.filter((user) => user.UserType === 'D' && user.Status === 'P').length,
+        });
       } else {
         setError('Failed to fetch users');
         setPendingUsers([]);
@@ -49,7 +89,11 @@ function AcceptNewUsers({ onMenuClick, setActiveTab, onLogout, onBack }) {
       
       if (response.success) {
         // Remove accepted user from list
-        setPendingUsers(pendingUsers.filter(user => user.UserID !== userId));
+        setPendingUsers((prevUsers) => prevUsers.filter((user) => user.UserID !== userId));
+        setPendingCounts((prevCounts) => ({
+          ...prevCounts,
+          [selectedUserType]: Math.max(0, (prevCounts[selectedUserType] || 0) - 1),
+        }));
         alert(`${userName} has been accepted successfully!`);
       } else {
         setError(`Failed to accept ${userName}`);
@@ -69,7 +113,11 @@ function AcceptNewUsers({ onMenuClick, setActiveTab, onLogout, onBack }) {
       
       if (response.success) {
         // Remove rejected user from list
-        setPendingUsers(pendingUsers.filter(user => user.UserID !== userId));
+        setPendingUsers((prevUsers) => prevUsers.filter((user) => user.UserID !== userId));
+        setPendingCounts((prevCounts) => ({
+          ...prevCounts,
+          [selectedUserType]: Math.max(0, (prevCounts[selectedUserType] || 0) - 1),
+        }));
         alert(`${userName} has been rejected successfully!`);
       } else {
         setError(`Failed to reject ${userName}`);
@@ -129,7 +177,7 @@ function AcceptNewUsers({ onMenuClick, setActiveTab, onLogout, onBack }) {
                     </div>
                     <p className="text-sm font-medium opacity-90">{info.description}</p>
                     <div className="mt-4 pt-4 border-t border-white/20">
-                      <span className="text-3xl font-bold">0</span>
+                      <span className="text-3xl font-bold">{pendingCounts[type] || 0}</span>
                       <p className="text-xs opacity-75 mt-1">Pending</p>
                     </div>
                   </button>

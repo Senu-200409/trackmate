@@ -24,6 +24,7 @@ import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
 import DriverServices from '../../services/DriverServices';
 import UserServices from '../../services/UserServices';
+import RegisterDriverModal from '../../components/Owner/RegisterDriverModal';
 
 function Drivers({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -125,6 +126,7 @@ function Drivers({ onMenuClick, setActiveTab }) {
     fetchDrivers();
   }, []);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showRegisterDriverModal, setShowRegisterDriverModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingDriver, setEditingDriver] = useState(null);
   const [formData, setFormData] = useState({
@@ -246,7 +248,7 @@ function Drivers({ onMenuClick, setActiveTab }) {
               <p className="text-gray-600 mt-1">Manage your drivers and track their performance</p>
             </div>
             <button 
-              onClick={() => setShowAddModal(true)}
+              onClick={() => setShowRegisterDriverModal(true)}
               className="flex items-center gap-2 px-4 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors"
             >
               <Plus className="w-5 h-5" />
@@ -420,6 +422,33 @@ function Drivers({ onMenuClick, setActiveTab }) {
       </main>
 
       <OwnerFooter />
+
+      {/* Register Driver Modal - Using new 2-step registration form */}
+      <RegisterDriverModal 
+        isOpen={showRegisterDriverModal}
+        onClose={() => setShowRegisterDriverModal(false)}
+        onSuccess={() => {
+          // Refresh drivers list after successful registration
+          const fetchDrivers = async () => {
+            try {
+              const [driverResp, usersResp] = await Promise.all([
+                DriverServices.getAllDrivers(),
+                UserServices.getAllUsers()
+              ]);
+
+              const driverList = driverResp && driverResp.data
+                ? (Array.isArray(driverResp.data) ? driverResp.data : driverResp.data.ResultSet || [])
+                : [];
+
+              const mappedDrivers = driverList.map(mapDriverData);
+              setDrivers(mappedDrivers);
+            } catch (err) {
+              console.error('Error fetching drivers:', err);
+            }
+          };
+          fetchDrivers();
+        }}
+      />
 
       {/* Add New Driver Modal */}
       {showAddModal && (

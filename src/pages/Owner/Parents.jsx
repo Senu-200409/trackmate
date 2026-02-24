@@ -21,6 +21,7 @@ import {
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
 import ParentServices from '../../services/ParentServices';
+import RegisterParentModal from '../../components/Owner/RegisterParentModal';
 
 function Parents({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,23 +30,34 @@ function Parents({ onMenuClick, setActiveTab }) {
   const [error, setError] = useState(null);
 
   // Map API parent response to component format
-  const mapParentData = (apiParent) => ({
-    id: apiParent.ParentID || '',
-    parentID: apiParent.ParentID || '',
-    userID: apiParent.UserID || '',
-    name: `Parent #${apiParent.ParentID}` || 'Unknown Parent',
-    role: apiParent.Role || 'Guardian',
-    phone: apiParent.ContactNo2 || '',
-    phone2: apiParent.ContactNo || '',
-    address: apiParent.Address || '',
-    status: apiParent.Status === 'A' ? 'Active' : 'Inactive',
-    statusCode: apiParent.Status,
-    createdDate: apiParent.CreateDate || '',
-    updatedDate: apiParent.UpdatedDate || '',
-    createdBy: apiParent.CreatedBy || '',
-    updatedBy: apiParent.UpdatedBy || '',
-    ...apiParent
-  });
+  const mapParentData = (apiParent) => {
+    // Map status codes to meaningful labels
+    const statusMap = {
+      'A': 'Active',
+      'P': 'Pending',
+      'I': 'Inactive',
+      'R': 'Rejected'
+    };
+    const statusLabel = statusMap[apiParent.Status] || apiParent.Status || 'Unknown';
+    
+    return {
+      id: apiParent.ParentID || '',
+      parentID: apiParent.ParentID || '',
+      userID: apiParent.UserID || '',
+      name: `Parent #${apiParent.ParentID}` || 'Unknown Parent',
+      role: apiParent.Role || 'Guardian',
+      phone: apiParent.ContactNo2 || '',
+      phone2: apiParent.ContactNo || '',
+      address: apiParent.Address || '',
+      status: statusLabel,
+      statusCode: apiParent.Status,
+      createdDate: apiParent.CreateDate || '',
+      updatedDate: apiParent.UpdatedDate || '',
+      createdBy: apiParent.CreatedBy || '',
+      updatedBy: apiParent.UpdatedBy || '',
+      ...apiParent
+    };
+  };
 
   // Fetch parents from API
   useEffect(() => {
@@ -72,8 +84,9 @@ function Parents({ onMenuClick, setActiveTab }) {
     };
     fetchParents();
   }, []);
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('active');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showRegisterParentModal, setShowRegisterParentModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingParent, setEditingParent] = useState(null);
   const [formData, setFormData] = useState({
@@ -141,7 +154,9 @@ function Parents({ onMenuClick, setActiveTab }) {
   const stats = {
     total: parentsList.length,
     active: parentsList.filter(p => p.status === 'Active').length,
-    inactive: parentsList.filter(p => p.status === 'Inactive').length
+    pending: parentsList.filter(p => p.status === 'Pending').length,
+    inactive: parentsList.filter(p => p.status === 'Inactive').length,
+    rejected: parentsList.filter(p => p.status === 'Rejected').length
   };
 
   return (
@@ -158,7 +173,7 @@ function Parents({ onMenuClick, setActiveTab }) {
               <p className="text-gray-600 mt-1">Register and manage parent/guardian information</p>
             </div>
             <button 
-              onClick={() => setShowAddModal(true)}
+              onClick={() => setShowRegisterParentModal(true)}
               className="flex items-center gap-2 px-4 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors"
             >
               <Plus className="w-5 h-5" />
@@ -167,8 +182,15 @@ function Parents({ onMenuClick, setActiveTab }) {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div 
+              onClick={() => setFilterStatus('all')}
+              className={`rounded-xl p-4 border-2 shadow-sm cursor-pointer transition-all duration-200 ${
+                filterStatus === 'all'
+                  ? 'bg-blue-50 border-blue-500 shadow-md'
+                  : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md'
+              }`}
+            >
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-blue-100">
                   <Users className="w-5 h-5 text-blue-600" />
@@ -179,7 +201,14 @@ function Parents({ onMenuClick, setActiveTab }) {
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+            <div 
+              onClick={() => setFilterStatus('active')}
+              className={`rounded-xl p-4 border-2 shadow-sm cursor-pointer transition-all duration-200 ${
+                filterStatus === 'active'
+                  ? 'bg-green-50 border-green-500 shadow-md'
+                  : 'bg-white border-gray-200 hover:border-green-300 hover:shadow-md'
+              }`}
+            >
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-green-100">
                   <CheckCircle className="w-5 h-5 text-green-600" />
@@ -190,14 +219,57 @@ function Parents({ onMenuClick, setActiveTab }) {
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+            <div 
+              onClick={() => setFilterStatus('pending')}
+              className={`rounded-xl p-4 border-2 shadow-sm cursor-pointer transition-all duration-200 ${
+                filterStatus === 'pending'
+                  ? 'bg-yellow-50 border-yellow-500 shadow-md'
+                  : 'bg-white border-gray-200 hover:border-yellow-300 hover:shadow-md'
+              }`}
+            >
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-red-100">
-                  <Users className="w-5 h-5 text-red-600" />
+                <div className="p-2.5 rounded-xl bg-yellow-100">
+                  <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{stats.pending}</div>
+                  <div className="text-sm text-gray-600">Pending</div>
+                </div>
+              </div>
+            </div>
+            <div 
+              onClick={() => setFilterStatus('inactive')}
+              className={`rounded-xl p-4 border-2 shadow-sm cursor-pointer transition-all duration-200 ${
+                filterStatus === 'inactive'
+                  ? 'bg-gray-100 border-gray-600 shadow-md'
+                  : 'bg-white border-gray-200 hover:border-gray-400 hover:shadow-md'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-gray-200">
+                  <Users className="w-5 h-5 text-gray-700" />
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-gray-900">{stats.inactive}</div>
                   <div className="text-sm text-gray-600">Inactive</div>
+                </div>
+              </div>
+            </div>
+            <div 
+              onClick={() => setFilterStatus('rejected')}
+              className={`rounded-xl p-4 border-2 shadow-sm cursor-pointer transition-all duration-200 ${
+                filterStatus === 'rejected'
+                  ? 'bg-red-50 border-red-500 shadow-md'
+                  : 'bg-white border-gray-200 hover:border-red-300 hover:shadow-md'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-red-100">
+                  <X className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{stats.rejected}</div>
+                  <div className="text-sm text-gray-600">Rejected</div>
                 </div>
               </div>
             </div>
@@ -219,11 +291,13 @@ function Parents({ onMenuClick, setActiveTab }) {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
+                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white cursor-pointer"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
+                <option value="pending">Pending</option>
                 <option value="inactive">Inactive</option>
+                <option value="rejected">Rejected</option>
               </select>
               <button className="px-4 py-2.5 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 font-medium text-gray-700">
                 <Filter className="w-5 h-5" />
@@ -263,6 +337,10 @@ function Parents({ onMenuClick, setActiveTab }) {
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                       parent.status === 'Active' 
                         ? 'bg-green-100/20 text-green-300' 
+                        : parent.status === 'Pending'
+                        ? 'bg-yellow-100/20 text-yellow-300'
+                        : parent.status === 'Rejected'
+                        ? 'bg-red-100/20 text-red-300'
                         : 'bg-gray-100/20 text-gray-300'
                     }`}>
                       {parent.status}
@@ -336,6 +414,30 @@ function Parents({ onMenuClick, setActiveTab }) {
       </main>
 
       <OwnerFooter />
+
+      {/* Register Parent Modal - Using new 2-step registration form */}
+      <RegisterParentModal 
+        isOpen={showRegisterParentModal}
+        onClose={() => setShowRegisterParentModal(false)}
+        onSuccess={() => {
+          // Refresh parents list after successful registration
+          const fetchParents = async () => {
+            try {
+              const response = await ParentServices.getAllParents();
+              if (response.success && response.data) {
+                const parentsList = Array.isArray(response.data) 
+                  ? response.data 
+                  : response.data.ResultSet || [];
+                const mappedParents = parentsList.map(mapParentData);
+                setParentsList(mappedParents);
+              }
+            } catch (err) {
+              console.error('Error fetching parents:', err);
+            }
+          };
+          fetchParents();
+        }}
+      />
 
       {/* Register Parent Modal */}
       {showAddModal && (

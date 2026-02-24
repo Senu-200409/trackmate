@@ -1,16 +1,11 @@
 import React, { useState } from 'react';
 import { Phone, GraduationCap, Shield, Clock, Users, AlertCircle, Loader, ArrowLeft, Upload, X, FileText, Building, MapPin, ChevronRight } from 'lucide-react';
-import UserServices from '../../services/UserServices';
-import DriverServices from '../../services/DriverServices';
-import ParentServices from '../../services/ParentServices';
-import OwnerServices from '../../services/OwnerServices';
 import ImageCropper from '../../components/ImageCropper';
 
 function RegisterPage({ onNavigateToLogin }) {
   // Step management
   const [currentStep, setCurrentStep] = useState(1); // 1 = common fields, 2 = role-specific
-  const [userId, setUserId] = useState(null); // Store UserID from Step 1
-  const [roleRecordId, setRoleRecordId] = useState(null); // Store auto-created role record ID (OwnerID, DriverID, ParentID)
+  const [userId, setUserId] = useState(null); // Store UserID from Step 1 API response
 
   // Form state
   const [isLoading, setIsLoading] = useState(false);
@@ -122,7 +117,7 @@ function RegisterPage({ onNavigateToLogin }) {
     return errors;
   };
 
-  // STEP 1: Validate common fields and call POST user API
+  // STEP 1: Validate common fields and call RegisterUser API
   const handleStep1Next = async (e) => {
     e.preventDefault();
     setError('');
@@ -135,46 +130,97 @@ function RegisterPage({ onNavigateToLogin }) {
 
     setIsLoading(true);
     try {
-      // Call POST user registration with common fields only
-      const response = await UserServices.register(registerForm);
+      // Prepare form-data for API call
+      const formData = new FormData();
+      formData.append('Phone', registerForm.tud_phone);
+      formData.append('UserType', registerForm.tud_user_type);
+      formData.append('UserName', registerForm.tud_user_name);
+      formData.append('ProfileImage', registerForm.tud_profile_image || '');
 
-      if (response.success) {
-        const newUserId = response.data?.UserID;
-        console.log('Step 1 complete — UserID:', newUserId);
+      // Call RegisterUser API
+      const response = await fetch('https://trackmate.dockyardsoftware.com/UserDetails/RegisterUser', {
+        method: 'POST',
+        body: formData,
+      });
 
-        if (!newUserId) {
-          setError('Registration succeeded but UserID was not returned. Please contact support.');
-          setIsLoading(false);
-          return;
+      const data = await response.json();
+      // DEBUG: Log full API response to see all fields
+      console.log('Step 1 FULL API response:', JSON.stringify(data));
+
+      if (response.ok && data.StatusCode === 200) {
+        console.log('Step 1 complete — UserID:', data.UserID);
+        // Store UserID in localStorage for Step 2
+        localStorage.setItem('registerUserID', data.UserID);
+        setUserId(data.UserID);
+
+        // Fetch ParentID from auto-created record by matching UserID
+        if (registerForm.tud_user_type === 'P') {
+          try {
+            const parentRes = await fetch('https://trackmate.dockyardsoftware.com/ParentDetails/GetAllParentDetails');
+            const parentData = await parentRes.json();
+            console.log('Fetched all parents to find ParentID for UserID:', data.UserID);
+            const parentRecord = parentData?.ResultSet?.find(p => String(p.UserID) === String(data.UserID));
+            if (parentRecord?.ParentID) {
+              localStorage.setItem('registerParentID', parentRecord.ParentID);
+              console.log('Found ParentID:', parentRecord.ParentID);
+            } else {
+              console.warn('Could not find auto-created parent record for UserID:', data.UserID);
+            }
+          } catch (fetchErr) {
+            console.error('Error fetching parent records:', fetchErr);
+          }
         }
 
-        // IMPORTANT: Fetch the auto-created empty role record to get its ID
-        // So we can UPDATE it in Step 2 instead of creating a duplicate
-        const autoRoleRecordId = await fetchAutoCreatedRoleRecord(newUserId, registerForm.tud_user_type);
-        
-        if (!autoRoleRecordId) {
-          console.warn('Auto-created role record not found. Will create new record in Step 2.');
-        } else {
-          console.log('Found auto-created role record ID:', autoRoleRecordId);
+        // Fetch DriverID from auto-created record by matching UserID
+        if (registerForm.tud_user_type === 'D') {
+          try {
+            const driverRes = await fetch('https://trackmate.dockyardsoftware.com/DriverDetails/GetAllDriverDetails');
+            const driverData = await driverRes.json();
+            console.log('Fetched all drivers to find DriverID for UserID:', data.UserID);
+            const driverRecord = driverData?.ResultSet?.find(d => String(d.UserID) === String(data.UserID));
+            if (driverRecord?.DriverID) {
+              localStorage.setItem('registerDriverID', driverRecord.DriverID);
+              console.log('Found DriverID:', driverRecord.DriverID);
+            } else {
+              console.warn('Could not find auto-created driver record for UserID:', data.UserID);
+            }
+          } catch (fetchErr) {
+            console.error('Error fetching driver records:', fetchErr);
+          }
         }
 
-        // Store UserID and roleRecordId, then move to Step 2
-        setUserId(newUserId);
-        setRoleRecordId(autoRoleRecordId);
+        // Fetch OwnerID from auto-created record by matching UserID
+        if (registerForm.tud_user_type === 'O') {
+          try {
+            const ownerRes = await fetch('https://trackmate.dockyardsoftware.com/OwnerDetails/GetAllOwnerDetails');
+            const ownerData = await ownerRes.json();
+            console.log('Fetched all owners to find OwnerID for UserID:', data.UserID);
+            const ownerRecord = ownerData?.ResultSet?.find(o => String(o.UserID) === String(data.UserID));
+            if (ownerRecord?.OwnerID) {
+              localStorage.setItem('registerOwnerID', ownerRecord.OwnerID);
+              console.log('Found OwnerID:', ownerRecord.OwnerID);
+            } else {
+              console.warn('Could not find auto-created owner record for UserID:', data.UserID);
+            }
+          } catch (fetchErr) {
+            console.error('Error fetching owner records:', fetchErr);
+          }
+        }
+
         setRegisterErrors({});
         setCurrentStep(2);
       } else {
-        setError('Failed to create user account. Please try again.');
+        setError(data.Message || 'Failed to register user. Please try again.');
       }
     } catch (err) {
       console.error('Step 1 error:', err);
-      setError(err.response?.data?.Message || 'Failed to create user account. Please try again.');
+      setError('Failed to connect to server. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // STEP 2: Validate role-specific fields and UPDATE the auto-created role record
+  // STEP 2: Validate role-specific fields and submit registration
   const handleStep2Submit = async (e) => {
     e.preventDefault();
     setError('');
@@ -188,95 +234,128 @@ function RegisterPage({ onNavigateToLogin }) {
 
     setIsLoading(true);
     try {
-      let roleResponse;
+      let response;
+      let data;
 
-      if (registerForm.tud_user_type === 'D') {
-        if (roleRecordId) {
-          // UPDATE the existing auto-created driver record
-          console.log('Step 2: UPDATING DriverDetails (ID:', roleRecordId, ') for UserID', userId);
-          roleResponse = await DriverServices.updateDriver(roleRecordId, {
-            LicenseNo: registerForm.licenseNo,
-            LicenseType: registerForm.licenseType,
-            Status: 'Active'
-          });
-        } else {
-          // Fallback: Create new driver record if auto-created one wasn't found
-          console.log('Step 2: Creating NEW DriverDetails for UserID', userId);
-          roleResponse = await DriverServices.createDriver({
-            UserID: userId,
-            LicenseNo: registerForm.licenseNo,
-            LicenseType: registerForm.licenseType,
-            Status: 'Active'
-          });
-        }
-      } else if (registerForm.tud_user_type === 'P') {
-        if (roleRecordId) {
-          // UPDATE the existing auto-created parent record
-          console.log('Step 2: UPDATING ParentDetails (ID:', roleRecordId, ') for UserID', userId);
-          roleResponse = await ParentServices.updateParent(roleRecordId, {
-            Address: registerForm.address,
-            ContactNo2: registerForm.contactNo2,
-            Role: registerForm.parentRole
-          });
-        } else {
-          // Fallback: Create new parent record if auto-created one wasn't found
-          console.log('Step 2: Creating NEW ParentDetails for UserID', userId);
-          roleResponse = await ParentServices.createParent({
-            UserID: userId,
-            Address: registerForm.address,
-            ContactNo2: registerForm.contactNo2,
-            Role: registerForm.parentRole
-          });
-        }
+      // Get UserID from localStorage (stored in Step 1)
+      const storedUserID = localStorage.getItem('registerUserID');
+      const userIdToUse = storedUserID || userId;
+
+      if (registerForm.tud_user_type === 'P') {
+        // Call PutParentDetails API to update the auto-created parent record
+        const parentID = localStorage.getItem('registerParentID');
+        console.log('Step 2 — ParentID from localStorage:', parentID, 'UserID:', userIdToUse);
+        
+        const formData = new FormData();
+        formData.append('ParentID', parentID);
+        formData.append('UserID', userIdToUse);
+        formData.append('Address', registerForm.address);
+        formData.append('ContactNo2', registerForm.contactNo2);
+        formData.append('Role', registerForm.parentRole);
+
+        // DEBUG: Log what we're sending
+        console.log('Step 2 — Sending to PutParentDetails:', {
+          ParentID: parentID,
+          UserID: userIdToUse,
+          Address: registerForm.address,
+          ContactNo2: registerForm.contactNo2,
+          Role: registerForm.parentRole
+        });
+
+        response = await fetch('https://trackmate.dockyardsoftware.com/ParentDetails/PutParentDetails', {
+          method: 'POST',
+          body: formData,
+        });
+        data = await response.json();
+        // DEBUG: Log Step 2 API response
+        console.log('Step 2 FULL API response:', JSON.stringify(data));
+      } else if (registerForm.tud_user_type === 'D') {
+        // Call PutDriverDetails API to update the auto-created driver record
+        const driverID = localStorage.getItem('registerDriverID');
+        console.log('Step 2 — DriverID from localStorage:', driverID, 'UserID:', userIdToUse);
+
+        const formData = new FormData();
+        formData.append('DriverID', driverID);
+        formData.append('UserID', userIdToUse);
+        formData.append('LicenseNo', registerForm.licenseNo);
+        formData.append('LicenseType', registerForm.licenseType);
+        formData.append('Status', 'A');
+
+        console.log('Step 2 — Sending to PutDriverDetails:', {
+          DriverID: driverID,
+          UserID: userIdToUse,
+          LicenseNo: registerForm.licenseNo,
+          LicenseType: registerForm.licenseType,
+          Status: 'A'
+        });
+
+        response = await fetch('https://trackmate.dockyardsoftware.com/DriverDetails/PutDriverDetails', {
+          method: 'POST',
+          body: formData,
+        });
+        data = await response.json();
+        console.log('Step 2 FULL API response:', JSON.stringify(data));
       } else if (registerForm.tud_user_type === 'O') {
-        if (roleRecordId) {
-          // UPDATE the existing auto-created owner record
-          console.log('Step 2: UPDATING OwnerDetails (ID:', roleRecordId, ') for UserID', userId);
-          roleResponse = await OwnerServices.updateOwner(roleRecordId, {
-            CompanyName: registerForm.companyName,
-            Status: 'A'
-          });
-        } else {
-          // Fallback: Create new owner record if auto-created one wasn't found
-          console.log('Step 2: Creating NEW OwnerDetails for UserID', userId);
-          roleResponse = await OwnerServices.createOwner({
-            UserID: userId,
-            CompanyName: registerForm.companyName,
-            Status: 'A'
-          });
-        }
+        // Call PutOwnerDetails API to update the auto-created owner record
+        const ownerID = localStorage.getItem('registerOwnerID');
+        console.log('Step 2 — OwnerID from localStorage:', ownerID, 'UserID:', userIdToUse);
+
+        const formData = new FormData();
+        formData.append('OwnerID', ownerID);
+        formData.append('UserID', userIdToUse);
+        formData.append('CompanyName', registerForm.companyName);
+        formData.append('Status', 'A');
+
+        console.log('Step 2 — Sending to PutOwnerDetails:', {
+          OwnerID: ownerID,
+          UserID: userIdToUse,
+          CompanyName: registerForm.companyName,
+          Status: 'A'
+        });
+
+        response = await fetch('https://trackmate.dockyardsoftware.com/OwnerDetails/PutOwnerDetails', {
+          method: 'POST',
+          body: formData,
+        });
+        data = await response.json();
+        console.log('Step 2 FULL API response:', JSON.stringify(data));
       }
 
-      if (roleResponse?.success) {
+      if (data?.StatusCode === 200 || response?.ok) {
         setRegisterSuccess('Account created successfully! Redirecting to login...');
-        setRegisterForm({
-          tud_user_name: '',
-          tud_phone: '',
-          tud_user_type: 'P',
-          tud_profile_image: null,
-          licenseNo: '',
-          licenseType: 'CDL-B',
-          address: '',
-          contactNo2: '',
-          parentRole: 'Mother',
-          companyName: ''
-        });
-        setRegisterErrors({});
-        setCroppedImagePreview(null);
-        setCurrentStep(1);
-        setUserId(null);
-        setRoleRecordId(null);
-
-        // Auto-redirect to login after 2 seconds
+        
+        // Clear localStorage and reset form, then redirect
+        localStorage.removeItem('registerUserID');
+        localStorage.removeItem('registerParentID');
+        localStorage.removeItem('registerDriverID');
+        localStorage.removeItem('registerOwnerID');
+        
         setTimeout(() => {
+          setRegisterForm({
+            tud_user_name: '',
+            tud_phone: '',
+            tud_user_type: 'P',
+            tud_profile_image: null,
+            licenseNo: '',
+            licenseType: 'CDL-B',
+            address: '',
+            contactNo2: '',
+            parentRole: 'Mother',
+            companyName: ''
+          });
+          setRegisterErrors({});
+          setCroppedImagePreview(null);
+          setCurrentStep(1);
+          setUserId(null);
+          setRegisterSuccess('');
           onNavigateToLogin();
         }, 2000);
       } else {
-        setError(roleResponse?.message || 'Failed to complete registration. Please try again.');
+        setError(data?.Message || 'Failed to complete registration. Please try again.');
       }
     } catch (err) {
       console.error('Step 2 error:', err);
-      setError(err.response?.data?.Message || 'Failed to complete registration. Please try again.');
+      setError('Failed to connect to server. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -286,35 +365,6 @@ function RegisterPage({ onNavigateToLogin }) {
     setCurrentStep(1);
     setError('');
     setRegisterErrors({});
-  };
-
-  // Helper: Fetch auto-created role record by UserID to get its ID
-  const fetchAutoCreatedRoleRecord = async (newUserId, userType) => {
-    try {
-      if (userType === 'D') {
-        // Get all drivers and find one with matching UserID
-        const response = await DriverServices.getAllDrivers?.();
-        if (!response?.success || !response?.data?.ResultSet) return null;
-        const autoRecord = response.data.ResultSet.find(d => d.UserID === newUserId);
-        return autoRecord?.DriverID;
-      } else if (userType === 'P') {
-        // Get all parents and find one with matching UserID
-        const response = await ParentServices.getAllParents?.();
-        if (!response?.success || !response?.data?.ResultSet) return null;
-        const autoRecord = response.data.ResultSet.find(p => p.UserID === newUserId);
-        return autoRecord?.ParentID;
-      } else if (userType === 'O') {
-        // Get all owners and find one with matching UserID
-        const response = await OwnerServices.getAllOwners();
-        if (!response?.success || !response?.data?.ResultSet) return null;
-        const autoRecord = response.data.ResultSet.find(o => o.UserID === newUserId);
-        return autoRecord?.OwnerID;
-      }
-      return null;
-    } catch (err) {
-      console.error('Error fetching auto-created role record:', err);
-      return null;
-    }
   };
 
   const validateRegisterForm = () => {
