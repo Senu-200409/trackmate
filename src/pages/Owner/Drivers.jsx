@@ -18,7 +18,8 @@ import {
   Save,
   FileText,
   Shield,
-  Loader2
+  Loader2,
+  AlertTriangle
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
@@ -28,11 +29,22 @@ import RegisterDriverModal from '../../components/Owner/RegisterDriverModal';
 
 function Drivers({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('active');
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
+
+  // Map API status codes to meaningful labels for registration status
+  const mapRegistrationStatus = (statusCode) => {
+    const statusMap = {
+      'A': 'Active',
+      'P': 'Pending',
+      'I': 'Inactive',
+      'R': 'Rejected'
+    };
+    return statusMap[statusCode] || 'Unknown';
+  };
 
   // Normalize driver status coming from DriverDetails (e.g. 'A') to UI-friendly labels
   const normalizeDriverStatus = (s) => {
@@ -54,6 +66,8 @@ function Drivers({ onMenuClick, setActiveTab }) {
     licenseNumber: apiDriver.LicenseNo || apiDriver.LicenseNumber || apiDriver.licenseNumber || '',
     license: apiDriver.LicenseType || apiDriver.license || 'CDL-B',
     status: normalizeDriverStatus(apiDriver.Status || apiDriver.status || ''),
+    registrationStatus: mapRegistrationStatus(apiDriver.Status),
+    registrationStatusCode: apiDriver.Status,
     createdDate: apiDriver.CreateDate || apiDriver.Create_Date || apiDriver.CreatedDate || apiDriver.createdDate || '',
     updatedDate: apiDriver.UpdatedDate || apiDriver.updatedDate || '',
     assignedBus: apiDriver.AssignedBus || apiDriver.assignedBus || apiDriver.BusID || 'N/A',
@@ -224,14 +238,17 @@ function Drivers({ onMenuClick, setActiveTab }) {
     const matchesSearch = driver.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          driver.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          driver.route.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || driver.status.toLowerCase().replace(' ', '-') === filterStatus;
+    const matchesFilter = filterStatus === 'all' || driver.registrationStatus.toLowerCase() === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
   const stats = {
     total: drivers.length,
-    onDuty: drivers.filter(d => d.status === 'On Duty' || d.status === 'On Route').length,
-    avgAttendance: Math.round(drivers.reduce((acc, d) => acc + d.attendance, 0) / drivers.length)
+    active: drivers.filter(d => d.registrationStatus === 'Active').length,
+    pending: drivers.filter(d => d.registrationStatus === 'Pending').length,
+    inactive: drivers.filter(d => d.registrationStatus === 'Inactive').length,
+    rejected: drivers.filter(d => d.registrationStatus === 'Rejected').length,
+    avgAttendance: drivers.length > 0 ? Math.round(drivers.reduce((acc, d) => acc + d.attendance, 0) / drivers.length) : 0
   };
 
   return (
@@ -257,8 +274,15 @@ function Drivers({ onMenuClick, setActiveTab }) {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <div 
+              onClick={() => setFilterStatus('all')}
+              className={`rounded-xl p-4 border-2 shadow-sm cursor-pointer transition-all duration-200 ${
+                filterStatus === 'all'
+                  ? 'bg-blue-50 border-blue-500 shadow-md'
+                  : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-md'
+              }`}
+            >
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-blue-100">
                   <Users className="w-5 h-5 text-blue-600" />
@@ -269,25 +293,75 @@ function Drivers({ onMenuClick, setActiveTab }) {
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+            <div 
+              onClick={() => setFilterStatus('active')}
+              className={`rounded-xl p-4 border-2 shadow-sm cursor-pointer transition-all duration-200 ${
+                filterStatus === 'active'
+                  ? 'bg-green-50 border-green-500 shadow-md'
+                  : 'bg-white border-gray-200 hover:border-green-300 hover:shadow-md'
+              }`}
+            >
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-green-100">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900">{stats.onDuty}</div>
-                  <div className="text-sm text-gray-600">On Duty</div>
+                  <div className="text-2xl font-bold text-gray-900">{stats.active}</div>
+                  <div className="text-sm text-gray-600">Active</div>
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+            <div 
+              onClick={() => setFilterStatus('pending')}
+              className={`rounded-xl p-4 border-2 shadow-sm cursor-pointer transition-all duration-200 ${
+                filterStatus === 'pending'
+                  ? 'bg-yellow-50 border-yellow-500 shadow-md'
+                  : 'bg-white border-gray-200 hover:border-yellow-300 hover:shadow-md'
+              }`}
+            >
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-purple-100">
-                  <TrendingUp className="w-5 h-5 text-purple-600" />
+                <div className="p-2.5 rounded-xl bg-yellow-100">
+                  <AlertTriangle className="w-5 h-5 text-yellow-600" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900">{stats.avgAttendance}%</div>
-                  <div className="text-sm text-gray-600">Avg Attendance</div>
+                  <div className="text-2xl font-bold text-gray-900">{stats.pending}</div>
+                  <div className="text-sm text-gray-600">Pending</div>
+                </div>
+              </div>
+            </div>
+            <div 
+              onClick={() => setFilterStatus('inactive')}
+              className={`rounded-xl p-4 border-2 shadow-sm cursor-pointer transition-all duration-200 ${
+                filterStatus === 'inactive'
+                  ? 'bg-gray-100 border-gray-600 shadow-md'
+                  : 'bg-white border-gray-200 hover:border-gray-400 hover:shadow-md'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-gray-200">
+                  <Users className="w-5 h-5 text-gray-700" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{stats.inactive}</div>
+                  <div className="text-sm text-gray-600">Inactive</div>
+                </div>
+              </div>
+            </div>
+            <div 
+              onClick={() => setFilterStatus('rejected')}
+              className={`rounded-xl p-4 border-2 shadow-sm cursor-pointer transition-all duration-200 ${
+                filterStatus === 'rejected'
+                  ? 'bg-red-50 border-red-500 shadow-md'
+                  : 'bg-white border-gray-200 hover:border-red-300 hover:shadow-md'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-red-100">
+                  <X className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{stats.rejected}</div>
+                  <div className="text-sm text-gray-600">Rejected</div>
                 </div>
               </div>
             </div>
@@ -311,13 +385,13 @@ function Drivers({ onMenuClick, setActiveTab }) {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent"
+                  className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent cursor-pointer"
                 >
                   <option value="all">All Status</option>
-                  <option value="on-duty">On Duty</option>
-                  <option value="on-route">On Route</option>
-                  <option value="off-duty">Off Duty</option>
-                  <option value="on-leave">On Leave</option>
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="rejected">Rejected</option>
                 </select>
               </div>
             </div>
