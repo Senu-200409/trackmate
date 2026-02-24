@@ -27,9 +27,11 @@ import DriverServices from '../../services/DriverServices';
 import StudentServices from '../../services/StudentServices';
 import NotificationServices from '../../services/NotificationServices';
 import AcceptNewUsers from './AcceptNewUsers';
+import DriversOnDuty from './DriversOnDuty';
 
 function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
   const [showAcceptUsers, setShowAcceptUsers] = useState(false);
+  const [showDriversOnDuty, setShowDriversOnDuty] = useState(false);
   const [notifications] = useState([]);
   const [currentAlertIndex, setCurrentAlertIndex] = useState(0);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
@@ -154,6 +156,16 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
     );
   }
 
+  if (showDriversOnDuty) {
+    return (
+      <DriversOnDuty 
+        onMenuClick={onMenuClick} 
+        setActiveTab={setActiveTab}
+        onBack={() => setShowDriversOnDuty(false)}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
       <OwnerHeader notifications={notifications} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} onLogout={onLogout} />
@@ -271,7 +283,7 @@ function OwnerDashboard({ onMenuClick, setActiveTab, onLogout }) {
             </div>
 
             {/* Drivers On Duty */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all hover:border-blue-300 group cursor-pointer">
+            <div onClick={() => setShowDriversOnDuty(true)} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all hover:border-blue-300 group cursor-pointer">
               <div className="flex items-center justify-between mb-3">
                 <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-400 to-cyan-500 shadow-lg shadow-blue-200">
                   <Users className="w-5 h-5 text-white" />
