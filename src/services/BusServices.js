@@ -39,6 +39,16 @@ const BusServices = {
   // Create bus - calls /BusDetails/AddBusDetails
   createBus: async (busData) => {
     try {
+      const normalizedLatitude =
+        busData.Latitude !== undefined && busData.Latitude !== null && String(busData.Latitude).trim() !== ''
+          ? Number(busData.Latitude)
+          : null;
+
+      const normalizedLongitude =
+        busData.Longitude !== undefined && busData.Longitude !== null && String(busData.Longitude).trim() !== ''
+          ? Number(busData.Longitude)
+          : null;
+
       const payload = {
         NumberPlate: busData.NumberPlate || busData.plate || busData.LicensePlate || '',
         DriverID: busData.DriverID ? Number(busData.DriverID) : (busData.DriverId ? Number(busData.DriverId) : null),
@@ -46,8 +56,8 @@ const BusServices = {
         SheetCount: busData.SheetCount ? Number(busData.SheetCount) : (busData.capacity ? Number(busData.capacity) : 0),
         LicenseExpiry: busData.LicenseExpiry || busData.licenseExpiry || busData.LicenseExpiryDate || '',
         InsuranceExpiry: busData.InsuranceExpiry || busData.insuranceExpiry || '',
-        Latitude: busData.Latitude != null ? Number(busData.Latitude) : null,
-        Longitude: busData.Longitude != null ? Number(busData.Longitude) : null,
+        Latitude: normalizedLatitude,
+        Longitude: normalizedLongitude,
       };
 
       const response = await apiClient.post(API_ENDPOINTS.BUS.ADD, payload);

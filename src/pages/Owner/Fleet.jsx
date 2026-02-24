@@ -22,6 +22,7 @@ import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
 import BusServices from '../../services/BusServices';
 import DriverServices from '../../services/DriverServices';
+import UserServices from '../../services/UserServices';
 
 function Fleet({ onMenuClick, setActiveTab }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,14 +41,23 @@ function Fleet({ onMenuClick, setActiveTab }) {
     return s;
   };
 
+  const getDriverDisplayName = (driverId, fallbackName = 'Unassigned') => {
+    if (!driverId) return fallbackName;
+    const match = availableDrivers.find((driver) => String(driver.id) === String(driverId));
+    return match ? match.name : fallbackName;
+  };
+
   // Map API bus response fields to UI model
   const mapBusData = (b) => ({
     plate: b.NumberPlate || b.Plate || b.LicensePlate || b.plate || b.Number || '',
     vehicle: b.VehicleName || b.Model || b.vehicle || b.Vehicle || '',
-    capacity: b.SeatingCapacity || b.Capacity || b.capacity || b.Seats || 0,
+    capacity: b.SheetCount || b.SeatingCapacity || b.Capacity || b.capacity || b.Seats || 0,
+    driverId: b.DriverID || b.DriverId || b.driverId || '',
     driver: b.DriverName || b.Driver || b.driver || b.AssignedDriver || 'Unassigned',
     insuranceExpiry: b.InsuranceExpiry || b.InsuranceExpiryDate || b.insuranceExpiry || '',
     licenseExpiry: b.LicenseExpiry || b.RegistrationExpiry || b.licenseExpiry || '',
+    latitude: b.Latitude || b.latitude || '',
+    longitude: b.Longitude || b.longitude || '',
     status: normalizeBusStatus(b.Status || b.status || ''),
     // keep original fields for debugging
     _raw: b
@@ -86,6 +96,8 @@ function Fleet({ onMenuClick, setActiveTab }) {
     assignedDriver: '',
     insuranceExpiry: '',
     licenseExpiry: '',
+    latitude: '',
+    longitude: '',
     status: 'active'
   });
 
@@ -147,6 +159,8 @@ function Fleet({ onMenuClick, setActiveTab }) {
           assignedDriver: '',
           insuranceExpiry: '',
           licenseExpiry: '',
+          latitude: '',
+          longitude: '',
           status: 'active'
         });
         alert(resp.message || 'Bus added successfully');
@@ -167,9 +181,11 @@ function Fleet({ onMenuClick, setActiveTab }) {
       licensePlate: bus.plate || '',
       vehicle: bus.vehicle || '',
       capacity: bus.capacity || '',
-      assignedDriver: bus.driver || '',
+      assignedDriver: bus.driverId || '',
       insuranceExpiry: bus.insuranceExpiry || '',
       licenseExpiry: bus.licenseExpiry || '',
+      latitude: bus.latitude || '',
+      longitude: bus.longitude || '',
       status: (bus.status || 'active').toLowerCase()
     });
     setShowEditModal(true);
@@ -183,19 +199,55 @@ function Fleet({ onMenuClick, setActiveTab }) {
     setEditingBus(null);
   };
 
-  // Available drivers for dropdowns (fetched from API)
   const [availableDrivers, setAvailableDrivers] = useState([]);
 
   useEffect(() => {
     const fetchDriversForSelect = async () => {
       try {
-        const res = await DriverServices.getAllDrivers();
-        const list = res && res.data ? (Array.isArray(res.data) ? res.data : res.data.ResultSet || []) : [];
-        const opts = list.map(d => ({
-          id: d.DriverID || d.DriverId || d.id || d.UserID || '',
-          name: d.DriverName || d.UserName || d.name || `Driver ${d.DriverID || d.DriverId || d.id || ''}`
-        }));
-        setAvailableDrivers(opts);
+        const [driversResponse, usersResponse] = await Promise.all([
+          DriverServices.getAllDrivers(),
+          UserServices.getAllUsers(),
+        ]);
+
+        const drivers = driversResponse && driversResponse.data
+          ? (Array.isArray(driversResponse.data) ? driversResponse.data : driversResponse.data.ResultSet || [])
+          : [];
+
+        const activeDrivers = drivers.filter((driver) => {
+          const status = String(driver?.Status || driver?.status || '').trim().toUpperCase();
+          return status === 'A' || status === 'ACTIVE';
+        });
+
+        const users = usersResponse && usersResponse.data
+          ? (Array.isArray(usersResponse.data) ? usersResponse.data : usersResponse.data.ResultSet || [])
+          : [];
+
+        const optionsById = new Map();
+
+        activeDrivers.forEach((driver) => {
+          const driverId = driver.DriverID || driver.DriverId || driver.id || '';
+          if (!driverId) return;
+
+          const userMatch = users.find((user) =>
+            (user.UserID && driver.UserID && String(user.UserID) === String(driver.UserID)) ||
+            (user.UserName && driver.DriverName && String(user.UserName) === String(driver.DriverName)) ||
+            (user.Phone && driver.Phone && String(user.Phone) === String(driver.Phone))
+          );
+
+          const displayName =
+            userMatch?.UserName ||
+            driver.DriverName ||
+            driver.UserName ||
+            driver.name ||
+            `Driver ${driverId}`;
+
+          optionsById.set(String(driverId), {
+            id: driverId,
+            name: displayName,
+          });
+        });
+
+        setAvailableDrivers(Array.from(optionsById.values()));
       } catch (err) {
         console.error('Error loading drivers for select:', err);
         setAvailableDrivers([]);
@@ -353,7 +405,7 @@ function Fleet({ onMenuClick, setActiveTab }) {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
                       <User className="w-4 h-4 text-gray-400" />
-                      <span className="text-gray-700">Driver: {bus.driver}</span>
+                      <span className="text-gray-700">Driver: {getDriverDisplayName(bus.driverId, bus.driver)}</span>
                     </div>
                   </div>
 
@@ -506,12 +558,13 @@ function Fleet({ onMenuClick, setActiveTab }) {
                   </h3>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Assigned Driver
+                      Assigned Driver <span className="text-red-500">*</span>
                     </label>
                     <select
                       name="assignedDriver"
                       value={formData.assignedDriver}
                       onChange={handleInputChange}
+                      required
                       className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
                     >
                       <option value="">Select a driver</option>
@@ -531,25 +584,64 @@ function Fleet({ onMenuClick, setActiveTab }) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Insurance Expiry Date
+                        Insurance Expiry Date <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="date"
                         name="insuranceExpiry"
                         value={formData.insuranceExpiry}
                         onChange={handleInputChange}
+                        required
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        License Expiry Date
+                        License Expiry Date <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="date"
                         name="licenseExpiry"
                         value={formData.licenseExpiry}
                         onChange={handleInputChange}
+                        required
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Location (Optional)
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Latitude
+                      </label>
+                      <input
+                        type="number"
+                        name="latitude"
+                        value={formData.latitude}
+                        onChange={handleInputChange}
+                        step="any"
+                        placeholder="e.g., 7.2906"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Longitude
+                      </label>
+                      <input
+                        type="number"
+                        name="longitude"
+                        value={formData.longitude}
+                        onChange={handleInputChange}
+                        step="any"
+                        placeholder="e.g., 80.6337"
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
