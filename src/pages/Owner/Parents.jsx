@@ -21,6 +21,7 @@ import {
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
 import ParentServices from '../../services/ParentServices';
+import UserServices from '../../services/UserServices';
 import RegisterParentModal from '../../components/Owner/RegisterParentModal';
 
 function Parents({ onMenuClick, setActiveTab }) {
@@ -89,13 +90,12 @@ function Parents({ onMenuClick, setActiveTab }) {
   const [showRegisterParentModal, setShowRegisterParentModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingParent, setEditingParent] = useState(null);
+  const [editLoading, setEditLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
     phone: '',
     address: '',
-    city: '',
-    childrenCount: '',
+    secondaryPhone: '',
     status: 'active'
   });
 
@@ -111,27 +111,72 @@ function Parents({ onMenuClick, setActiveTab }) {
     setShowAddModal(false);
     setFormData({
       name: '',
-      email: '',
       phone: '',
       address: '',
-      city: '',
-      childrenCount: '',
+      secondaryPhone: '',
       status: 'active'
     });
   };
 
-  const handleEditClick = (parent) => {
-    setEditingParent(parent);
-    setFormData({
-      name: parent.name || '',
-      email: parent.email || '',
-      phone: parent.phone || '',
-      address: parent.address || '',
-      city: parent.city || '',
-      childrenCount: parent.children || '',
-      status: (parent.status || 'active').toLowerCase()
-    });
-    setShowEditModal(true);
+  const handleEditClick = async (parent) => {
+    // fetch latest parent record before opening modal
+    setEditLoading(true);
+    try {
+      const id = parent.parentID || parent.id;
+      const resp = await ParentServices.getParent(id);
+      if (resp.success && resp.data) {
+        // some endpoints return arrays under ResultSet
+        const raw = Array.isArray(resp.data)
+          ? resp.data[0]
+          : resp.data.ResultSet && resp.data.ResultSet.length
+            ? resp.data.ResultSet[0]
+            : resp.data;
+        const fresh = mapParentData(raw);
+        setEditingParent(fresh);
+
+        // prepare form values; later we may override with user info
+        // Address and secondary mobile come directly from parent details
+        let initValues = {
+          name: fresh.name || '',
+          phone: fresh.phone || '',           // primary phone (may be overridden by user API)
+          address: fresh.address || '',
+          secondaryPhone: fresh.phone || '',   // use ContactNo2 for secondary mobile
+          status: (fresh.status || 'active').toLowerCase()
+        };
+
+        // if parent has linked user id, fetch user details
+        if (fresh.userID) {
+          try {
+            // eslint-disable-next-line no-undef
+            const userResp = await UserServices.getUserById(fresh.userID);
+            if (userResp.success && userResp.data) {
+              const uraw = Array.isArray(userResp.data)
+                ? userResp.data[0]
+                : userResp.data.ResultSet && userResp.data.ResultSet.length
+                  ? userResp.data.ResultSet[0]
+                  : userResp.data;
+              // override form fields
+              initValues.name = uraw.UserName || initValues.name;
+              initValues.phone = uraw.Phone || initValues.phone;
+              // user.Status is a code like 'A' or 'I'; map to active/inactive
+              if (uraw.Status) {
+                initValues.status = uraw.Status.toUpperCase() === 'A' ? 'active' : 'inactive';
+              }
+            }
+          } catch (uerr) {
+            console.warn('Failed to fetch user for parent:', uerr);
+          }
+        }
+
+        setFormData(initValues);
+        setShowEditModal(true);
+      }
+    } catch (err) {
+      console.error('Failed to fetch parent for edit:', err);
+      alert('Unable to load parent details. Please try again.');
+    } finally {
+      setEditLoading(false);
+    }
   };
 
   const handleUpdateSubmit = (e) => {
@@ -395,11 +440,16 @@ function Parents({ onMenuClick, setActiveTab }) {
                 <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
                   <button
                     onClick={() => handleEditClick(parent)}
-                    className="px-3 py-1.5 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] transition-colors text-xs font-medium flex items-center gap-1"
+                    disabled={editLoading}
+                    className="px-3 py-1.5 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] transition-colors text-xs font-medium flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Update"
                   >
-                    <Edit className="w-3 h-3" />
-                    View
+                    {editLoading ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Edit className="w-3 h-3" />
+                    )}
+                    Update
                   </button>
                   <button className="p-2 rounded-lg hover:bg-gray-200 transition-colors" title="More Options">
                     <MoreVertical className="w-4 h-4 text-gray-600" />
@@ -496,21 +546,7 @@ function Parents({ onMenuClick, setActiveTab }) {
                     <Phone className="w-4 h-4" />
                     Contact Information
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email Address <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., john@example.com"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Phone Number <span className="text-red-500">*</span>
@@ -549,42 +585,27 @@ function Parents({ onMenuClick, setActiveTab }) {
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        City <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., New York"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
                   </div>
                 </div>
 
-                {/* Children Information Section */}
+                {/* Secondary Mobile Section */}
                 <div>
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    Children Information
+                    <Phone className="w-4 h-4" />
+                    Secondary Mobile Number
                   </h3>
                   <div className="grid grid-cols-1 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Number of Children <span className="text-red-500">*</span>
+                        Secondary Mobile Number <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="number"
-                        name="childrenCount"
-                        value={formData.childrenCount}
+                        type="tel"
+                        name="secondaryPhone"
+                        value={formData.secondaryPhone}
                         onChange={handleInputChange}
                         required
-                        min="1"
-                        placeholder="e.g., 1"
+                        placeholder="e.g., +44 7123 456789"
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
@@ -681,11 +702,7 @@ function Parents({ onMenuClick, setActiveTab }) {
                     <Phone className="w-4 h-4" />
                     Contact Information
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Email Address <span className="text-red-500">*</span></label>
-                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} required placeholder="e.g., john@example.com" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
-                    </div>
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number <span className="text-red-500">*</span></label>
                       <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} required placeholder="e.g., +1 212-555-0100" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
@@ -704,23 +721,19 @@ function Parents({ onMenuClick, setActiveTab }) {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Address <span className="text-red-500">*</span></label>
                       <input type="text" name="address" value={formData.address} onChange={handleInputChange} required placeholder="Full address" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">City <span className="text-red-500">*</span></label>
-                      <input type="text" name="city" value={formData.city} onChange={handleInputChange} required placeholder="e.g., New York" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
-                    </div>
                   </div>
                 </div>
 
-                {/* Children Information Section */}
+                {/* Secondary Mobile Section */}
                 <div>
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    Children Information
+                    <Phone className="w-4 h-4" />
+                    Secondary Mobile Number
                   </h3>
                   <div className="grid grid-cols-1 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Number of Children <span className="text-red-500">*</span></label>
-                      <input type="number" name="childrenCount" value={formData.childrenCount} onChange={handleInputChange} required min="1" placeholder="e.g., 1" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Secondary Mobile Number <span className="text-red-500">*</span></label>
+                      <input type="tel" name="secondaryPhone" value={formData.secondaryPhone} onChange={handleInputChange} required placeholder="e.g., +44 7123 456789" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
                     </div>
                   </div>
                 </div>
@@ -735,10 +748,6 @@ function Parents({ onMenuClick, setActiveTab }) {
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                       </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                      <textarea name="notes" value={formData.notes} onChange={handleInputChange} rows="3" placeholder="Any additional information..." className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all resize-none" />
                     </div>
                   </div>
                 </div>
