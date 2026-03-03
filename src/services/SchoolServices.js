@@ -10,9 +10,14 @@ const SchoolServices = {
   getAllSchools: async () => {
     try {
       const response = await apiClient.get(API_ENDPOINTS.SCHOOL.GET_ALL);
+      let data = response.data;
+      // backend sometimes wraps results in ResultSet
+      if (data && !Array.isArray(data) && Array.isArray(data.ResultSet)) {
+        data = data.ResultSet;
+      }
       return {
         success: true,
-        data: response.data,
+        data,
       };
     } catch (error) {
       console.error('Error fetching schools:', error);
@@ -39,7 +44,15 @@ const SchoolServices = {
   // Create school
   addSchool: async (schoolData) => {
     try {
-      const response = await apiClient.post(API_ENDPOINTS.SCHOOL.ADD, schoolData);
+      const payload = {
+        Userid: schoolData.Userid || 1,
+        SchoolName: schoolData.SchoolName,
+        City: schoolData.City,
+        Town: schoolData.Town,
+        Address: schoolData.Address,
+        SchoolType: schoolData.SchoolType
+      };
+      const response = await apiClient.post(API_ENDPOINTS.SCHOOL.ADD, payload);
       return {
         success: true,
         data: response.data,
@@ -53,8 +66,15 @@ const SchoolServices = {
   // Update school
   updateSchool: async (schoolId, schoolData) => {
     try {
-      // Some APIs expect the ID as part of the payload for PUT
-      const payload = { SchoolID: schoolId, ...schoolData };
+      const payload = {
+        SchoolID: schoolId,
+        Userid: schoolData.Userid || 1,
+        SchoolName: schoolData.SchoolName,
+        City: schoolData.City,
+        Town: schoolData.Town,
+        Address: schoolData.Address,
+        SchoolType: schoolData.SchoolType
+      };
       const response = await apiClient.put(API_ENDPOINTS.SCHOOL.PUT, payload);
       return {
         success: true,

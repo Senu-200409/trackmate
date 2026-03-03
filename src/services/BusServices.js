@@ -75,14 +75,23 @@ const BusServices = {
   // Update bus
   updateBus: async (busId, busData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.BUSES.UPDATE, { id: busId });
-      // return await httpClient.put(url, busData);
+      // payload should follow /BusDetails/PutBusDetails specification
+      const payload = {
+        NumberPlate: busData.NumberPlate || busData.plate || busData.licensePlate || '',
+        DriverID: busData.DriverID || busData.driverId || null,
+        Vehicle: busData.Vehicle || busData.vehicle || '',
+        SheetCount: busData.SheetCount || busData.capacity || 0,
+        LicenseExpiry: busData.LicenseExpiry || busData.licenseExpiry || '',
+        InsuranceExpiry: busData.InsuranceExpiry || busData.insuranceExpiry || '',
+        Latitude: busData.Latitude || busData.latitude || '',
+        Longitude: busData.Longitude || busData.longitude || ''
+      };
 
+      const response = await apiClient.post(API_ENDPOINTS.BUS.PUT, payload);
       return {
         success: true,
-        message: 'Bus updated successfully',
-        data: { id: busId, ...busData },
+        message: response.data?.Result || 'Bus updated successfully',
+        data: response.data,
       };
     } catch (error) {
       console.error('Error updating bus:', error);

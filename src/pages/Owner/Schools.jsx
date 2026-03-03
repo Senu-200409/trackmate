@@ -27,17 +27,41 @@ function Schools({ onMenuClick, setActiveTab }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // helper to normalize API fields into UI-friendly object
+  const mapSchoolData = (apiSchool) => ({
+    id: apiSchool.SchoolID || apiSchool.id || '',
+    name: apiSchool.SchoolName || apiSchool.name || '',
+    city: apiSchool.City || '',
+    town: apiSchool.Town || '',
+    address: apiSchool.Address || '',
+    type: apiSchool.SchoolType || '',
+    status: apiSchool.Status === 'A' ? 'Active' : apiSchool.Status === 'I' ? 'Inactive' : apiSchool.Status || 'Unknown',
+    createDate: apiSchool.CreateDate || '',
+    createdBy: apiSchool.CreatedBy || '',
+    updatedDate: apiSchool.UpdatedDate || '',
+    updatedBy: apiSchool.UpdatedBy || '',
+    // preserve any other fields
+    ...apiSchool,
+  });
+
   // Fetch schools from API
   useEffect(() => {
     const fetchSchools = async () => {
       try {
         setLoading(true);
         const response = await SchoolServices.getAllSchools();
-        if (response.success && Array.isArray(response.data)) {
-          setSchoolsList(response.data);
-        } else {
-          setSchoolsList([]);
+        let list = [];
+        if (response.success && response.data) {
+          // unwrap ResultSet if necessary
+          if (Array.isArray(response.data)) {
+            list = response.data;
+          } else if (Array.isArray(response.data.ResultSet)) {
+            list = response.data.ResultSet;
+          }
         }
+        // normalize entries
+        const normalized = list.map(mapSchoolData);
+        setSchoolsList(normalized);
       } catch (err) {
         console.error('Error fetching schools:', err);
         setError('Failed to load schools');
@@ -56,9 +80,8 @@ function Schools({ onMenuClick, setActiveTab }) {
     schoolName: '',
     address: '',
     city: '',
-    phoneNumber: '',
-    totalStudents: '',
-    status: 'active'
+    town: '',
+    schoolType: 'Boys'
   });
 
   const handleInputChange = (e) => {
@@ -71,20 +94,22 @@ function Schools({ onMenuClick, setActiveTab }) {
     (async () => {
       try {
         const payload = {
+          Userid: 1,
           SchoolName: formData.schoolName,
           Address: formData.address,
           City: formData.city,
-          Phone: formData.phoneNumber,
-          Students: Number(formData.totalStudents) || 0,
-          Status: formData.status === 'active' ? 'Active' : 'Inactive'
+          Town: formData.town,
+          SchoolType: formData.schoolType
         };
         const res = await SchoolServices.addSchool(payload);
         if (res.success) {
           alert('School added successfully!');
           setShowAddModal(false);
-          // refresh list
           const listRes = await SchoolServices.getAllSchools();
-          if (listRes.success && Array.isArray(listRes.data)) setSchoolsList(listRes.data);
+          if (listRes.success) {
+            const normalized = (Array.isArray(listRes.data) ? listRes.data : listRes.data.ResultSet || []).map(mapSchoolData);
+            setSchoolsList(normalized);
+          }
         }
       } catch (err) {
         console.error('Add school error:', err);
@@ -94,9 +119,8 @@ function Schools({ onMenuClick, setActiveTab }) {
           schoolName: '',
           address: '',
           city: '',
-          phoneNumber: '',
-          totalStudents: '',
-          status: 'active'
+          town: '',
+          schoolType: 'Boys'
         });
       }
     })();
@@ -108,9 +132,8 @@ function Schools({ onMenuClick, setActiveTab }) {
       schoolName: school.name || '',
       address: school.address || '',
       city: school.city || '',
-      phoneNumber: school.phone || '',
-      totalStudents: school.students || '',
-      status: (school.status || 'active').toLowerCase()
+      town: school.town || '',
+      schoolType: school.type || 'Boys'
     });
     setShowEditModal(true);
   };
@@ -120,20 +143,23 @@ function Schools({ onMenuClick, setActiveTab }) {
     (async () => {
       try {
         const payload = {
+          Userid: 1,
           SchoolName: formData.schoolName,
           Address: formData.address,
           City: formData.city,
-          Phone: formData.phoneNumber,
-          Students: Number(formData.totalStudents) || 0,
-          Status: formData.status === 'active' ? 'Active' : 'Inactive'
+          Town: formData.town,
+          SchoolType: formData.schoolType
         };
-        const res = await SchoolServices.updateSchool(editingSchool.id || editingSchool.schoolId || editingSchool.id, payload);
+        const res = await SchoolServices.updateSchool(editingSchool.id || editingSchool.schoolId, payload);
         if (res.success) {
           alert('School updated successfully!');
           setShowEditModal(false);
           setEditingSchool(null);
           const listRes = await SchoolServices.getAllSchools();
-          if (listRes.success && Array.isArray(listRes.data)) setSchoolsList(listRes.data);
+          if (listRes.success) {
+            const normalized = (Array.isArray(listRes.data) ? listRes.data : listRes.data.ResultSet || []).map(mapSchoolData);
+            setSchoolsList(normalized);
+          }
         }
       } catch (err) {
         console.error('Update school error:', err);
@@ -143,16 +169,19 @@ function Schools({ onMenuClick, setActiveTab }) {
   };
 
   const filteredSchools = schoolsList.filter(school => {
-    const matchesSearch = school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         school.city.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      school.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      school.town.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      school.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      school.type.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'all' || school.status.toLowerCase() === filterStatus.toLowerCase();
     return matchesSearch && matchesFilter;
   });
 
   const stats = {
     total: schoolsList.length,
-    active: schoolsList.filter(s => s.status === 'Active').length,
-    totalStudents: schoolsList.reduce((acc, s) => acc + s.students, 0)
+    active: schoolsList.filter(s => s.status === 'Active').length
   };
 
   return (
@@ -178,7 +207,7 @@ function Schools({ onMenuClick, setActiveTab }) {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-blue-100">
@@ -197,18 +226,7 @@ function Schools({ onMenuClick, setActiveTab }) {
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-gray-900">{stats.active}</div>
-                  <div className="text-sm text-gray-600">Active</div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-purple-100">
-                  <Users className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">{stats.totalStudents.toLocaleString()}</div>
-                  <div className="text-sm text-gray-600">Total Students</div>
+                  <div className="text-sm text-gray-600">Active Schools</div>
                 </div>
               </div>
             </div>
@@ -253,6 +271,7 @@ function Schools({ onMenuClick, setActiveTab }) {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="text-lg font-bold">{school.name}</h3>
+                      <div className="text-xs mt-1">{school.type}</div>
                     </div>
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                       school.status === 'Active' 
@@ -264,27 +283,18 @@ function Schools({ onMenuClick, setActiveTab }) {
                   </div>
                 </div>
 
-                {/* Contact Details */}
-                <div className="px-4 py-3 space-y-2 border-b border-gray-100">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Phone className="w-4 h-4 text-[#F5C518]" />
-                    {school.phone}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                {/* Location Details */}
+                <div className="px-4 py-3 space-y-2 border-b border-gray-100 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-[#F5C518]" />
-                    {school.city}
+                    {school.address || school.city}
                   </div>
-                </div>
-
-                {/* Statistics */}
-                <div className="px-4 py-3 space-y-2 border-b border-gray-100">
-                  <div className="flex items-center justify-between">
+                  {school.town && (
                     <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-purple-600" />
-                      <span className="text-sm text-gray-600">Students:</span>
+                      <Building className="w-4 h-4 text-[#F5C518]" />
+                      {school.town}
                     </div>
-                    <span className="font-semibold text-gray-900">{school.students}</span>
-                  </div>
+                  )}
                 </div>
 
                 {/* Footer Actions */}
@@ -361,26 +371,28 @@ function Schools({ onMenuClick, setActiveTab }) {
                   </div>
                 </div>
 
-                {/* Contact Information */}
+                {/* School Type */}
                 <div>
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Phone className="w-4 h-4" />
-                    Contact Information
+                    <Building className="w-4 h-4" />
+                    School Type
                   </h3>
                   <div className="grid grid-cols-1 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number <span className="text-red-500">*</span>
+                        School Type <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="tel"
-                        name="phoneNumber"
-                        value={formData.phoneNumber}
+                      <select
+                        name="schoolType"
+                        value={formData.schoolType}
                         onChange={handleInputChange}
                         required
-                        placeholder="e.g., +1 212-555-0100"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
+                      >
+                        <option value="Boys">Boys</option>
+                        <option value="Girls">Girls</option>
+                        <option value="Mixed">Mixed</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -416,48 +428,23 @@ function Schools({ onMenuClick, setActiveTab }) {
                         value={formData.city}
                         onChange={handleInputChange}
                         required
-                        placeholder="e.g., New York"
+                        placeholder="e.g., Colombo"
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
                     </div>
-                  </div>
-                </div>
-
-                {/* School Details Section */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Building className="w-4 h-4" />
-                    School Details
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Total Students <span className="text-red-500">*</span>
+                        Town <span className="text-red-500">*</span>
                       </label>
                       <input
-                        type="number"
-                        name="totalStudents"
-                        value={formData.totalStudents}
+                        type="text"
+                        name="town"
+                        value={formData.town}
                         onChange={handleInputChange}
                         required
-                        min="0"
-                        placeholder="e.g., 450"
+                        placeholder="e.g., Colombo 07"
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Status
-                      </label>
-                      <select
-                        name="status"
-                        value={formData.status}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                      </select>
                     </div>
                   </div>
                 </div>
@@ -525,16 +512,20 @@ function Schools({ onMenuClick, setActiveTab }) {
                   </div>
                 </div>
 
-                {/* Contact Information */}
+                {/* School Type */}
                 <div>
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Phone className="w-4 h-4" />
-                    Contact Information
+                    <Building className="w-4 h-4" />
+                    School Type
                   </h3>
                   <div className="grid grid-cols-1 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number <span className="text-red-500">*</span></label>
-                      <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} required placeholder="e.g., +1 212-555-0100" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
+                      <label className="block text-sm font-medium text-gray-700 mb-1">School Type <span className="text-red-500">*</span></label>
+                      <select name="schoolType" value={formData.schoolType} onChange={handleInputChange} required className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white">
+                        <option value="Boys">Boys</option>
+                        <option value="Girls">Girls</option>
+                        <option value="Mixed">Mixed</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -552,28 +543,11 @@ function Schools({ onMenuClick, setActiveTab }) {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">City <span className="text-red-500">*</span></label>
-                      <input type="text" name="city" value={formData.city} onChange={handleInputChange} required placeholder="e.g., New York" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* School Details Section */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Building className="w-4 h-4" />
-                    School Details
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Total Students <span className="text-red-500">*</span></label>
-                      <input type="number" name="totalStudents" value={formData.totalStudents} onChange={handleInputChange} required min="0" placeholder="e.g., 450" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all" />
+                      <input type="text" name="city" value={formData.city} onChange={handleInputChange} required placeholder="e.g., Colombo" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                      <select name="status" value={formData.status} onChange={handleInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus-border-transparent transition-all bg-white">
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                      </select>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Town <span className="text-red-500">*</span></label>
+                      <input type="text" name="town" value={formData.town} onChange={handleInputChange} required placeholder="e.g., Colombo 07" className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all" />
                     </div>
                   </div>
                 </div>

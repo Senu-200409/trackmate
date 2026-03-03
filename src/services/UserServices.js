@@ -294,6 +294,23 @@ const UserServices = {
       throw error;
     }
   },
+
+  // Update basic user details (name/phone)
+  updateUser: async (userData) => {
+    try {
+      // some backends expect a different endpoint name
+      const url = API_ENDPOINTS.USER.UPDATE || API_ENDPOINTS.USER.PUT;
+      const response = await apiClient.post(url, userData);
+      return {
+        success: true,
+        message: response.data.Result || 'User updated successfully',
+        data: response.data,
+      };
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  },
 };
 
 export default UserServices;

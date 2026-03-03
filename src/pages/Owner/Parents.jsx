@@ -179,12 +179,64 @@ function Parents({ onMenuClick, setActiveTab }) {
     }
   };
 
-  const handleUpdateSubmit = (e) => {
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  const handleUpdateSubmit = async (e) => {
     e.preventDefault();
-    console.log('Updated Parent Data:', formData);
-    alert('Parent updated successfully!');
-    setShowEditModal(false);
-    setEditingParent(null);
+    setSaveLoading(true);
+    try {
+      // if this parent has a linked user record, update it
+      if (editingParent && editingParent.userID) {
+        const payload = {
+          UserID: editingParent.userID,
+          Phone: formData.phone,
+          UserName: formData.name,
+        };
+        const resp = await UserServices.updateUser(payload);
+        if (resp.success) {
+          alert('User information updated successfully');
+        } else {
+          alert('Failed to update user information');
+        }
+
+        // update status code if changed
+        const statusCode = formData.status === 'active' ? 'A'
+                         : formData.status === 'inactive' ? 'I'
+                         : null;
+        if (statusCode) {
+          try {
+            await UserServices.updateUserStatus(editingParent.userID, statusCode);
+          } catch (sErr) {
+            console.warn('Failed to update user status:', sErr);
+          }
+        }
+      }
+
+      // now update parent-specific details
+      if (editingParent && editingParent.parentID) {
+        const parentPayload = {
+          UserID: editingParent.userID,
+          Address: formData.address,
+          ContactNo2: formData.secondaryPhone,
+          Role: editingParent.role || '',
+        };
+        try {
+          const pResp = await ParentServices.updateParent(editingParent.parentID, parentPayload);
+          if (!pResp.success) {
+            console.warn('Parent update response not success', pResp);
+          }
+        } catch (perr) {
+          console.error('Error updating parent record:', perr);
+        }
+      }
+    } catch (err) {
+      console.error('Error updating user:', err);
+      alert('An error occurred while updating user information');
+    } finally {
+      setSaveLoading(false);
+      setShowEditModal(false);
+      setEditingParent(null);
+    }
   };
 
   const filteredParents = parentsList.filter(parent => {
@@ -758,8 +810,17 @@ function Parents({ onMenuClick, setActiveTab }) {
             {/* Modal Footer */}
             <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-3">
               <button type="button" onClick={() => { setShowEditModal(false); setEditingParent(null); }} className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium">Cancel</button>
-              <button type="submit" onClick={handleUpdateSubmit} className="px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors font-medium flex items-center gap-2">
-                <Save className="w-4 h-4" />
+              <button
+                type="submit"
+                onClick={handleUpdateSubmit}
+                disabled={saveLoading}
+                className="px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saveLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
                 Update Parent
               </button>
             </div>

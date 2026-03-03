@@ -79,6 +79,7 @@ export const API_ENDPOINTS = {
     GET_ALL: '/BusDetails/GetAllBusDetails',
     GET_BY_NUMBERPLATE: '/BusDetails/GetBusDetailsByNumberplate',
     ADD: '/BusDetails/AddBusDetails',
+    PUT: '/BusDetails/PutBusDetails',
   },
 
   // Device endpoints
@@ -129,6 +130,7 @@ export const API_ENDPOINTS = {
     VERIFY_OTP: '/UserDetails/VerifyOtp',
     ADD: '/UserDetails/AddUserDetails',
     PUT: '/UserDetails/PutUserDetails',
+    UPDATE: '/UserDetails/UpdateUser',
     UPDATE_STATUS: '/UserDetails/UpdateUserStatus',
   },
 };

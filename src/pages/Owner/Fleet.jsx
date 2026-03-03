@@ -191,12 +191,38 @@ function Fleet({ onMenuClick, setActiveTab }) {
     setShowEditModal(true);
   };
 
-  const handleUpdateSubmit = (e) => {
+  const handleUpdateSubmit = async (e) => {
     e.preventDefault();
-    console.log('Updated Bus Data:', formData);
-    alert('Bus updated successfully!');
-    setShowEditModal(false);
-    setEditingBus(null);
+    try {
+      // construct payload using existing immutable fields from editingBus
+      const payload = {
+        NumberPlate: editingBus?.plate || formData.licensePlate,
+        DriverID: editingBus?.driverId || Number(formData.assignedDriver),
+        Vehicle: formData.vehicle,
+        SheetCount: formData.capacity ? parseInt(String(formData.capacity), 10) : 0,
+        LicenseExpiry: formData.licenseExpiry,
+        InsuranceExpiry: formData.insuranceExpiry,
+        Latitude: formData.latitude || '',
+        Longitude: formData.longitude || ''
+      };
+
+      const resp = await BusServices.updateBus(editingBus?.plate || '', payload);
+      if (resp && resp.success) {
+        // reload list
+        const all = await BusServices.getAllBuses();
+        const list = all && all.data ? (Array.isArray(all.data) ? all.data : all.data.ResultSet || []) : [];
+        setBusFleet(list.map(mapBusData));
+        alert(resp.message || 'Bus updated successfully!');
+      } else {
+        alert('Failed to update bus');
+      }
+    } catch (err) {
+      console.error('Error updating bus:', err);
+      alert('Error updating bus: ' + err.message);
+    } finally {
+      setShowEditModal(false);
+      setEditingBus(null);
+    }
   };
 
   const [availableDrivers, setAvailableDrivers] = useState([]);
@@ -777,17 +803,9 @@ function Fleet({ onMenuClick, setActiveTab }) {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Assigned Driver
                     </label>
-                    <select
-                      name="assignedDriver"
-                      value={formData.assignedDriver}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                    >
-                      <option value="">Select a driver</option>
-                      {availableDrivers.map(driver => (
-                        <option key={driver.id} value={driver.id}>{driver.name}</option>
-                      ))}
-                    </select>
+                    <div className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-100 text-gray-600">
+                      {getDriverDisplayName(formData.assignedDriver)}
+                    </div>
                   </div>
                 </div>
 
