@@ -86,6 +86,16 @@ export const API_ENDPOINTS = {
   DEVICE: {
     GET_ALL: '/DeviceDetails/GetAllDeviceDetails',
     GET_BY_ID: '/DeviceDetails/GetDeviceDetailsByDeviceID',
+    ADD: '/DeviceDetails/AddDeviceDetails',
+    PUT: '/DeviceDetails/PutDeviceDetails',
+  },
+
+  // RFID endpoints
+  RFID: {
+    GET_ALL: '/Rfid/GetAllRfid',
+    GET_BY_LOG_ID: '/Rfid/GetRfidByLogID',
+    ADD: '/Rfid/AddRfid',
+    PUT: '/Rfid/PutRfid',
   },
 
   // Driver endpoints
@@ -120,6 +130,9 @@ export const API_ENDPOINTS = {
   // Student endpoints
   STUDENT: {
     GET_ALL: '/StudentDetails/GetAllStudentDetails',
+    GET_BY_ID: '/StudentDetails/GetStudentDetailsByStudentID',
+    ADD: '/StudentDetails/AddStudentDetails',
+    PUT: '/StudentDetails/PutStudentDetails',
   },
 
   // User endpoints

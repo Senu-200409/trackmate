@@ -10,7 +10,7 @@ import {
   Navigation,
   FileText,
   HelpCircle,
-  Route,
+  Radio,
   BarChart3,
   LogOut,
   X,
@@ -47,7 +47,7 @@ function Sidebar({ activeTab, setActiveTab, onLogout, isOpen, userRole, onClose 
         { icon: <School className="w-5 h-5" />, label: 'Schools', view: 'schools' },
         { icon: <Users className="w-5 h-5" />, label: 'Students', view: 'students' },
         { icon: <User className="w-5 h-5" />, label: 'Parents', view: 'parents' },
-        { icon: <Route className="w-5 h-5" />, label: 'Routes', view: 'routes' },
+        { icon: <Radio className="w-5 h-5" />, label: 'RFID', view: 'rfid' },
         { icon: <BarChart3 className="w-5 h-5" />, label: 'Analytics', view: 'analytics' },
         { icon: <Settings className="w-5 h-5" />, label: 'Settings', view: 'settings' },
       ];

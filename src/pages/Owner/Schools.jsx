@@ -22,6 +22,7 @@ import OwnerFooter from '../../components/Owner/OwnerFooter';
 import SchoolServices from '../../services/SchoolServices';
 
 function Schools({ onMenuClick, setActiveTab }) {
+  const currentUserid = localStorage.getItem('userId') || '1';
   const [searchTerm, setSearchTerm] = useState('');
   const [schoolsList, setSchoolsList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +30,7 @@ function Schools({ onMenuClick, setActiveTab }) {
 
   // helper to normalize API fields into UI-friendly object
   const mapSchoolData = (apiSchool) => ({
+    statusCode: apiSchool.Status || 'A',
     id: apiSchool.SchoolID || apiSchool.id || '',
     name: apiSchool.SchoolName || apiSchool.name || '',
     city: apiSchool.City || '',
@@ -81,7 +83,8 @@ function Schools({ onMenuClick, setActiveTab }) {
     address: '',
     city: '',
     town: '',
-    schoolType: 'Boys'
+    schoolType: 'Boys',
+    status: 'A'
   });
 
   const handleInputChange = (e) => {
@@ -94,7 +97,7 @@ function Schools({ onMenuClick, setActiveTab }) {
     (async () => {
       try {
         const payload = {
-          Userid: 1,
+          Userid: currentUserid,
           SchoolName: formData.schoolName,
           Address: formData.address,
           City: formData.city,
@@ -120,7 +123,8 @@ function Schools({ onMenuClick, setActiveTab }) {
           address: '',
           city: '',
           town: '',
-          schoolType: 'Boys'
+          schoolType: 'Boys',
+          status: 'A'
         });
       }
     })();
@@ -133,7 +137,8 @@ function Schools({ onMenuClick, setActiveTab }) {
       address: school.address || '',
       city: school.city || '',
       town: school.town || '',
-      schoolType: school.type || 'Boys'
+      schoolType: school.type || 'Boys',
+      status: school.statusCode || (school.status === 'Inactive' ? 'I' : 'A')
     });
     setShowEditModal(true);
   };
@@ -143,12 +148,14 @@ function Schools({ onMenuClick, setActiveTab }) {
     (async () => {
       try {
         const payload = {
-          Userid: 1,
+          SchoolID: editingSchool.id || editingSchool.schoolId,
+          Userid: currentUserid,
           SchoolName: formData.schoolName,
           Address: formData.address,
           City: formData.city,
           Town: formData.town,
-          SchoolType: formData.schoolType
+          SchoolType: formData.schoolType,
+          Status: formData.status || 'A'
         };
         const res = await SchoolServices.updateSchool(editingSchool.id || editingSchool.schoolId, payload);
         if (res.success) {
@@ -392,6 +399,23 @@ function Schools({ onMenuClick, setActiveTab }) {
                         <option value="Boys">Boys</option>
                         <option value="Girls">Girls</option>
                         <option value="Mixed">Mixed</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    Status
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Status <span className="text-red-500">*</span></label>
+                      <select name="status" value={formData.status} onChange={handleInputChange} required className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white">
+                        <option value="A">Active</option>
+                        <option value="I">Inactive</option>
                       </select>
                     </div>
                   </div>

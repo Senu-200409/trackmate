@@ -5,6 +5,18 @@
 
 import apiClient, { API_ENDPOINTS } from './AuthService';
 
+const unwrapResultSet = (payload) => {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (payload && Array.isArray(payload.ResultSet)) {
+    return payload.ResultSet;
+  }
+
+  return [];
+};
+
 const DeviceServices = {
   // Get all devices
   getAllDevices: async () => {
@@ -12,7 +24,8 @@ const DeviceServices = {
       const response = await apiClient.get(API_ENDPOINTS.DEVICE.GET_ALL);
       return {
         success: true,
-        data: response.data,
+        data: unwrapResultSet(response.data),
+        raw: response.data,
       };
     } catch (error) {
       console.error('Error fetching devices:', error);
@@ -28,7 +41,8 @@ const DeviceServices = {
       });
       return {
         success: true,
-        data: response.data,
+        data: unwrapResultSet(response.data),
+        raw: response.data,
       };
     } catch (error) {
       console.error('Error fetching device:', error);
@@ -39,14 +53,17 @@ const DeviceServices = {
   // Create device
   createDevice: async (deviceData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.DEVICES.CREATE);
-      // return await httpClient.post(url, deviceData);
+      const payload = {
+        DeviceName: deviceData.DeviceName || deviceData.deviceName || '',
+        NumberPlate: deviceData.NumberPlate || deviceData.numberPlate || '',
+      };
+
+      const response = await apiClient.post(API_ENDPOINTS.DEVICE.ADD, payload);
 
       return {
         success: true,
-        message: 'Device created successfully',
-        data: { id: Date.now(), ...deviceData },
+        message: response.data?.Result || 'Device added successfully',
+        data: response.data,
       };
     } catch (error) {
       console.error('Error creating device:', error);
@@ -57,14 +74,18 @@ const DeviceServices = {
   // Update device
   updateDevice: async (deviceId, deviceData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.DEVICES.UPDATE, { id: deviceId });
-      // return await httpClient.put(url, deviceData);
+      const payload = {
+        DeviceID: deviceData.DeviceID || deviceId,
+        DeviceName: deviceData.DeviceName || deviceData.deviceName || '',
+        NumberPlate: deviceData.NumberPlate || deviceData.numberPlate || '',
+      };
+
+      const response = await apiClient.post(API_ENDPOINTS.DEVICE.PUT, payload);
 
       return {
         success: true,
-        message: 'Device updated successfully',
-        data: { id: deviceId, ...deviceData },
+        message: response.data?.Result || 'Device updated successfully',
+        data: response.data,
       };
     } catch (error) {
       console.error('Error updating device:', error);

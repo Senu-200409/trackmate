@@ -67,15 +67,16 @@ const SchoolServices = {
   updateSchool: async (schoolId, schoolData) => {
     try {
       const payload = {
-        SchoolID: schoolId,
+        SchoolID: schoolData.SchoolID || schoolId,
         Userid: schoolData.Userid || 1,
         SchoolName: schoolData.SchoolName,
         City: schoolData.City,
         Town: schoolData.Town,
         Address: schoolData.Address,
-        SchoolType: schoolData.SchoolType
+        SchoolType: schoolData.SchoolType,
+        Status: schoolData.Status || 'A'
       };
-      const response = await apiClient.put(API_ENDPOINTS.SCHOOL.PUT, payload);
+      const response = await apiClient.post(API_ENDPOINTS.SCHOOL.PUT, payload);
       return {
         success: true,
         data: response.data,

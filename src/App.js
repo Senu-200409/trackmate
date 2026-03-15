@@ -18,7 +18,7 @@ import DriverStudents from './pages/Driver/Students';
 import OwnerDashboard from './pages/Owner/OwnerDashboard';
 import Fleet from './pages/Owner/Fleet';
 import Drivers from './pages/Owner/Drivers';
-import Routes from './pages/Owner/Routes';
+import Rfid from './pages/Owner/Rfid';
 import Analytics from './pages/Owner/Analytics';
 import Schools from './pages/Owner/Schools';
 import Students from './pages/Owner/Students';
@@ -48,8 +48,9 @@ function App() {
       
       if (savedLogin === 'true' && savedRole) {
         console.log('Session found! Restoring...');
+        const normalizedTab = savedRole === 'owner' && savedTab === 'routes' ? 'rfid' : savedTab;
         setUserRole(savedRole);
-        setActiveTab(savedTab || 'dashboard');
+        setActiveTab(normalizedTab || 'dashboard');
         setCurrentView('dashboard');
       } else {
         console.log('No valid session found');
@@ -179,7 +180,7 @@ function App() {
         case 'fleet': return <Fleet {...ownerProps} />;
         case 'drivers': return <Drivers {...ownerProps} />;
         case 'devices': return <Devices {...ownerProps} />;
-        case 'routes': return <Routes {...ownerProps} />;
+        case 'rfid': return <Rfid {...ownerProps} />;
         case 'analytics': return <Analytics {...ownerProps} />;
         case 'schools': return <Schools {...ownerProps} />;
         case 'students': return <Students {...ownerProps} />;

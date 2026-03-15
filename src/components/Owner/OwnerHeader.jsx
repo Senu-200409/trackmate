@@ -76,9 +76,9 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
               <Users className="w-5 h-5" />
               <span>Drivers</span>
             </button>
-            <button onClick={() => setActiveTab('routes')} className="text-white/85 hover:text-[#FFE066] transition-colors font-semibold flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1.5 text-sm">
+            <button onClick={() => setActiveTab('rfid')} className="text-white/85 hover:text-[#FFE066] transition-colors font-semibold flex items-center gap-2 border-b-2 border-transparent hover:border-[#F5C518] pb-1.5 text-sm">
               <AlignJustify className="w-5 h-5" />
-              <span>Routes</span>
+              <span>RFID</span>
             </button>
           </nav>
 
@@ -162,9 +162,9 @@ function OwnerHeader({ notifications = [], ownerName = "Fleet Owner", companyNam
             <Users className="w-5 h-5 text-[#FFE066]" />
             Drivers
           </button>
-          <button onClick={() => { setActiveTab('routes'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
+          <button onClick={() => { setActiveTab('rfid'); setMobileMenuOpen(false); }} className="flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-[#3B6FB6] transition-colors font-medium w-full text-left">
             <AlignJustify className="w-5 h-5 text-[#FFE066]" />
-            Routes
+            RFID
           </button>
 
           <div className="border-t border-[#3B6FB6] pt-4 mt-4">

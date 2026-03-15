@@ -5,6 +5,18 @@
 
 import apiClient, { API_ENDPOINTS } from './AuthService';
 
+const unwrapResultSet = (payload) => {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (payload && Array.isArray(payload.ResultSet)) {
+    return payload.ResultSet;
+  }
+
+  return [];
+};
+
 const StudentServices = {
   // Get all students
   getAllStudents: async () => {
@@ -12,7 +24,8 @@ const StudentServices = {
       const response = await apiClient.get(API_ENDPOINTS.STUDENT.GET_ALL);
       return {
         success: true,
-        data: response.data,
+        data: unwrapResultSet(response.data),
+        raw: response.data,
       };
     } catch (error) {
       console.error('Error fetching students:', error);
@@ -20,17 +33,50 @@ const StudentServices = {
     }
   },
 
+  // Get student by ID
+  getStudentById: async (studentId) => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.STUDENT.GET_BY_ID, {
+        params: { StudentID: studentId },
+      });
+      return {
+        success: true,
+        data: unwrapResultSet(response.data),
+        raw: response.data,
+      };
+    } catch (error) {
+      console.error('Error fetching student by ID:', error);
+      throw error;
+    }
+  },
+
   // Create student
   createStudent: async (studentData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.STUDENTS.CREATE);
-      // return await httpClient.post(url, studentData);
+      const formData = new FormData();
+      formData.append('FullName', studentData.FullName || '');
+      formData.append('Age', studentData.Age || '');
+      formData.append('Gender', studentData.Gender || '');
+      formData.append('RfidID', studentData.RfidID || '');
+      formData.append('ParentID', studentData.ParentID || '');
+      formData.append('SchoolID', studentData.SchoolID || '');
+      formData.append('NumberPlate', studentData.NumberPlate || '');
+      formData.append('Userid', studentData.Userid || '1');
+
+      if (studentData.file) {
+        formData.append('file', studentData.file);
+      } else {
+        formData.append('file', '');
+      }
+
+      const response = await apiClient.post(API_ENDPOINTS.STUDENT.ADD, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
 
       return {
         success: true,
-        message: 'Student created successfully',
-        data: { id: Date.now(), ...studentData },
+        message: response.data?.Message || 'Student added successfully',
+        data: response.data,
       };
     } catch (error) {
       console.error('Error creating student:', error);
@@ -41,14 +87,17 @@ const StudentServices = {
   // Update student
   updateStudent: async (studentId, studentData) => {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const url = buildURL(API_ENDPOINTS.STUDENTS.UPDATE, { id: studentId });
-      // return await httpClient.put(url, studentData);
+      const payload = {
+        StudentID: studentId,
+        Age: studentData.Age,
+      };
+
+      const response = await apiClient.post(API_ENDPOINTS.STUDENT.PUT, payload);
 
       return {
         success: true,
-        message: 'Student updated successfully',
-        data: { id: studentId, ...studentData },
+        message: response.data?.Result || 'Student updated successfully',
+        data: response.data,
       };
     } catch (error) {
       console.error('Error updating student:', error);

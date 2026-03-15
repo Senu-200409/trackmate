@@ -1,174 +1,304 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Users, 
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Users,
   School,
-  Phone,
-  Mail,
   Search,
   Filter,
   Plus,
-  MoreVertical,
   CheckCircle,
   X,
   Save,
-  FileText,
   Edit,
-  Loader2
+  Loader2,
+  AlertTriangle,
 } from 'lucide-react';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
 import StudentServices from '../../services/StudentServices';
+import ParentServices from '../../services/ParentServices';
+import SchoolServices from '../../services/SchoolServices';
+
+const toArray = (payload) => {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+  if (payload && Array.isArray(payload.ResultSet)) {
+    return payload.ResultSet;
+  }
+  return [];
+};
+
+const firstDefined = (...values) => values.find((value) => value !== undefined && value !== null && value !== '');
+
+const normalizeStudent = (item) => ({
+  id: String(firstDefined(item.StudentID, item.id, '')).trim(),
+  fullName: firstDefined(item.FullName, item.name, ''),
+  age: String(firstDefined(item.Age, '')).trim(),
+  gender: String(firstDefined(item.Gender, '')).toUpperCase(),
+  rfidId: firstDefined(item.RfidID, item.RFIDCode, ''),
+  parentId: String(firstDefined(item.ParentID, '')).trim(),
+  schoolId: String(firstDefined(item.SchoolID, '')).trim(),
+  numberPlate: firstDefined(item.NumberPlate, ''),
+  status: String(firstDefined(item.Status, 'A')).toUpperCase(),
+  image: firstDefined(item.Image, ''),
+  raw: item,
+});
+
+const normalizeSchool = (item) => ({
+  id: String(firstDefined(item.SchoolID, item.id, '')).trim(),
+  name: firstDefined(item.SchoolName, item.name, 'Unknown School'),
+});
+
+const normalizeParent = (item) => ({
+  id: String(firstDefined(item.ParentID, item.id, '')).trim(),
+  name: firstDefined(item.ParentName, item.UserName, item.name, `Parent #${firstDefined(item.ParentID, item.id, '')}`),
+});
+
+const statusLabel = (status) => {
+  const code = String(status || '').toUpperCase();
+  if (code === 'A') return 'Active';
+  if (code === 'I') return 'Inactive';
+  if (code === 'D') return 'Disabled';
+  return code || 'Unknown';
+};
 
 function Students({ onMenuClick, setActiveTab }) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [studentsList, setStudentsList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
-  // Fetch students from API
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        setLoading(true);
-        const response = await StudentServices.getAllStudents();
-        if (response.success && Array.isArray(response.data)) {
-          setStudentsList(response.data);
-        } else {
-          setStudentsList([]);
-        }
-      } catch (err) {
-        console.error('Error fetching students:', err);
-        setError('Failed to load students');
-        setStudentsList([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStudents();
-  }, []);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const [studentsList, setStudentsList] = useState([]);
+  const [schools, setSchools] = useState([]);
+  const [parents, setParents] = useState([]);
+
+  const [searchTerm, setSearchTerm] = useState('');
   const [filterSchool, setFilterSchool] = useState('all');
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    address: '',
-    city: '',
-    parentId: '',
-    schoolId: '',
-    status: 'active'
+
+  const [createForm, setCreateForm] = useState({
+    FullName: '',
+    Age: '',
+    Gender: 'M',
+    RfidID: '',
+    ParentID: '',
+    SchoolID: '',
+    NumberPlate: '',
+    Userid: localStorage.getItem('userId') || '1',
+    file: null,
   });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const [updateAge, setUpdateAge] = useState('');
+
+  const schoolMap = useMemo(() => {
+    const map = new Map();
+    schools.forEach((school) => map.set(school.id, school.name));
+    return map;
+  }, [schools]);
+
+  const parentMap = useMemo(() => {
+    const map = new Map();
+    parents.forEach((parent) => map.set(parent.id, parent.name));
+    return map;
+  }, [parents]);
+
+  const resetCreateForm = () => {
+    setCreateForm((prev) => ({
+      ...prev,
+      FullName: '',
+      Age: '',
+      Gender: 'M',
+      RfidID: '',
+      ParentID: '',
+      SchoolID: '',
+      NumberPlate: '',
+      file: null,
+    }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('New Student Data:', formData);
-    alert('Student registered successfully!');
-    setShowAddModal(false);
-    setFormData({
-      name: '',
-      phone: '',
-      email: '',
-      address: '',
-      city: '',
-      parentId: '',
-      schoolId: '',
-      status: 'active'
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const [studentsRes, schoolsRes, parentsRes] = await Promise.all([
+        StudentServices.getAllStudents(),
+        SchoolServices.getAllSchools(),
+        ParentServices.getAllParents(),
+      ]);
+
+      const studentRows = toArray(studentsRes.raw || studentsRes.data || []).map(normalizeStudent);
+      const schoolRows = toArray(schoolsRes.data || []).map(normalizeSchool).filter((item) => item.id);
+      const parentRows = toArray(parentsRes.data || []).map(normalizeParent).filter((item) => item.id);
+
+      setStudentsList(studentRows);
+      setSchools(schoolRows);
+      setParents(parentRows);
+    } catch (err) {
+      console.error('Error loading students page data:', err);
+      setError('Failed to load students data. Please refresh and try again.');
+      setStudentsList([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllData();
+  }, []);
+
+  const filteredStudents = useMemo(() => {
+    const search = searchTerm.trim().toLowerCase();
+
+    return studentsList.filter((student) => {
+      const schoolName = (schoolMap.get(student.schoolId) || '').toLowerCase();
+      const parentName = (parentMap.get(student.parentId) || '').toLowerCase();
+
+      const matchesSearch = !search
+        || student.fullName.toLowerCase().includes(search)
+        || student.rfidId.toLowerCase().includes(search)
+        || student.numberPlate.toLowerCase().includes(search)
+        || schoolName.includes(search)
+        || parentName.includes(search);
+
+      const matchesSchool = filterSchool === 'all' || student.schoolId === filterSchool;
+
+      return matchesSearch && matchesSchool;
     });
+  }, [studentsList, searchTerm, filterSchool, schoolMap, parentMap]);
+
+  const stats = useMemo(() => ({
+    total: studentsList.length,
+    active: studentsList.filter((student) => student.status === 'A').length,
+    bySchool: new Set(studentsList.map((student) => student.schoolId).filter(Boolean)).size,
+  }), [studentsList]);
+
+  const handleCreateInputChange = (event) => {
+    const { name, value } = event.target;
+    setCreateForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleEditClick = (student) => {
+  const handleCreateFileChange = (event) => {
+    const file = event.target.files && event.target.files[0] ? event.target.files[0] : null;
+    setCreateForm((prev) => ({ ...prev, file }));
+  };
+
+  const validateCreate = () => {
+    if (!createForm.FullName.trim()) return 'Full name is required.';
+    if (!createForm.Age.trim()) return 'Age is required.';
+    if (!createForm.Gender) return 'Gender is required.';
+    if (!createForm.RfidID.trim()) return 'RFID ID is required.';
+    if (!createForm.ParentID) return 'Parent is required.';
+    if (!createForm.SchoolID) return 'School is required.';
+    if (!createForm.NumberPlate.trim()) return 'Number plate is required.';
+    if (!createForm.Userid) return 'Userid is required.';
+    return '';
+  };
+
+  const handleCreateStudent = async (event) => {
+    event.preventDefault();
+    setError('');
+    setSuccess('');
+
+    const validationError = validateCreate();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const response = await StudentServices.createStudent(createForm);
+      const newStudentId = response.data?.StudentID;
+
+      setSuccess(newStudentId ? `Student added successfully. StudentID: ${newStudentId}` : 'Student added successfully.');
+      setShowAddModal(false);
+      resetCreateForm();
+      await fetchAllData();
+    } catch (err) {
+      console.error('Create student failed:', err);
+      setError('Failed to add student. Please check payload values and try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const openEditModal = (student) => {
     setEditingStudent(student);
-    setFormData({
-      name: student.name || '',
-      phone: student.phone || '',
-      email: student.email || '',
-      address: student.address || '',
-      city: student.city || '',
-      parentId: student.parentId || '',
-      schoolId: student.schoolId || '',
-      status: (student.status || 'active').toLowerCase()
-    });
+    setUpdateAge(student.age || '');
     setShowEditModal(true);
   };
 
-  const handleUpdateSubmit = (e) => {
-    e.preventDefault();
-    console.log('Updated Student Data:', formData);
-    alert('Student updated successfully!');
-    setShowEditModal(false);
-    setEditingStudent(null);
-  };
+  const handleUpdateStudent = async (event) => {
+    event.preventDefault();
+    if (!editingStudent) return;
 
-  const schools = [
-    { id: 'SCH-001', name: 'Riverside Academy' },
-    { id: 'SCH-002', name: 'Greenfield International' },
-    { id: 'SCH-003', name: 'Sunridge Public School' },
-    { id: 'SCH-004', name: 'Lakeside High School' },
-    { id: 'SCH-005', name: 'Mountain View School' },
-  ];
+    setError('');
+    setSuccess('');
 
-  const routes = [
-    { id: 'RT-001', name: 'Route A - Morning' },
-    { id: 'RT-002', name: 'Route B - Morning' },
-    { id: 'RT-003', name: 'Route C - Morning' },
-    { id: 'RT-004', name: 'Route A - Afternoon' },
-    { id: 'RT-005', name: 'Route D - Morning' },
-  ];
+    if (!updateAge.trim()) {
+      setError('Age is required for update.');
+      return;
+    }
 
-  const parents = [
-    { id: 'PAR-001', name: 'Robert Johnson' },
-    { id: 'PAR-002', name: 'Michael Chen' },
-    { id: 'PAR-003', name: 'Carlos Martinez' },
-    { id: 'PAR-004', name: 'James Williams' },
-    { id: 'PAR-005', name: 'Sarah Taylor' },
-  ];
-
-  const filteredStudents = studentsList.filter(student => {
-    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         student.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         student.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const parentName = parents.find(p => p.id === student.parentId)?.name || '';
-    const schoolName = schools.find(s => s.id === student.schoolId)?.name || '';
-    const matchesFilter = filterSchool === 'all' || schoolName === filterSchool;
-    return matchesSearch && matchesFilter;
-  });
-
-  const stats = {
-    total: studentsList.length,
-    active: studentsList.filter(s => s.status === 'Active').length,
-    bySchool: schools.length
+    try {
+      setUpdating(true);
+      await StudentServices.updateStudent(editingStudent.id, { Age: updateAge.trim() });
+      setSuccess('Student updated successfully.');
+      setShowEditModal(false);
+      setEditingStudent(null);
+      setUpdateAge('');
+      await fetchAllData();
+    } catch (err) {
+      console.error('Update student failed:', err);
+      setError('Failed to update student age.');
+    } finally {
+      setUpdating(false);
+    }
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF6D6] via-[#FFE8B0] to-[#FFF6D6]">
       <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
-      
+
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-7xl mx-auto space-y-6">
-          
-          {/* Page Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Students Management</h1>
-              <p className="text-gray-600 mt-1">Register and manage student information</p>
+              <p className="text-gray-600 mt-1">Create and manage students from live endpoints</p>
             </div>
-            <button 
+            <button
               onClick={() => setShowAddModal(true)}
               className="flex items-center gap-2 px-4 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors"
             >
               <Plus className="w-5 h-5" />
-              Register Student
+              Add Student
             </button>
           </div>
 
-          {/* Stats Cards */}
+          {(error || success) && (
+            <div className="space-y-2">
+              {error && (
+                <div className="flex items-start gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-700">
+                  <AlertTriangle className="w-5 h-5 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
+              {success && (
+                <div className="flex items-start gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-green-700">
+                  <CheckCircle className="w-5 h-5 mt-0.5" />
+                  <span>{success}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-3">
@@ -181,6 +311,7 @@ function Students({ onMenuClick, setActiveTab }) {
                 </div>
               </div>
             </div>
+
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-green-100">
@@ -192,6 +323,7 @@ function Students({ onMenuClick, setActiveTab }) {
                 </div>
               </div>
             </div>
+
             <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-purple-100">
@@ -199,498 +331,219 @@ function Students({ onMenuClick, setActiveTab }) {
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-gray-900">{stats.bySchool}</div>
-                  <div className="text-sm text-gray-600">Partner Schools</div>
+                  <div className="text-sm text-gray-600">Schools</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Search & Filter */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="relative">
+              <Search className="absolute left-3.5 top-3 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search by name, roll number, or parent..."
+                placeholder="Search by name, RFID, parent, school..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
+                onChange={(event) => setSearchTerm(event.target.value)}
+                className="w-full pl-12 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent"
               />
-              <Search className="absolute left-3.5 top-3 w-5 h-5 text-gray-400" />
             </div>
+
             <div className="flex gap-2">
               <select
                 value={filterSchool}
-                onChange={(e) => setFilterSchool(e.target.value)}
-                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
+                onChange={(event) => setFilterSchool(event.target.value)}
+                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent bg-white"
               >
                 <option value="all">All Schools</option>
-                {schools.map(school => (
-                  <option key={school.id} value={school.name}>{school.name}</option>
+                {schools.map((school) => (
+                  <option key={school.id} value={school.id}>{school.name}</option>
                 ))}
               </select>
-              <button className="px-4 py-2.5 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 font-medium text-gray-700">
+              <button className="px-4 py-2.5 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors text-gray-700">
                 <Filter className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          {/* Students Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredStudents.map(student => {
-              const parentName = parents.find(p => p.id === student.parentId)?.name || 'N/A';
-              const schoolName = schools.find(s => s.id === student.schoolId)?.name || 'N/A';
-              return (
-              <div key={student.id} className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col">
-                
-                {/* Header Section */}
-                <div className="px-4 py-4 bg-gradient-to-r from-[#1E3A5F] to-[#3B6FB6] text-white">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h3 className="text-lg font-bold">{student.name}</h3>
-                      <p className="text-sm text-[#FFE066]">{student.city}</p>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      student.status === 'Active' 
-                        ? 'bg-green-100/20 text-green-300' 
-                        : 'bg-gray-100/20 text-gray-300'
-                    }`}>
-                      {student.status}
-                    </span>
-                  </div>
-                </div>
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Student</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Age/Gender</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">RFID</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">School</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Parent</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Number Plate</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
 
-                {/* School & Contact */}
-                <div className="px-4 py-3 space-y-2 border-b border-gray-100">
-                  <div className="flex items-center gap-2 text-sm">
-                    <School className="w-4 h-4 text-[#3B6FB6]" />
-                    <span className="text-gray-700">
-                      <span className="font-semibold text-gray-900">{schoolName}</span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Phone className="w-4 h-4 text-[#F5C518]" />
-                    {student.phone}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Mail className="w-4 h-4 text-[#F5C518]" />
-                    {student.email}
-                  </div>
-                </div>
+                <tbody className="divide-y divide-gray-100">
+                  {loading && (
+                    <tr>
+                      <td colSpan={8} className="px-4 py-12 text-center text-gray-500">
+                        <div className="inline-flex items-center gap-2">
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          Loading students...
+                        </div>
+                      </td>
+                    </tr>
+                  )}
 
-                {/* Address */}
-                <div className="px-4 py-3 space-y-2 border-b border-gray-100">
-                  <div className="text-sm text-gray-600">
-                    <span className="font-semibold text-gray-900">{student.address}</span>
-                  </div>
-                </div>
+                  {!loading && filteredStudents.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="px-4 py-12 text-center text-gray-500">No students found.</td>
+                    </tr>
+                  )}
 
-                {/* Footer Actions */}
-                <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-2">
-                  <button
-                    onClick={() => handleEditClick(student)}
-                    className="px-3 py-1.5 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] transition-colors text-xs font-medium flex items-center gap-1"
-                    title="Update"
-                  >
-                    <Edit className="w-3 h-3" />
-                    Update
-                  </button>
-                  <button className="p-2 rounded-lg hover:bg-gray-200 transition-colors" title="More Options">
-                    <MoreVertical className="w-4 h-4 text-gray-600" />
-                  </button>
-                </div>
-              </div>
-            );
-            })}
+                  {!loading && filteredStudents.map((student) => (
+                    <tr key={student.id}>
+                      <td className="px-4 py-3">
+                        <div className="font-semibold text-gray-900">{student.fullName || '-'}</div>
+                        <div className="text-xs text-gray-500">ID: {student.id || '-'}</div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{student.age || '-'} / {student.gender || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{student.rfidId || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{schoolMap.get(student.schoolId) || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{parentMap.get(student.parentId) || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{student.numberPlate || '-'}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${student.status === 'A' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                          {statusLabel(student.status)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => openEditModal(student)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] text-xs"
+                        >
+                          <Edit className="w-3 h-3" />
+                          Update Age
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-
         </div>
       </main>
 
       <OwnerFooter />
 
-      {/* Register Student Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
-            {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#1E3A5F] to-[#3B6FB6]">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white">Register New Student</h2>
-                  <p className="text-white/70 text-sm">Fill in the student's information</p>
-                </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">Add Student</h2>
+                <p className="text-white/70 text-sm">Endpoint: AddStudentDetails</p>
               </div>
-              <button 
-                onClick={() => setShowAddModal(false)}
-                className="p-2 rounded-lg hover:bg-white/20 transition-colors"
-              >
+              <button onClick={() => setShowAddModal(false)} className="p-2 rounded-lg hover:bg-white/20">
                 <X className="w-6 h-6 text-white" />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <form onSubmit={handleSubmit} className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
-              <div className="space-y-6">
-                
-                {/* Student Information Section */}
+            <form onSubmit={handleCreateStudent} className="p-6 overflow-y-auto max-h-[calc(90vh-180px)] space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    Student Information
-                  </h3>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Full Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., John Doe"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., +1 212-555-0100"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., student@example.com"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                  </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                  <input name="FullName" value={createForm.FullName} onChange={handleCreateInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl" required />
                 </div>
-
-                {/* Address Information */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <School className="w-4 h-4" />
-                    Address Information
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Address <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="Full street address"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        City <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., New York"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                  </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Age *</label>
+                  <input name="Age" value={createForm.Age} onChange={handleCreateInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl" required />
                 </div>
-
-                {/* School & Parent Information */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    School & Parent Information
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        School <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        name="schoolId"
-                        value={formData.schoolId}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="">Select School</option>
-                        {schools.map(school => (
-                          <option key={school.id} value={school.id}>{school.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Parent <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        name="parentId"
-                        value={formData.parentId}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="">Select Parent</option>
-                        {parents.map(parent => (
-                          <option key={parent.id} value={parent.id}>{parent.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Status
-                      </label>
-                      <select
-                        name="status"
-                        value={formData.status}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                      </select>
-                    </div>
-                  </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
+                  <select name="Gender" value={createForm.Gender} onChange={handleCreateInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-white" required>
+                    <option value="M">M</option>
+                    <option value="F">F</option>
+                  </select>
                 </div>
-
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">RFID ID *</label>
+                  <input name="RfidID" value={createForm.RfidID} onChange={handleCreateInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Parent *</label>
+                  <select name="ParentID" value={createForm.ParentID} onChange={handleCreateInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-white" required>
+                    <option value="">Select Parent</option>
+                    {parents.map((parent) => (
+                      <option key={parent.id} value={parent.id}>{parent.name} (ID: {parent.id})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">School *</label>
+                  <select name="SchoolID" value={createForm.SchoolID} onChange={handleCreateInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-white" required>
+                    <option value="">Select School</option>
+                    {schools.map((school) => (
+                      <option key={school.id} value={school.id}>{school.name} (ID: {school.id})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Number Plate *</label>
+                  <input name="NumberPlate" value={createForm.NumberPlate} onChange={handleCreateInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Userid *</label>
+                  <input name="Userid" value={createForm.Userid} onChange={handleCreateInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl" required />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Photo File</label>
+                  <input type="file" onChange={handleCreateFileChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl" />
+                </div>
               </div>
             </form>
 
-            {/* Modal Footer */}
             <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                className="px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors font-medium flex items-center gap-2"
-              >
-                <Save className="w-4 h-4" />
-                Register Student
+              <button type="button" onClick={() => setShowAddModal(false)} className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100">Cancel</button>
+              <button type="button" onClick={handleCreateStudent} disabled={saving} className="px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] flex items-center gap-2 disabled:opacity-50">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Save Student
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Update Student Modal */}
       {showEditModal && editingStudent && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
-            {/* Modal Header */}
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#1E3A5F] to-[#3B6FB6]">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <Edit className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white">Update Student</h2>
-                  <p className="text-white/70 text-sm">Update student's information</p>
-                </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">Update Student Age</h2>
+                <p className="text-white/70 text-sm">Endpoint: PutStudentDetails</p>
               </div>
-              <button onClick={() => { setShowEditModal(false); setEditingStudent(null); }} className="p-2 rounded-lg hover:bg-white/20 transition-colors">
+              <button onClick={() => { setShowEditModal(false); setEditingStudent(null); }} className="p-2 rounded-lg hover:bg-white/20">
                 <X className="w-6 h-6 text-white" />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <form onSubmit={handleUpdateSubmit} className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
-              <div className="space-y-6">
-
-                {/* Student Information Section */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    Student Information
-                  </h3>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Full Name <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., John Doe"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., +1 212-555-0100"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., student@example.com"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Address Information */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <School className="w-4 h-4" />
-                    Address Information
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Address <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="Full street address"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        City <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g., New York"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* School & Parent Information */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    School & Parent Information
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        School <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        name="schoolId"
-                        value={formData.schoolId}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="">Select School</option>
-                        {schools.map(school => (
-                          <option key={school.id} value={school.id}>{school.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Parent <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        name="parentId"
-                        value={formData.parentId}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="">Select Parent</option>
-                        {parents.map(parent => (
-                          <option key={parent.id} value={parent.id}>{parent.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Status
-                      </label>
-                      <select
-                        name="status"
-                        value={formData.status}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent transition-all bg-white"
-                      >
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
+            <form onSubmit={handleUpdateStudent} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Student</label>
+                <input value={`${editingStudent.fullName} (ID: ${editingStudent.id})`} readOnly className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Age *</label>
+                <input value={updateAge} onChange={(event) => setUpdateAge(event.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl" required />
+              </div>
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button type="button" onClick={() => { setShowEditModal(false); setEditingStudent(null); }} className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100">Cancel</button>
+                <button type="submit" disabled={updating} className="px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] flex items-center gap-2 disabled:opacity-50">
+                  {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Update
+                </button>
               </div>
             </form>
-
-            {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-3">
-              <button type="button" onClick={() => { setShowEditModal(false); setEditingStudent(null); }} className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium">Cancel</button>
-              <button type="submit" onClick={handleUpdateSubmit} className="px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] transition-colors font-medium flex items-center gap-2">
-                <Save className="w-4 h-4" />
-                Update Student
-              </button>
-            </div>
           </div>
         </div>
       )}
