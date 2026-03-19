@@ -24,7 +24,7 @@ import ParentServices from '../../services/ParentServices';
 import UserServices from '../../services/UserServices';
 import RegisterParentModal from '../../components/Owner/RegisterParentModal';
 
-function Parents({ onMenuClick, setActiveTab }) {
+function Parents({ onMenuClick, setActiveTab, onLogout }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [parentsList, setParentsList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -258,7 +258,7 @@ function Parents({ onMenuClick, setActiveTab }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF6E0] via-[#FFE8C0] to-[#FFF6E0]">
-      <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
+      <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} onLogout={onLogout} />
       
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-7xl mx-auto space-y-6">

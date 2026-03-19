@@ -21,7 +21,7 @@ const normalizeDevice = (item) => ({
   status: String(item.Status || item.status || 'A').toUpperCase(),
 });
 
-function Devices({ onMenuClick, setActiveTab }) {
+function Devices({ onMenuClick, setActiveTab, onLogout }) {
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -174,7 +174,7 @@ function Devices({ onMenuClick, setActiveTab }) {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <OwnerHeader onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
+      <OwnerHeader onMenuClick={onMenuClick} setActiveTab={setActiveTab} onLogout={onLogout} />
 
       <main className="flex-1 container mx-auto px-4 py-6 space-y-6">
         <div className="flex items-center justify-between">

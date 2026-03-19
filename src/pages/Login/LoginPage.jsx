@@ -119,7 +119,7 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
 
     setIsLoading(true);
     try {
-      const response = await UserServices.sendOTP(phoneNumber);
+      await UserServices.sendOTP(phoneNumber);
       setOtpSent(true);
       setShowOtp(true);
       setResendTimer(30);
@@ -128,7 +128,13 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      setError('Failed to send OTP. Please try again.');
+      setOtpSent(false);
+      setShowOtp(false);
+      setResendTimer(0);
+      setOtp('');
+      setOtpError('');
+      setIsOtpValid(false);
+      setError(UserServices.getFriendlyOtpErrorMessage(err, 'Failed to send OTP. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -142,7 +148,7 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
 
     setIsLoading(true);
     try {
-      const response = await UserServices.sendOTP(phoneNumber);
+      await UserServices.sendOTP(phoneNumber);
       
       setResendTimer(30);
       setSuccessMessage('OTP resent successfully');
@@ -150,7 +156,7 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      setError('Failed to resend OTP. Please try again.');
+      setError(UserServices.getFriendlyOtpErrorMessage(err, 'Failed to resend OTP. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -201,8 +207,13 @@ function LoginPage({ onLogin, phoneNumber, setPhoneNumber, otp, setOtp, showOtp,
         onLogin(role);
       }, 500);
     } catch (err) {
-      setError('Invalid OTP. Please check and try again.');
-      setOtpError('OTP verification failed');
+      const friendlyMessage = UserServices.getFriendlyOtpErrorMessage(err, 'Unable to verify OTP. Please try again.');
+      setError(friendlyMessage);
+      if (/otp/i.test(friendlyMessage)) {
+        setOtpError('OTP verification failed');
+      } else {
+        setOtpError('');
+      }
     } finally {
       setIsLoading(false);
     }

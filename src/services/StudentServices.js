@@ -66,20 +66,52 @@ const StudentServices = {
       if (studentData.file) {
         formData.append('file', studentData.file);
       } else {
-        formData.append('file', '');
+        // Backend expects a non-empty placeholder string for blank file.
+        formData.append('file', ' ');
       }
+
+      // Diagnostics for payload mismatch troubleshooting.
+      console.log('[StudentServices.createStudent] Request payload', {
+        FullName: studentData.FullName,
+        Age: studentData.Age,
+        Gender: studentData.Gender,
+        RfidID: studentData.RfidID,
+        ParentID: studentData.ParentID,
+        SchoolID: studentData.SchoolID,
+        NumberPlate: studentData.NumberPlate,
+        Userid: studentData.Userid,
+        hasFile: !!studentData.file,
+        fileMeta: studentData.file ? {
+          name: studentData.file.name,
+          size: studentData.file.size,
+          type: studentData.file.type,
+        } : null,
+      });
 
       const response = await apiClient.post(API_ENDPOINTS.STUDENT.ADD, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
+      console.log('[StudentServices.createStudent] Response', response?.data);
+
+      const statusCode = Number(response?.data?.StatusCode);
+      const isSuccess = statusCode === 200;
+      const backendMessage = response?.data?.Message || response?.data?.Result || 'Student registration failed';
+
+      if (!isSuccess) {
+        const apiError = new Error(backendMessage);
+        apiError.response = { data: response?.data };
+        throw apiError;
+      }
+
       return {
-        success: true,
-        message: response.data?.Message || 'Student added successfully',
+        success: isSuccess,
+        message: backendMessage,
         data: response.data,
       };
     } catch (error) {
       console.error('Error creating student:', error);
+      console.error('[StudentServices.createStudent] Error response', error?.response?.data || null);
       throw error;
     }
   },

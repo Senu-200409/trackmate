@@ -3,7 +3,7 @@ import { Users, UserCircle, School, User, MapPin, Phone, Search, BadgeCheck } fr
 import DriverHeader from '../../components/Driver/DriverHeader';
 import DriverFooter from '../../components/Driver/DriverFooter';
 
-function Students({ onMenuClick, setActiveTab, driverBusId = 'BUS-101' }) {
+function Students({ onMenuClick, setActiveTab, onLogout, driverBusId = 'BUS-101' }) {
   // Sample assigned students data. Each student includes the bus they are assigned to.
   const allStudents = [
     { id: 'STU-001', name: 'Emma Wilson', grade: '5', rollNumber: 'R-105', stop: 'Maple St', school: 'Central School', parentPhone: '+1 (555) 010-1111', status: 'boarded', busId: 'BUS-101' },
@@ -39,7 +39,7 @@ function Students({ onMenuClick, setActiveTab, driverBusId = 'BUS-101' }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
-      <DriverHeader notifications={[]} driverName="Michael" onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
+      <DriverHeader notifications={[]} driverName="Michael" onMenuClick={onMenuClick} setActiveTab={setActiveTab} onLogout={onLogout} />
 
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
         <div className="space-y-6 max-w-6xl mx-auto">

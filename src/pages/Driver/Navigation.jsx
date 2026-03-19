@@ -13,7 +13,7 @@ import {
 import DriverHeader from '../../components/Driver/DriverHeader';
 import DriverFooter from '../../components/Driver/DriverFooter';
 
-function NavigationPage({ onMenuClick, setActiveTab }) {
+function NavigationPage({ onMenuClick, setActiveTab, onLogout }) {
   const [selectedStop, setSelectedStop] = useState(null);
 
   const currentRoute = {
@@ -79,7 +79,7 @@ function NavigationPage({ onMenuClick, setActiveTab }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
-      <DriverHeader notifications={[]} driverName="Michael" onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
+      <DriverHeader notifications={[]} driverName="Michael" onMenuClick={onMenuClick} setActiveTab={setActiveTab} onLogout={onLogout} />
       
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
         <div className="space-y-6 max-w-6xl mx-auto">

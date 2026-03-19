@@ -4,23 +4,102 @@
  */
 
 import apiClient, { API_ENDPOINTS } from './AuthService';
+import { clearStoredSession } from '../utils/session';
+
+const OTP_FRIENDLY_MESSAGES = [
+  {
+    match: /not registered|user not found|no user/i,
+    message: 'This phone number is not registered. Please register first.',
+  },
+  {
+    match: /inactive|disabled|blocked|deactivated/i,
+    message: 'Your account is inactive. Please contact support.',
+  },
+  {
+    match: /invalid otp|otp invalid|wrong otp|incorrect otp/i,
+    message: 'The OTP you entered is invalid. Please check and try again.',
+  },
+  {
+    match: /otp expired|expired otp|timeout/i,
+    message: 'This OTP has expired. Please request a new OTP.',
+  },
+  {
+    match: /otp session|send otp first|phone number does not match/i,
+    message: 'Please request a fresh OTP and try again.',
+  },
+];
+
+const toNumberOrNull = (value) => {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? null : parsed;
+};
+
+const getResponseStatusCode = (payload = {}) => {
+  return toNumberOrNull(payload.StatusCode ?? payload.statusCode ?? payload.Code ?? payload.code);
+};
+
+const isSuccessStatusCode = (statusCode) => {
+  return statusCode === null || statusCode === 200;
+};
+
+const createServiceError = (message, code = null, payload = null) => {
+  const err = new Error(message || 'Request failed');
+  err.backendCode = code;
+  err.backendPayload = payload;
+  return err;
+};
+
+const ensureResponseSuccess = (payload, fallbackMessage) => {
+  const statusCode = getResponseStatusCode(payload);
+  if (!isSuccessStatusCode(statusCode)) {
+    throw createServiceError(payload?.Message || fallbackMessage, statusCode, payload);
+  }
+};
+
+const isActiveUserStatus = (status) => {
+  if (status === null || status === undefined || status === '') {
+    return true;
+  }
+  const normalized = String(status).trim().toUpperCase();
+  return normalized === 'A' || normalized === 'ACTIVE' || normalized === '1' || normalized === 'TRUE';
+};
 
 // User Services
 const UserServices = {
+  getFriendlyOtpErrorMessage: (error, fallback = 'Unable to process OTP request. Please try again.') => {
+    const backendMessage =
+      error?.backendPayload?.Message
+      || error?.response?.data?.Message
+      || error?.message
+      || '';
+
+    const lowerMessage = String(backendMessage).trim();
+    const mapped = OTP_FRIENDLY_MESSAGES.find((entry) => entry.match.test(lowerMessage));
+    return mapped ? mapped.message : (lowerMessage || fallback);
+  },
+
   // Send OTP to phone number
   sendOTP: async (phoneNumber) => {
     try {
       const response = await apiClient.post(
         `${API_ENDPOINTS.USER.SEND_OTP}?Phone=${phoneNumber}`
       );
+
+      ensureResponseSuccess(response.data, 'Failed to send OTP.');
+
+      const otpValue = response.data?.ResultSet;
+      if (!otpValue) {
+        throw createServiceError('OTP was not generated. Please try again.', getResponseStatusCode(response.data), response.data);
+      }
       
       // Always store the phone number after successful OTP send
       localStorage.setItem('otpPhone', phoneNumber);
       
       // Store OTP from ResultSet (backend returns OTP in ResultSet field)
-      if (response.data && response.data.ResultSet) {
-        localStorage.setItem('sentOtp', response.data.ResultSet);
-      }
+      localStorage.setItem('sentOtp', otpValue);
       
       // Log for debugging
       console.log('OTP sent to phone:', phoneNumber);
@@ -28,7 +107,7 @@ const UserServices = {
       
       return {
         success: true,
-        message: 'OTP sent successfully',
+        message: response.data?.Message || 'OTP sent successfully',
         data: response.data,
       };
     } catch (error) {
@@ -61,7 +140,7 @@ const UserServices = {
       
       // Compare OTPs
       if (storedOtp !== otp) {
-        throw new Error('Invalid OTP');
+        throw createServiceError('Invalid OTP');
       }
       
       return {
@@ -78,6 +157,7 @@ const UserServices = {
   getUserByPhone: async (phoneNumber) => {
     try {
       const response = await apiClient.get(API_ENDPOINTS.USER.GET_ALL);
+      ensureResponseSuccess(response.data, 'Failed to fetch users.');
       
       // Find user with matching phone number
       if (response.data && response.data.ResultSet) {
@@ -86,6 +166,10 @@ const UserServices = {
         );
         
         if (user) {
+          if (!isActiveUserStatus(user.Status)) {
+            throw createServiceError('User account is inactive');
+          }
+
           return {
             success: true,
             data: user,
@@ -93,7 +177,7 @@ const UserServices = {
         }
       }
       
-      throw new Error('User not found');
+      throw createServiceError('User not registered');
     } catch (error) {
       console.error('Error fetching user by phone:', error);
       throw error;
@@ -121,7 +205,7 @@ const UserServices = {
       // const url = buildURL(API_ENDPOINTS.AUTH.LOGOUT);
       // return await httpClient.post(url, {});
 
-      localStorage.removeItem('token');
+      clearStoredSession();
       return { success: true, message: 'Logged out successfully' };
     } catch (error) {
       console.error('Error logging out:', error);

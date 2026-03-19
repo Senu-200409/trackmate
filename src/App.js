@@ -24,6 +24,8 @@ import Schools from './pages/Owner/Schools';
 import Students from './pages/Owner/Students';
 import Parents from './pages/Owner/Parents';
 import Devices from './pages/Owner/Devices';
+import UserServices from './services/UserServices';
+import { clearStoredSession } from './utils/session';
 
 function App() {
   // Initialize all states with defaults
@@ -96,9 +98,8 @@ function App() {
   const handleLogout = () => {
     console.log('Logout');
     try {
-      localStorage.removeItem('trackmate_login');
-      localStorage.removeItem('trackmate_role');
-      localStorage.removeItem('trackmate_tab');
+      UserServices.logout();
+      clearStoredSession();
     } catch (error) {
       console.error('Error clearing localStorage:', error);
     }

@@ -24,7 +24,7 @@ import BusServices from '../../services/BusServices';
 import DriverServices from '../../services/DriverServices';
 import UserServices from '../../services/UserServices';
 
-function Fleet({ onMenuClick, setActiveTab }) {
+function Fleet({ onMenuClick, setActiveTab, onLogout }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [busFleet, setBusFleet] = useState([]);
@@ -316,7 +316,7 @@ function Fleet({ onMenuClick, setActiveTab }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF8DC] via-[#FFF4C2] to-[#FFF8DC]">
-      <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
+      <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} onLogout={onLogout} />
       
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-7xl mx-auto space-y-6">

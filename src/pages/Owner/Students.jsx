@@ -62,7 +62,7 @@ const statusLabel = (status) => {
   return code || 'Unknown';
 };
 
-function Students({ onMenuClick, setActiveTab }) {
+function Students({ onMenuClick, setActiveTab, onLogout }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -264,7 +264,7 @@ function Students({ onMenuClick, setActiveTab }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF6D6] via-[#FFE8B0] to-[#FFF6D6]">
-      <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
+      <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} onLogout={onLogout} />
 
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-7xl mx-auto space-y-6">

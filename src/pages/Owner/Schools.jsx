@@ -21,7 +21,7 @@ import OwnerHeader from '../../components/Owner/OwnerHeader';
 import OwnerFooter from '../../components/Owner/OwnerFooter';
 import SchoolServices from '../../services/SchoolServices';
 
-function Schools({ onMenuClick, setActiveTab }) {
+function Schools({ onMenuClick, setActiveTab, onLogout }) {
   const currentUserid = localStorage.getItem('userId') || '1';
   const [searchTerm, setSearchTerm] = useState('');
   const [schoolsList, setSchoolsList] = useState([]);
@@ -193,7 +193,7 @@ function Schools({ onMenuClick, setActiveTab }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF7CC] via-[#FFE7A0] to-[#FFF7CC]">
-      <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
+      <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} onLogout={onLogout} />
       
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-7xl mx-auto space-y-6">

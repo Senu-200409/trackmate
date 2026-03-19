@@ -22,7 +22,7 @@ import BusServices from '../../services/BusServices';
 import DriverServices from '../../services/DriverServices';
 import StudentServices from '../../services/StudentServices';
 
-function Analytics({ onMenuClick, setActiveTab }) {
+function Analytics({ onMenuClick, setActiveTab, onLogout }) {
   const [selectedPeriod, setSelectedPeriod] = useState('monthly');
   const [analyticsData, setAnalyticsData] = useState({
     totalBuses: 0,
@@ -97,7 +97,7 @@ function Analytics({ onMenuClick, setActiveTab }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#FFF9E6] via-[#FFFDF5] to-[#FFF9E6]">
-      <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
+      <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} onLogout={onLogout} />
       
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-7xl mx-auto space-y-6">

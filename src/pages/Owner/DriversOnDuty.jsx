@@ -27,7 +27,7 @@ import OwnerFooter from '../../components/Owner/OwnerFooter';
 import DriverServices from '../../services/DriverServices';
 import UserServices from '../../services/UserServices';
 
-function DriversOnDuty({ onMenuClick, setActiveTab, onBack }) {
+function DriversOnDuty({ onMenuClick, setActiveTab, onLogout, onBack }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('on-duty');
   const [drivers, setDrivers] = useState([]);
@@ -156,7 +156,7 @@ function DriversOnDuty({ onMenuClick, setActiveTab, onBack }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#E0F4FF] via-[#F0F9FF] to-[#E8F4FF]">
-      <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} />
+      <OwnerHeader notifications={[]} ownerName="David" companyName="TrackMate Fleet" onMenuClick={onMenuClick} setActiveTab={setActiveTab} onLogout={onLogout} />
       
       <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-7xl mx-auto space-y-6">
