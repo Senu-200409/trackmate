@@ -13,6 +13,7 @@ import {
 import OwnerFooter from '../../components/Owner/OwnerFooter';
 import OwnerHeader from '../../components/Owner/OwnerHeader';
 import DeviceServices from '../../services/DeviceServices';
+import BusServices from '../../services/BusServices';
 
 const normalizeDevice = (item) => ({
   deviceId: String(item.DeviceID || item.deviceId || item.id || ''),
@@ -21,8 +22,27 @@ const normalizeDevice = (item) => ({
   status: String(item.Status || item.status || 'A').toUpperCase(),
 });
 
+const toArray = (payload) => {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (payload && Array.isArray(payload.ResultSet)) {
+    return payload.ResultSet;
+  }
+
+  return [];
+};
+
+const extractNumberPlates = (payload) => {
+  return toArray(payload)
+    .map((item) => (item.NumberPlate || item.Plate || item.LicensePlate || item.plate || '').toString().trim())
+    .filter(Boolean);
+};
+
 function Devices({ onMenuClick, setActiveTab, onLogout }) {
   const [devices, setDevices] = useState([]);
+  const [availableNumberPlates, setAvailableNumberPlates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -66,6 +86,20 @@ function Devices({ onMenuClick, setActiveTab, onLogout }) {
   useEffect(() => {
     fetchDevices();
   }, [fetchDevices]);
+
+  useEffect(() => {
+    const fetchBuses = async () => {
+      try {
+        const response = await BusServices.getAllBuses();
+        setAvailableNumberPlates(extractNumberPlates(response.data));
+      } catch (err) {
+        console.error('Error fetching buses for device forms:', err);
+        setAvailableNumberPlates([]);
+      }
+    };
+
+    fetchBuses();
+  }, []);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -312,14 +346,18 @@ function Devices({ onMenuClick, setActiveTab, onLogout }) {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Number Plate *</label>
-                      <input
-                        type="text"
+                      <select
                         name="numberPlate"
                         value={formData.numberPlate}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent bg-white"
                         required
-                      />
+                      >
+                        <option value="">Select Number Plate</option>
+                        {availableNumberPlates.map((numberPlate) => (
+                          <option key={numberPlate} value={numberPlate}>{numberPlate}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -395,14 +433,18 @@ function Devices({ onMenuClick, setActiveTab, onLogout }) {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Number Plate *</label>
-                      <input
-                        type="text"
+                      <select
                         name="numberPlate"
                         value={formData.numberPlate}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1E3A5F] focus:border-transparent bg-white"
                         required
-                      />
+                      >
+                        <option value="">Select Number Plate</option>
+                        {availableNumberPlates.map((numberPlate) => (
+                          <option key={numberPlate} value={numberPlate}>{numberPlate}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </div>

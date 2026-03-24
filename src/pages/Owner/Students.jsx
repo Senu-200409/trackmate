@@ -17,6 +17,8 @@ import OwnerFooter from '../../components/Owner/OwnerFooter';
 import StudentServices from '../../services/StudentServices';
 import ParentServices from '../../services/ParentServices';
 import SchoolServices from '../../services/SchoolServices';
+import UserServices from '../../services/UserServices';
+import BusServices from '../../services/BusServices';
 
 const toArray = (payload) => {
   if (Array.isArray(payload)) {
@@ -51,8 +53,20 @@ const normalizeSchool = (item) => ({
 
 const normalizeParent = (item) => ({
   id: String(firstDefined(item.ParentID, item.id, '')).trim(),
+  userId: String(firstDefined(item.UserID, item.Userid, item.userId, '')).trim(),
   name: firstDefined(item.ParentName, item.UserName, item.name, `Parent #${firstDefined(item.ParentID, item.id, '')}`),
 });
+
+const normalizeUser = (item) => ({
+  id: String(firstDefined(item.UserID, item.id, '')).trim(),
+  name: firstDefined(item.UserName, item.FullName, item.name, '').trim(),
+});
+
+const extractNumberPlates = (payload) => {
+  return toArray(payload)
+    .map((item) => firstDefined(item.NumberPlate, item.Plate, item.LicensePlate, item.plate, '').toString().trim())
+    .filter(Boolean);
+};
 
 const statusLabel = (status) => {
   const code = String(status || '').toUpperCase();
@@ -73,6 +87,7 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
   const [studentsList, setStudentsList] = useState([]);
   const [schools, setSchools] = useState([]);
   const [parents, setParents] = useState([]);
+  const [availableNumberPlates, setAvailableNumberPlates] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSchool, setFilterSchool] = useState('all');
@@ -126,23 +141,36 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
       setLoading(true);
       setError('');
 
-      const [studentsRes, schoolsRes, parentsRes] = await Promise.all([
+      const [studentsRes, schoolsRes, parentsRes, usersRes, busesRes] = await Promise.all([
         StudentServices.getAllStudents(),
         SchoolServices.getAllSchools(),
         ParentServices.getAllParents(),
+        UserServices.getAllUsers(),
+        BusServices.getAllBuses(),
       ]);
 
       const studentRows = toArray(studentsRes.raw || studentsRes.data || []).map(normalizeStudent);
       const schoolRows = toArray(schoolsRes.data || []).map(normalizeSchool).filter((item) => item.id);
-      const parentRows = toArray(parentsRes.data || []).map(normalizeParent).filter((item) => item.id);
+      const userRows = toArray(usersRes.data || []).map(normalizeUser).filter((item) => item.id);
+      const userMap = new Map(userRows.map((user) => [user.id, user.name]));
+      const numberPlateRows = extractNumberPlates(busesRes.data || []);
+      const parentRows = toArray(parentsRes.data || [])
+        .map(normalizeParent)
+        .filter((item) => item.id)
+        .map((parent) => ({
+          ...parent,
+          name: userMap.get(parent.userId) || parent.name,
+        }));
 
       setStudentsList(studentRows);
       setSchools(schoolRows);
       setParents(parentRows);
+      setAvailableNumberPlates(numberPlateRows);
     } catch (err) {
       console.error('Error loading students page data:', err);
       setError('Failed to load students data. Please refresh and try again.');
       setStudentsList([]);
+      setAvailableNumberPlates([]);
     } finally {
       setLoading(false);
     }
@@ -475,7 +503,7 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
                   <select name="ParentID" value={createForm.ParentID} onChange={handleCreateInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-white" required>
                     <option value="">Select Parent</option>
                     {parents.map((parent) => (
-                      <option key={parent.id} value={parent.id}>{parent.name} (ID: {parent.id})</option>
+                      <option key={parent.id} value={parent.id}>{parent.name}</option>
                     ))}
                   </select>
                 </div>
@@ -490,7 +518,12 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Number Plate *</label>
-                  <input name="NumberPlate" value={createForm.NumberPlate} onChange={handleCreateInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl" required />
+                  <select name="NumberPlate" value={createForm.NumberPlate} onChange={handleCreateInputChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-white" required>
+                    <option value="">Select Number Plate</option>
+                    {availableNumberPlates.map((numberPlate) => (
+                      <option key={numberPlate} value={numberPlate}>{numberPlate}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Userid *</label>

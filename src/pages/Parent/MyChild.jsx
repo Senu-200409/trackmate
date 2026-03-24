@@ -247,21 +247,15 @@ function MyChild({ onMenuClick, setActiveTab, onLogout }) {
       return;
     }
 
-    if (availableNumberPlates.length === 0) {
-      setError('No buses are available. Please add a bus first before registering a student.');
-      console.error('[MyChild] Cannot create student: no valid bus NumberPlate available');
-      return;
-    }
-
     try {
       setSaving(true);
       
       // Force computed next ID to prevent tampering
       const finalStudentId = String(nextStudentId);
 
-      // Backend currently requires these fields even when not shown in UI.
-      const fallbackRfidId = `RFID-AUTO-${finalStudentId}`;
-      const fallbackNumberPlate = availableNumberPlates[0];
+      // Send explicit empty values for fields not collected in this UI flow.
+      const fallbackRfidId = '';
+      const fallbackNumberPlate = '';
       
       // Prepare payload for StudentServices.createStudent
       const studentPayload = {
@@ -284,10 +278,8 @@ function MyChild({ onMenuClick, setActiveTab, onLogout }) {
           type: studentPayload.file.type,
         } : null,
         debug: {
-          usesFallbackRfid: true,
-          usesFallbackNumberPlate: true,
-          selectedNumberPlate: fallbackNumberPlate,
-          availableNumberPlatesCount: availableNumberPlates.length,
+          sendsEmptyRfid: true,
+          sendsEmptyNumberPlate: true,
         },
       });
 
