@@ -19,6 +19,7 @@ import ParentServices from '../../services/ParentServices';
 import SchoolServices from '../../services/SchoolServices';
 import UserServices from '../../services/UserServices';
 import BusServices from '../../services/BusServices';
+import RfidServices from '../../services/RfidServices';
 
 const toArray = (payload) => {
   if (Array.isArray(payload)) {
@@ -88,9 +89,11 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
   const [schools, setSchools] = useState([]);
   const [parents, setParents] = useState([]);
   const [availableNumberPlates, setAvailableNumberPlates] = useState([]);
+  const [availableRFIDs, setAvailableRFIDs] = useState([]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSchool, setFilterSchool] = useState('all');
+  const [filterBus, setFilterBus] = useState('all');
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -108,7 +111,13 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
     file: null,
   });
 
-  const [updateAge, setUpdateAge] = useState('');
+  const [updateForm, setUpdateForm] = useState({
+    FullName: '',
+    Age: '',
+    RfidID: '',
+    SchoolID: '',
+    NumberPlate: '',
+  });
 
   const schoolMap = useMemo(() => {
     const map = new Map();
@@ -141,12 +150,13 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
       setLoading(true);
       setError('');
 
-      const [studentsRes, schoolsRes, parentsRes, usersRes, busesRes] = await Promise.all([
+      const [studentsRes, schoolsRes, parentsRes, usersRes, busesRes, rfidsRes] = await Promise.all([
         StudentServices.getAllStudents(),
         SchoolServices.getAllSchools(),
         ParentServices.getAllParents(),
         UserServices.getAllUsers(),
         BusServices.getAllBuses(),
+        RfidServices.getAllRfid(),
       ]);
 
       const studentRows = toArray(studentsRes.raw || studentsRes.data || []).map(normalizeStudent);
@@ -154,6 +164,10 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
       const userRows = toArray(usersRes.data || []).map(normalizeUser).filter((item) => item.id);
       const userMap = new Map(userRows.map((user) => [user.id, user.name]));
       const numberPlateRows = extractNumberPlates(busesRes.data || []);
+      const rfidRows = toArray(rfidsRes.data || [])
+        .filter((item) => item && item.RfidID && item.RfidID.trim())
+        .map((item) => String(item.RfidID).trim())
+        .filter((rfid, index, self) => self.indexOf(rfid) === index);
       const parentRows = toArray(parentsRes.data || [])
         .map(normalizeParent)
         .filter((item) => item.id)
@@ -166,6 +180,7 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
       setSchools(schoolRows);
       setParents(parentRows);
       setAvailableNumberPlates(numberPlateRows);
+      setAvailableRFIDs(rfidRows);
     } catch (err) {
       console.error('Error loading students page data:', err);
       setError('Failed to load students data. Please refresh and try again.');
@@ -195,10 +210,11 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
         || parentName.includes(search);
 
       const matchesSchool = filterSchool === 'all' || student.schoolId === filterSchool;
+      const matchesBus = filterBus === 'all' || student.numberPlate === filterBus;
 
-      return matchesSearch && matchesSchool;
+      return matchesSearch && matchesSchool && matchesBus;
     });
-  }, [studentsList, searchTerm, filterSchool, schoolMap, parentMap]);
+  }, [studentsList, searchTerm, filterSchool, filterBus, schoolMap, parentMap]);
 
   const stats = useMemo(() => ({
     total: studentsList.length,
@@ -258,8 +274,19 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
 
   const openEditModal = (student) => {
     setEditingStudent(student);
-    setUpdateAge(student.age || '');
+    setUpdateForm({
+      FullName: student.fullName || '',
+      Age: student.age || '',
+      RfidID: student.rfidId || '',
+      SchoolID: student.schoolId || '',
+      NumberPlate: student.numberPlate || '',
+    });
     setShowEditModal(true);
+  };
+
+  const handleUpdateFormChange = (event) => {
+    const { name, value } = event.target;
+    setUpdateForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleUpdateStudent = async (event) => {
@@ -269,25 +296,52 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
     setError('');
     setSuccess('');
 
-    if (!updateAge.trim()) {
-      setError('Age is required for update.');
+    const updatePayload = {};
+    if (updateForm.FullName.trim() && updateForm.FullName !== editingStudent.fullName) {
+      updatePayload.FullName = updateForm.FullName.trim();
+    }
+    if (updateForm.Age.trim() && updateForm.Age !== editingStudent.age) {
+      updatePayload.Age = updateForm.Age.trim();
+    }
+    if (updateForm.RfidID.trim() && updateForm.RfidID !== editingStudent.rfidId) {
+      updatePayload.RfidID = updateForm.RfidID.trim();
+    }
+    if (updateForm.SchoolID && updateForm.SchoolID !== editingStudent.schoolId) {
+      updatePayload.SchoolID = updateForm.SchoolID;
+    }
+    if (updateForm.NumberPlate.trim() && updateForm.NumberPlate !== editingStudent.numberPlate) {
+      updatePayload.NumberPlate = updateForm.NumberPlate.trim();
+    }
+
+    if (Object.keys(updatePayload).length === 0) {
+      setError('No changes detected.');
       return;
     }
 
     try {
       setUpdating(true);
-      await StudentServices.updateStudent(editingStudent.id, { Age: updateAge.trim() });
+      await StudentServices.updateStudent(editingStudent.id, updatePayload);
       setSuccess('Student updated successfully.');
       setShowEditModal(false);
       setEditingStudent(null);
-      setUpdateAge('');
+      setUpdateForm({
+        FullName: '',
+        Age: '',
+        RfidID: '',
+        SchoolID: '',
+        NumberPlate: '',
+      });
       await fetchAllData();
     } catch (err) {
       console.error('Update student failed:', err);
-      setError('Failed to update student age.');
+      setError('Failed to update student details.');
     } finally {
       setUpdating(false);
     }
+  };
+
+  const hasIncompleteAssignment = (student) => {
+    return !student.rfidId || !student.numberPlate;
   };
 
   return (
@@ -365,7 +419,7 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
               <Search className="absolute left-3.5 top-3 w-5 h-5 text-gray-400" />
               <input
@@ -377,21 +431,27 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
               />
             </div>
 
-            <div className="flex gap-2">
-              <select
-                value={filterSchool}
-                onChange={(event) => setFilterSchool(event.target.value)}
-                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent bg-white"
-              >
-                <option value="all">All Schools</option>
-                {schools.map((school) => (
-                  <option key={school.id} value={school.id}>{school.name}</option>
-                ))}
-              </select>
-              <button className="px-4 py-2.5 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors text-gray-700">
-                <Filter className="w-5 h-5" />
-              </button>
-            </div>
+            <select
+              value={filterSchool}
+              onChange={(event) => setFilterSchool(event.target.value)}
+              className="px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent bg-white"
+            >
+              <option value="all">All Schools</option>
+              {schools.map((school) => (
+                <option key={school.id} value={school.id}>{school.name}</option>
+              ))}
+            </select>
+
+            <select
+              value={filterBus}
+              onChange={(event) => setFilterBus(event.target.value)}
+              className="px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent bg-white"
+            >
+              <option value="all">All Buses</option>
+              {availableNumberPlates.map((plate) => (
+                <option key={plate} value={plate}>{plate}</option>
+              ))}
+            </select>
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -429,16 +489,34 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
                   )}
 
                   {!loading && filteredStudents.map((student) => (
-                    <tr key={student.id}>
+                    <tr key={student.id} className={`${
+                      hasIncompleteAssignment(student)
+                        ? 'bg-red-50 border-l-4 border-red-400 hover:bg-red-100/50'
+                        : 'hover:bg-gray-50'
+                    } transition-colors`}>
                       <td className="px-4 py-3">
                         <div className="font-semibold text-gray-900">{student.fullName || '-'}</div>
                         <div className="text-xs text-gray-500">ID: {student.id || '-'}</div>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700">{student.age || '-'} / {student.gender || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{student.rfidId || '-'}</td>
+                      <td className={`px-4 py-3 text-sm ${!student.rfidId ? 'font-semibold text-red-600' : 'text-gray-700'}`}>
+                        {student.rfidId || (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">
+                            <AlertTriangle className="w-3 h-3" />
+                            Missing
+                          </span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 text-sm text-gray-700">{schoolMap.get(student.schoolId) || '-'}</td>
                       <td className="px-4 py-3 text-sm text-gray-700">{parentMap.get(student.parentId) || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">{student.numberPlate || '-'}</td>
+                      <td className={`px-4 py-3 text-sm ${!student.numberPlate ? 'font-semibold text-red-600' : 'text-gray-700'}`}>
+                        {student.numberPlate || (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium">
+                            <AlertTriangle className="w-3 h-3" />
+                            Missing
+                          </span>
+                        )}
+                      </td>
                       <td className="px-4 py-3">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${student.status === 'A' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
                           {statusLabel(student.status)}
@@ -450,7 +528,7 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
                           className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] text-xs"
                         >
                           <Edit className="w-3 h-3" />
-                          Update Age
+                          Update
                         </button>
                       </td>
                     </tr>
@@ -552,7 +630,7 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#1E3A5F] to-[#3B6FB6]">
               <div>
-                <h2 className="text-xl font-bold text-white">Update Student Age</h2>
+                <h2 className="text-xl font-bold text-white">Update Student Details</h2>
                 <p className="text-white/70 text-sm">Endpoint: PutStudentDetails</p>
               </div>
               <button onClick={() => { setShowEditModal(false); setEditingStudent(null); }} className="p-2 rounded-lg hover:bg-white/20">
@@ -560,20 +638,51 @@ function Students({ onMenuClick, setActiveTab, onLogout }) {
               </button>
             </div>
 
-            <form onSubmit={handleUpdateStudent} className="p-6 space-y-4">
+            <form onSubmit={handleUpdateStudent} className="p-6 space-y-4 max-h-[calc(90vh-240px)] overflow-y-auto">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Student</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Student ID</label>
                 <input value={`${editingStudent.fullName} (ID: ${editingStudent.id})`} readOnly className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-gray-50" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Age *</label>
-                <input value={updateAge} onChange={(event) => setUpdateAge(event.target.value)} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl" required />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <input name="FullName" value={updateForm.FullName} onChange={handleUpdateFormChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent" />
               </div>
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                <input name="Age" type="number" value={updateForm.Age} onChange={handleUpdateFormChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">RFID Card</label>
+                <select name="RfidID" value={updateForm.RfidID} onChange={handleUpdateFormChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent">
+                  <option value="">Select RFID Card</option>
+                  {availableRFIDs.map((rfid) => (
+                    <option key={rfid} value={rfid}>{rfid}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">School</label>
+                <select name="SchoolID" value={updateForm.SchoolID} onChange={handleUpdateFormChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent">
+                  <option value="">Select School</option>
+                  {schools.map((school) => (
+                    <option key={school.id} value={school.id}>{school.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bus Number Plate</label>
+                <select name="NumberPlate" value={updateForm.NumberPlate} onChange={handleUpdateFormChange} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-[#3B6FB6] focus:border-transparent">
+                  <option value="">Select Number Plate</option>
+                  {availableNumberPlates.map((numberPlate) => (
+                    <option key={numberPlate} value={numberPlate}>{numberPlate}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center justify-end gap-3 pt-4">
                 <button type="button" onClick={() => { setShowEditModal(false); setEditingStudent(null); }} className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100">Cancel</button>
                 <button type="submit" disabled={updating} className="px-5 py-2.5 bg-[#1E3A5F] text-white rounded-xl hover:bg-[#3B6FB6] flex items-center gap-2 disabled:opacity-50">
                   {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  Update
+                  Update Student
                 </button>
               </div>
             </form>

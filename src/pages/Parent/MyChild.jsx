@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { User, School, Plus, Search, BadgeCheck, Edit2, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { User, School, Plus, Search, BadgeCheck, Edit2, AlertCircle, CheckCircle, Loader2, CreditCard, Bus, Hash, Calendar, ShieldAlert, ShieldCheck } from 'lucide-react';
 import ParentHeader from '../../components/Parent/ParentHeader';
 import ParentFooter from '../../components/Parent/ParentFooter';
 import StudentServices from '../../services/StudentServices';
@@ -33,6 +33,8 @@ function MyChild({ onMenuClick, setActiveTab, onLogout }) {
     parentPhone: item.ParentPhone || item.parentPhone || '',
     status: (item.Status === 'A' || item.Status === 'Active') ? 'active' : 'inactive',
     parentId: String(item.ParentID || item.parentId || '').trim(),
+    rfidId: String(item.RfidID || item.RFIDCode || item.rfidId || '').trim(),
+    numberPlate: String(item.NumberPlate || item.numberPlate || '').trim(),
   });
 
   // Helper to compute next numeric student ID
@@ -185,6 +187,16 @@ function MyChild({ onMenuClick, setActiveTab, onLogout }) {
       setImagePreview(null);
     }
   }, [showAddModal, students]);
+
+  const schoolMap = useMemo(() => {
+    const map = new Map();
+    schools.forEach((s) => {
+      const id = String(s.SchoolID || s.id || '').trim();
+      const name = s.SchoolName || s.name || '';
+      if (id) map.set(id, name);
+    });
+    return map;
+  }, [schools]);
 
   const myStudents = useMemo(() => {
     const base = resolvedParentId
@@ -350,19 +362,41 @@ function MyChild({ onMenuClick, setActiveTab, onLogout }) {
     setEditForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!editingStudent) return;
-    setStudents(prev => prev.map(s => s.id === editingStudent.id ? {
-      ...s,
-      name: editForm.name.trim(),
-      grade: editForm.grade.trim(),
-      stop: editForm.stop.trim(),
-      school: editForm.school.trim(),
-      parentPhone: editForm.parentPhone.trim()
-    } : s));
-    setShowEditModal(false);
-    setEditingStudent(null);
+    setSaving(true);
+    setError('');
+    try {
+      const payload = {};
+      if (editForm.name.trim() && editForm.name.trim() !== editingStudent.name) {
+        payload.FullName = editForm.name.trim();
+      }
+      if (String(editForm.age) && String(editForm.age) !== String(editingStudent.age)) {
+        payload.Age = editForm.age;
+      }
+      if (editForm.gender && editForm.gender !== editingStudent.gender) {
+        payload.Gender = editForm.gender;
+      }
+      if (Object.keys(payload).length > 0) {
+        await StudentServices.updateStudent(editingStudent.id, payload);
+        setStudents(prev => prev.map(s => s.id === editingStudent.id ? {
+          ...s,
+          name: editForm.name.trim() || s.name,
+          age: editForm.age || s.age,
+          gender: editForm.gender || s.gender,
+        } : s));
+        setSuccess('Student updated successfully!');
+        setTimeout(() => setSuccess(''), 3000);
+      }
+      setShowEditModal(false);
+      setEditingStudent(null);
+    } catch (err) {
+      console.error('Error updating student:', err);
+      setError('Failed to update student. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -423,62 +457,168 @@ function MyChild({ onMenuClick, setActiveTab, onLogout }) {
           </div>
 
           {/* List with Loading State */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-            <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <h3 className="font-bold text-gray-900">Students ({myStudents.length})</h3>
-              <span className="text-xs sm:text-sm text-gray-600">Parent ID: {resolvedParentId || 'Not resolved'}</span>
-            </div>
-            <div className="divide-y divide-gray-100">
-              {loading ? (
-                <div className="p-8 text-center flex items-center justify-center gap-2 text-gray-600">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Loading students...
-                </div>
-              ) : myStudents.length === 0 ? (
-                <div className="p-8 text-center text-gray-600">No students linked to your account yet.</div>
-              ) : (
-                myStudents.map(s => (
-                  <div key={s.id} className="p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-yellow-100 text-yellow-700 flex items-center justify-center flex-shrink-0">
-                        {s.image ? (
-                          <img src={s.image} alt={s.name} className="w-10 h-10 rounded-full object-cover" />
-                        ) : (
-                          <User className="w-6 h-6" />
-                        )}
+          <div className="space-y-4">
+            {loading ? (
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center flex items-center justify-center gap-2 text-gray-600">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Loading students...
+              </div>
+            ) : myStudents.length === 0 ? (
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
+                <User className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="font-semibold text-gray-700">No students linked to your account yet.</p>
+                <p className="text-sm text-gray-500 mt-1">Click "Add Student" to register your child.</p>
+              </div>
+            ) : (
+              myStudents.map(s => {
+                const hasRfid = !!s.rfidId;
+                const hasBus = !!s.numberPlate;
+                const isIncomplete = !hasRfid || !hasBus;
+
+                return (
+                  <div
+                    key={s.id}
+                    className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-shadow hover:shadow-md ${
+                      isIncomplete ? 'border-amber-300' : 'border-gray-200'
+                    }`}
+                  >
+                    {/* Incomplete assignment banner */}
+                    {isIncomplete && (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border-b border-amber-200">
+                        <ShieldAlert className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                        <span className="text-xs font-medium text-amber-700">
+                          {!hasRfid && !hasBus
+                            ? 'RFID card and bus are not assigned yet'
+                            : !hasRfid
+                            ? 'RFID card not assigned yet'
+                            : 'Bus not assigned yet'}
+                        </span>
                       </div>
-                      <div className="flex-1">
-                        <div className="font-semibold text-gray-900 text-sm sm:text-base">{s.name}</div>
-                        <div className="text-xs text-gray-600 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                          <span className="flex items-center gap-1">
-                            <School className="w-3 h-3" />
-                            {s.school}
-                          </span>
-                          <span className="hidden sm:inline">•</span>
-                          <span>Age: {s.age}</span>
-                          <span className="hidden sm:inline">•</span>
-                          <span>{s.gender === 'M' ? 'Boy' : 'Girl'}</span>
+                    )}
+
+                    <div className="p-4 sm:p-5">
+                      {/* Top row: avatar + name + status */}
+                      <div className="flex items-start gap-4">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center flex-shrink-0 overflow-hidden border border-gray-200">
+                          {s.image ? (
+                            <img src={s.image} alt={s.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <User className="w-7 h-7 text-indigo-400" />
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-bold text-gray-900 text-base">{s.name || '—'}</h3>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                              s.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                            }`}>
+                              <BadgeCheck className="w-3 h-3" />
+                              {s.status === 'active' ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5">
+                            <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                              <Hash className="w-3 h-3" /> ID: {s.id || '—'}
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                              <Calendar className="w-3 h-3" /> Age: {s.age || '—'}
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                              <span className="text-sm">{s.gender === 'F' ? '♀' : '♂'}</span>
+                              {s.gender === 'F' ? 'Girl' : 'Boy'}
+                            </span>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                        <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-700 font-semibold inline-flex items-center justify-center sm:justify-start gap-1">
-                          <BadgeCheck className="w-3 h-3" /> Active
-                        </span>
+
                         <button
                           onClick={() => handleEditClick(s)}
-                          className="px-3 py-1.5 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] text-xs font-medium inline-flex items-center justify-center gap-1"
+                          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#3B6FB6] text-xs font-medium transition-colors"
                         >
                           <Edit2 className="w-3 h-3" /> Update
                         </button>
                       </div>
+
+                      {/* Detail grid */}
+                      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {/* School */}
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-purple-50 border border-purple-100">
+                          <div className="p-2 rounded-lg bg-purple-100">
+                            <School className="w-4 h-4 text-purple-600" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs text-purple-500 font-medium">School</div>
+                            <div className="text-sm font-semibold text-purple-900 truncate">{schoolMap.get(s.schoolId) || s.school || '—'}</div>
+                          </div>
+                        </div>
+
+                        {/* RFID */}
+                        <div className={`flex items-center gap-3 p-3 rounded-xl border ${
+                          hasRfid
+                            ? 'bg-green-50 border-green-100'
+                            : 'bg-red-50 border-red-100'
+                        }`}>
+                          <div className={`p-2 rounded-lg ${
+                            hasRfid ? 'bg-green-100' : 'bg-red-100'
+                          }`}>
+                            <CreditCard className={`w-4 h-4 ${
+                              hasRfid ? 'text-green-600' : 'text-red-500'
+                            }`} />
+                          </div>
+                          <div className="min-w-0">
+                            <div className={`text-xs font-medium ${
+                              hasRfid ? 'text-green-500' : 'text-red-400'
+                            }`}>RFID Card</div>
+                            {hasRfid ? (
+                              <div className="flex items-center gap-1">
+                                <ShieldCheck className="w-3 h-3 text-green-600 flex-shrink-0" />
+                                <span className="text-sm font-semibold text-green-800 truncate">{s.rfidId}</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <ShieldAlert className="w-3 h-3 text-red-500 flex-shrink-0" />
+                                <span className="text-sm font-semibold text-red-600">Not Assigned</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Bus */}
+                        <div className={`flex items-center gap-3 p-3 rounded-xl border ${
+                          hasBus
+                            ? 'bg-blue-50 border-blue-100'
+                            : 'bg-red-50 border-red-100'
+                        }`}>
+                          <div className={`p-2 rounded-lg ${
+                            hasBus ? 'bg-blue-100' : 'bg-red-100'
+                          }`}>
+                            <Bus className={`w-4 h-4 ${
+                              hasBus ? 'text-blue-600' : 'text-red-500'
+                            }`} />
+                          </div>
+                          <div className="min-w-0">
+                            <div className={`text-xs font-medium ${
+                              hasBus ? 'text-blue-500' : 'text-red-400'
+                            }`}>Bus</div>
+                            {hasBus ? (
+                              <div className="flex items-center gap-1">
+                                <ShieldCheck className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                                <span className="text-sm font-semibold text-blue-800 truncate">{s.numberPlate}</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <ShieldAlert className="w-3 h-3 text-red-500 flex-shrink-0" />
+                                <span className="text-sm font-semibold text-red-600">Not Assigned</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="mt-3 text-xs sm:text-sm text-gray-500">ID: {s.id}</div>
                   </div>
-                ))
-              )}
-            </div>
+                );
+              })
+            )}
           </div>
         </div>
       </main>

@@ -16,11 +16,17 @@ import {
 import ParentHeader from '../../components/Parent/ParentHeader';
 import ParentFooter from '../../components/Parent/ParentFooter';
 import NotificationServices from '../../services/NotificationServices';
+import StudentServices from '../../services/StudentServices';
+import BusServices from '../../services/BusServices';
+import DriverServices from '../../services/DriverServices';
+import UserServices from '../../services/UserServices';
 
 function ParentDashboard({ onMenuClick, setActiveTab, onLogout }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [driverCards, setDriverCards] = useState([]);
+  const [driversLoading, setDriversLoading] = useState(true);
 
   // Fetch notifications from API
   useEffect(() => {
@@ -42,6 +48,69 @@ function ParentDashboard({ onMenuClick, setActiveTab, onLogout }) {
       }
     };
     fetchNotifications();
+  }, []);
+
+  // Resolve driver cards: parent → students → buses → drivers → users
+  useEffect(() => {
+    const fetchDriverCards = async () => {
+      setDriversLoading(true);
+      try {
+        const parentId = localStorage.getItem('parentId') || localStorage.getItem('registerParentID') || '';
+
+        const [studentsRes, busesRes, driversRes, usersRes] = await Promise.all([
+          StudentServices.getAllStudents(),
+          BusServices.getAllBuses(),
+          DriverServices.getAllDrivers(),
+          UserServices.getAllUsers(),
+        ]);
+
+        const toArr = (payload) => {
+          if (Array.isArray(payload)) return payload;
+          if (payload && Array.isArray(payload.ResultSet)) return payload.ResultSet;
+          return [];
+        };
+
+        const students = toArr(studentsRes?.data);
+        const buses    = toArr(busesRes?.data);
+        const drivers  = toArr(driversRes?.data);
+        const users    = toArr(usersRes?.data);
+
+        // Filter students that belong to this parent
+        const myStudents = parentId
+          ? students.filter(s => String(s.ParentID || '') === String(parentId))
+          : students;
+
+        // Build a card per student that has a bus
+        const cards = myStudents
+          .filter(s => s.NumberPlate || s.numberPlate)
+          .map(s => {
+            const plate = (s.NumberPlate || s.numberPlate || '').toString().trim();
+            const bus   = buses.find(b => (b.NumberPlate || b.numberPlate || '').toString().trim() === plate);
+            const driverRec = bus
+              ? drivers.find(d => String(d.DriverID || d.driverId || '') === String(bus.DriverID || bus.driverId || ''))
+              : null;
+            const userRec = driverRec
+              ? users.find(u => String(u.UserID || u.userId || '') === String(driverRec.UserID || driverRec.userId || ''))
+              : null;
+
+            return {
+              studentName: s.FullName || s.name || 'Student',
+              numberPlate: plate,
+              driverName:  userRec?.UserName || userRec?.FullName || userRec?.fullName || driverRec?.DriverName || driverRec?.UserName || driverRec?.FullName || '—',
+              driverPhone: userRec?.Phone || userRec?.phone || driverRec?.Phone || '—',
+              driverId:    driverRec?.DriverID || null,
+            };
+          });
+
+        setDriverCards(cards);
+      } catch (err) {
+        console.error('[ParentDashboard] Error resolving driver cards:', err);
+        setDriverCards([]);
+      } finally {
+        setDriversLoading(false);
+      }
+    };
+    fetchDriverCards();
   }, []);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
@@ -281,26 +350,72 @@ function ParentDashboard({ onMenuClick, setActiveTab, onLogout }) {
             {/* Right Column - Alerts & Quick Actions */}
             <div className="space-y-6">
 
-              {/* Driver Info */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Driver Info</h3>
-                <div className="flex items-start gap-4 mb-4">
-                  <img src={childStatus.driverImage} alt="Driver" className="w-16 h-16 rounded-full object-cover" />
-                  <div className="flex-1">
-                    <div className="font-semibold text-gray-900">{childStatus.busDriver}</div>
-                    <div className="text-sm text-gray-600">{childStatus.driverPhone}</div>
+              {/* Driver Info - dynamic per student */}
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Bus className="w-5 h-5 text-blue-600" />
+                  Bus Drivers
+                </h3>
+
+                {driversLoading ? (
+                  <div className="flex items-center justify-center py-6 text-gray-400 text-sm gap-2">
+                    <span className="animate-spin inline-block w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full"></span>
+                    Loading drivers…
                   </div>
-                </div>
-                <div className="space-y-3">
-                  <div>
-                    <div className="text-sm text-gray-600 mb-1">Bus Number Plate</div>
-                    <div className="font-semibold text-gray-900">{childStatus.busNumberPlate}</div>
+                ) : driverCards.length === 0 ? (
+                  <div className="text-center py-6">
+                    <Bus className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">No bus assigned to your children yet.</p>
                   </div>
-                  <button className="w-full flex items-center justify-center gap-2 mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-                    <Phone className="w-4 h-4" />
-                    Call Driver
-                  </button>
-                </div>
+                ) : (
+                  <div className="space-y-4">
+                    {driverCards.map((card, idx) => (
+                      <div key={idx} className="rounded-xl border border-gray-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-4 space-y-3">
+
+                        {/* Student row */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                              <User className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="text-xs text-blue-500 font-medium leading-none mb-0.5">Student</div>
+                              <div className="text-sm font-semibold text-gray-800 truncate">{card.studentName}</div>
+                            </div>
+                          </div>
+                          <span className="text-xs font-bold bg-[#1E3A5F] text-white px-2 py-0.5 rounded-full tracking-wide flex-shrink-0">{card.numberPlate}</span>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="border-t border-blue-100" />
+
+                        {/* Driver row */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#3B6FB6] to-[#1E3A5F] flex items-center justify-center flex-shrink-0">
+                            <User className="w-5 h-5 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs text-gray-400 font-medium leading-none mb-0.5">Driver</div>
+                            <div className="font-semibold text-gray-900 text-sm truncate">{card.driverName}</div>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <Phone className="w-3 h-3 text-gray-400" />
+                              <span className="text-xs text-gray-500">{card.driverPhone}</span>
+                            </div>
+                          </div>
+                          {card.driverPhone && card.driverPhone !== '—' && (
+                            <a
+                              href={`tel:${card.driverPhone}`}
+                              className="flex items-center justify-center w-9 h-9 rounded-full bg-green-500 hover:bg-green-600 transition-colors flex-shrink-0"
+                              title="Call driver"
+                            >
+                              <Phone className="w-4 h-4 text-white" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Quick Actions */}

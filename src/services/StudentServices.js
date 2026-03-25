@@ -116,23 +116,44 @@ const StudentServices = {
     }
   },
 
-  // Update student
+  // Update student - supports updating one or multiple fields
   updateStudent: async (studentId, studentData) => {
     try {
       const payload = {
         StudentID: studentId,
-        Age: studentData.Age,
       };
+
+      // Add fields to payload only if they are provided
+      if (studentData.FullName !== undefined && studentData.FullName !== '') {
+        payload.FullName = studentData.FullName;
+      }
+      if (studentData.Age !== undefined && studentData.Age !== '') {
+        payload.Age = studentData.Age;
+      }
+      if (studentData.RfidID !== undefined && studentData.RfidID !== '') {
+        payload.RfidID = studentData.RfidID;
+      }
+      if (studentData.SchoolID !== undefined && studentData.SchoolID !== '') {
+        payload.SchoolID = studentData.SchoolID;
+      }
+      if (studentData.NumberPlate !== undefined && studentData.NumberPlate !== '') {
+        payload.NumberPlate = studentData.NumberPlate;
+      }
+
+      console.log('[StudentServices.updateStudent] Request payload', payload);
 
       const response = await apiClient.post(API_ENDPOINTS.STUDENT.PUT, payload);
 
+      console.log('[StudentServices.updateStudent] Response', response?.data);
+
       return {
         success: true,
-        message: response.data?.Result || 'Student updated successfully',
+        message: response.data?.Result || response.data?.Message || 'Student updated successfully',
         data: response.data,
       };
     } catch (error) {
       console.error('Error updating student:', error);
+      console.error('[StudentServices.updateStudent] Error response', error?.response?.data || null);
       throw error;
     }
   },
